@@ -1,0 +1,9 @@
+{% import 'macro.jinja2' as MRO with context %}cols = [f"c{i}"for i in range(estimator.gbm_model.feature_importances_.shape[0])]
+feature_importance_data = sorted(zip(cols, estimator.gbm_model.feature_importances_), key=lambda v: v[1], reverse=False)
+
+plt.figure(figsize=(15, 5))
+
+plt.barh(range(len(cols)), [f[1] for f in feature_importance_data], height=0.6)
+plt.yticks(range(len(cols)), [f[0] for f in feature_importance_data], rotation=-45, fontsize=10)
+plt.title('Feature importance', fontsize=14)
+plt.show()

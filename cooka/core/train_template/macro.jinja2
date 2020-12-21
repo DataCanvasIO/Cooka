@@ -1,0 +1,11 @@
+{% macro insert_tab() -%}
+{% if target_source_type == 'raw_python' %}    {% endif %}
+{%- endmacro %}
+
+{% macro insert_title(title) -%}
+{% if target_source_type == 'raw_python' %}{{ title }}{% endif %}
+{%- endmacro %}
+
+{% macro handle_None(value, require_str) -%}
+{% if value %}{% if require_str %}"{{ value }}"{% else %}{{ value }}{% endif %}{% else %}None{% endif %}
+{%- endmacro %}

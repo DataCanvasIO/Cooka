@@ -1,0 +1,23 @@
+{% import 'macro.jinja2' as MRO with context %}
+{{ MRO.insert_tab()}}model_dir_path = util.model_dir(dataset_name, model_name)
+{{ MRO.insert_tab()}}if not P.exists(model_dir_path):
+{{ MRO.insert_tab()}}    os.makedirs(model_dir_path)
+{% if framework == "DeepTables" %}
+{{ MRO.insert_tab()}}model_data_path = P.join(model_dir_path, 'model')
+{{ MRO.insert_tab()}}estimator.model.save(model_data_path)
+{{ MRO.insert_tab()}}model_file_size = 0
+{{ MRO.insert_tab()}}for f_name in os.listdir(model_data_path):
+{{ MRO.insert_tab()}}    f_path = P.join(model_data_path, f_name)
+{{ MRO.insert_tab()}}    if P.isfile(f_path):
+{{ MRO.insert_tab()}}        model_file_size = model_file_size + P.getsize(f_path)
+{% elif framework == "HyperGBM" %}
+{{ MRO.insert_tab()}}model_data_path = P.join(model_dir_path, 'model.pkl')
+{{ MRO.insert_tab()}}with open(model_data_path, 'wb') as f:
+{{ MRO.insert_tab()}}    pickle.dump(estimator, f)
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}model_file_size = P.getsize(model_data_path)
+{% endif %}
+{{ MRO.insert_tab()}}print(f"Persist model to: {model_data_path}")
+{{ MRO.insert_tab()}}persist_extension = {
+{{ MRO.insert_tab()}}    "model_file_size": model_file_size
+{{ MRO.insert_tab()}}}

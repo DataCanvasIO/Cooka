@@ -1,0 +1,16 @@
+{% import 'macro.jinja2' as MRO with context %}
+{{ MRO.insert_tab()}}y_pred = estimator.predict(X_test)
+{% if task_type != 'regression' %}
+{{ MRO.insert_tab()}}y_score = estimator.predict_proba(X_test)
+{{ MRO.insert_tab()}}y_pos_score = y_score[:, 1]
+{% endif %}
+{% if target_source_type == 'raw_python' %}
+{% if task_type == 'binary_classification' %}
+{% include "evaluate_binary_classification.jinja2" %}
+{% elif task_type == 'multi_classification' %}
+{% include "evaluate_multi_classification.jinja2" %}
+{% elif task_type == 'regression' %}
+{% include "evaluate_regression.jinja2" %}
+{% endif %}
+{{ MRO.insert_tab()}}evaluate_extension['performance'] = performance
+{% endif %}

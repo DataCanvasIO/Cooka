@@ -1,0 +1,23 @@
+{% import 'macro.jinja2' as MRO with context %}
+{{ MRO.insert_tab()}}explained_variance = round(metrics.explained_variance_score(y_true=y_test, y_pred=y_pred), 4)
+{{ MRO.insert_tab()}}neg_mean_absolute_error = round(metrics.mean_absolute_error(y_true=y_test, y_pred=y_pred), 4)
+{{ MRO.insert_tab()}}neg_mean_squared_error = round(metrics.mean_squared_error(y_true=y_test, y_pred=y_pred), 4)
+{{ MRO.insert_tab()}}rmse = round(math.sqrt(neg_mean_squared_error), 4)
+{{ MRO.insert_tab()}}neg_median_absolute_error = round(metrics.median_absolute_error(y_true=y_test, y_pred=y_pred), 4)
+{{ MRO.insert_tab()}}r2 = round(metrics.r2_score(y_true=y_test, y_pred=y_pred), 4)
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}if (y_test >= 0).all() and (y_pred >= 0).all():
+{{ MRO.insert_tab()}}    neg_mean_squared_log_error = round(metrics.mean_squared_log_error(y_true=y_test, y_pred=y_pred), 4)
+{{ MRO.insert_tab()}}else:
+{{ MRO.insert_tab()}}    neg_mean_squared_log_error = None
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}metrics_dict = {
+{{ MRO.insert_tab()}}    "explained_variance": explained_variance,
+{{ MRO.insert_tab()}}    "neg_mean_absolute_error": neg_mean_absolute_error,
+{{ MRO.insert_tab()}}    "neg_mean_squared_error": neg_mean_squared_error,
+{{ MRO.insert_tab()}}    "rmse": rmse,
+{{ MRO.insert_tab()}}    "neg_mean_squared_log_error": neg_mean_squared_log_error,
+{{ MRO.insert_tab()}}    "r2": r2,
+{{ MRO.insert_tab()}}    "neg_median_absolute_error": neg_median_absolute_error
+{{ MRO.insert_tab()}}}
+{{ MRO.insert_tab()}}performance = {"metrics": metrics_dict, "confusion_matrix": None, "roc_curve": None}

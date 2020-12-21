@@ -1,0 +1,8 @@
+{% import 'macro.jinja2' as MRO with context %}{{ MRO.insert_tab()}}reward_metric =  "{{ reward_metric }}"
+{{ MRO.insert_tab()}}optimize_direction = {{ optimize_direction }}
+{{ MRO.insert_tab()}}print(f"Optimize direction: {optimize_direction}, reward metric: reward_metric")
+{% if framework == 'HyperGBM' %}
+{% include "search_gbm.jinja2" %}
+{% elif framework == 'DeepTables'  %}
+{% include "search_dt.jinja2" %}
+{% endif %}

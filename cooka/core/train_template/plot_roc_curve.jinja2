@@ -1,0 +1,17 @@
+{% import 'macro.jinja2' as MRO with context %}
+fpr, tpr, threshold = metrics.roc_curve(y_test, y_score, pos_label=pos_label)
+roc_auc = metrics.auc(fpr,tpr)
+plt.figure(figsize=(6,6), facecolor=(1, 1, 1))
+lw = 2
+# darkorange
+plt.plot(fpr, tpr, color='blue', lw=lw, label=' (AUC = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xticks(fontsize=15)
+plt.yticks(fontsize=15)
+plt.xlabel('FPR', fontsize=20)
+plt.ylabel('TPR', fontsize=20)
+plt.title('ROC')
+plt.legend(loc="lower right")
+plt.show()

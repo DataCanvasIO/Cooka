@@ -1,0 +1,58 @@
+{% import 'macro.jinja2' as MRO with context %}
+{% if task_type == "regression" %}
+{{ MRO.insert_tab()}}def search_space(dataframe_mapper_default=False,
+{{ MRO.insert_tab()}}                         lightgbm_fit_kwargs=None,
+{{ MRO.insert_tab()}}                         xgb_fit_kwargs=None,
+{{ MRO.insert_tab()}}                         catboost_fit_kwargs=None):
+{{ MRO.insert_tab()}}    if lightgbm_fit_kwargs is None:
+{{ MRO.insert_tab()}}        lightgbm_fit_kwargs = {}
+{{ MRO.insert_tab()}}    if xgb_fit_kwargs is None:
+{{ MRO.insert_tab()}}        xgb_fit_kwargs = {}
+{{ MRO.insert_tab()}}    if catboost_fit_kwargs is None:
+{{ MRO.insert_tab()}}        catboost_fit_kwargs = {}
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}    space = HyperSpace()
+{{ MRO.insert_tab()}}    with space.as_default():
+{{ MRO.insert_tab()}}        input = HyperInput(name='input1')
+{{ MRO.insert_tab()}}        num_pipeline = numeric_pipeline_complex()(input)
+{{ MRO.insert_tab()}}        cat_pipeline = categorical_pipeline_simple()(input)
+{{ MRO.insert_tab()}}        union_pipeline = DataFrameMapper(default=dataframe_mapper_default, input_df=True, df_out=True,
+{{ MRO.insert_tab()}}                                         df_out_dtype_transforms=[(column_object, 'int')])([num_pipeline, cat_pipeline])
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}        lightgbm_init_kwargs = {
+{{ MRO.insert_tab()}}            'boosting_type': Choice(['gbdt', 'dart', 'goss']),
+{{ MRO.insert_tab()}}            'num_leaves': Choice([3, 5]),
+{{ MRO.insert_tab()}}            'learning_rate': 0.1,
+{{ MRO.insert_tab()}}            'n_estimators': Choice([10, 30, 50]),
+{{ MRO.insert_tab()}}            'max_depth': Choice([3, 5]),
+{{ MRO.insert_tab()}}            'reg_alpha': Choice([1e-2, 0.1, 1, 100]),
+{{ MRO.insert_tab()}}            'reg_lambda': Choice([1e-2, 0.1, 1, 100]),
+{{ MRO.insert_tab()}}            # 'class_weight': 'balanced',
+{{ MRO.insert_tab()}}            # subsample_for_bin = 200000, objective = None, class_weight = None,
+{{ MRO.insert_tab()}}            #  min_split_gain = 0., min_child_weight = 1e-3, min_child_samples = 20,
+{{ MRO.insert_tab()}}        }
+{{ MRO.insert_tab()}}        lightgbm_est = LightGBMEstimator(fit_kwargs=lightgbm_fit_kwargs, **lightgbm_init_kwargs)
+{{ MRO.insert_tab()}}        xgb_init_kwargs = {}
+{{ MRO.insert_tab()}}        xgb_est = XGBoostEstimator(fit_kwargs=xgb_fit_kwargs, **xgb_init_kwargs)
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}        catboost_init_kwargs = {
+{{ MRO.insert_tab()}}            'silent': True
+{{ MRO.insert_tab()}}        }
+{{ MRO.insert_tab()}}        catboost_est = CatBoostEstimator(fit_kwargs=catboost_fit_kwargs, **catboost_init_kwargs)
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}        ModuleChoice([lightgbm_est, xgb_est, catboost_est], name='estimator_options')(union_pipeline)
+{{ MRO.insert_tab()}}        space.set_inputs(input)
+{{ MRO.insert_tab()}}    return space
+{% else %}
+{{ MRO.insert_tab()}}search_space = search_space_general
+{% endif %}
+{% if task_type in ['binary_classification', 'multi_classification'] %}
+{% set gbm_task_type = 'classification' %}
+{% elif task_type == 'regression' %}
+{% set gbm_task_type = 'regression' %}
+{% endif %}
+{{ MRO.insert_tab()}}rs = MCTSSearcher(search_space, max_node_space=10, optimize_direction=optimize_direction)
+{{ MRO.insert_tab()}}hk = HyperGBM(rs, task="{{ gbm_task_type }}", reward_metric=reward_metric,
+{{ MRO.insert_tab()}}              callbacks=[{% if target_source_type == 'raw_python' %}TrainTrailCallback(server_portal, train_job_name, dataset_name), {% endif %}SummaryCallback(), FileLoggingCallback(rs), EarlyStoppingCallback(max_no_improvement_trails=5, mode=optimize_direction.value)])
+{{ MRO.insert_tab()}}experiment = GeneralExperiment(hk, X_train, y_train, X_eval=X_test, y_eval=y_test)
+{{ MRO.insert_tab()}}estimator = experiment.run(use_cache=True, max_trails=max_trails)

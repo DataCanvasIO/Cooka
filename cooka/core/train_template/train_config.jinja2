@@ -1,0 +1,49 @@
+{% import 'macro.jinja2' as MRO with context %}{{ MRO.insert_title("# [1]. train config")}}
+train_file_path = "{{ train_file_path }}"
+test_file_path = {{ MRO.handle_None(test_file_path, True) }}
+server_portal = "{{ server_portal }}"
+max_trails = {{ max_trails }}
+task_type = "{{ task_type }}"
+dataset_name = "{{ dataset_name }}"
+dataset_has_header = {{ dataset_has_header }}
+
+dataset_default_headers = {{ MRO.handle_None(dataset_default_headers, False) }}
+label_col = "{{ label_col }}"
+pos_label = {{ MRO.handle_None(pos_label, True) }}
+train_mode = "{{ train_mode }}"
+framework = "{{ framework }}"
+partition_strategy = "{{ partition_strategy }}"
+holdout_percentage = {{ MRO.handle_None(holdout_percentage, False) }}
+n_folds = {{ MRO.handle_None(n_folds, False) }}
+train_percentage = {{ MRO.handle_None(train_percentage, False) }}
+validation_percentage = {{ MRO.handle_None(validation_percentage, False) }}
+datetime_series_col = {{ MRO.handle_None(datetime_series_col, True) }}
+train_job_name = "{{ train_job_name }}"
+model_name = "{{ model_name }}"
+model_feature_list = {{ model_feature_list }}
+data_root = "{{ data_root }}"
+{% if target_source_type == 'raw_python' %}
+print("=================Train Config================")
+print(f"train_file_path: {train_file_path}")
+print(f"test_file_path: {test_file_path}")
+print(f"server_portal: {server_portal}")
+print(f"max_trails: {max_trails}")
+print(f"task_type: {task_type}")
+print(f"dataset_name: {dataset_name}")
+print(f"dataset_has_header: {dataset_has_header}")
+print(f"dataset_default_headers: {dataset_default_headers}")
+print(f"label_col: {label_col}")
+print(f"pos_label: {pos_label}")
+print(f"train_mode: {train_mode}")
+print(f"framework: {framework}")
+print(f"partition_strategy: {partition_strategy}")
+print(f"holdout_percentage: {holdout_percentage}")
+print(f"n_folds: {n_folds}")
+print(f"train_percentage: {train_percentage}")
+print(f"validation_percentage: {validation_percentage}")
+print(f"datetime_series_col: {datetime_series_col}")
+print(f"train_job_name: {train_job_name}")
+print(f"model_name: {model_name}")
+print(f"data_root: {data_root}")
+print("============================================")
+{% endif %}

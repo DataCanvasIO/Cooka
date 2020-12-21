@@ -1,0 +1,52 @@
+# -*- encoding: utf-8 -*-
+{% set target_source_type = 'raw_python' %}
+
+{% include "train_header.jinja2"  %}
+{% include "train_config.jinja2" %}
+
+# [2]. data partition
+load_start_time = time.time()
+load_status = Status_Succeed
+try:
+{% include "train_data_partition.jinja2" with context %}
+except Exception as e:
+    load_status = Status_Failed
+    raise e
+finally:
+    train_callback(server_portal, train_job_name, dataset_name, 'load', load_status, time.time() - load_start_time, None)
+
+# [3]. search best params
+t_search_begin = time.time()
+search_status = Status_Succeed
+try:
+{% include "train_search.jinja2" %}
+except Exception as e:
+    search_status = Status_Failed
+    raise e
+finally:
+    train_callback(server_portal, train_job_name, dataset_name, 'searched', search_status, time.time() - t_search_begin, None)
+
+
+# [4]. evaluate
+t_evaluate_begin = time.time()
+evaluate_status = Status_Succeed
+evaluate_extension = {}
+try:
+{% include "train_evaluate.jinja2" %}
+except Exception as e:
+    evaluate_status = Status_Failed
+    raise e
+finally:
+    train_callback(server_portal, train_job_name, dataset_name, 'evaluate', evaluate_status, time.time() - t_evaluate_begin, evaluate_extension)
+
+# [5]. persist model
+persist_status = Status_Succeed
+t_persist_begin = time.time()
+persist_extension = {}
+try:
+{% include "train_persist.jinja2" %}
+except Exception as e:
+    persist_status = Status_Failed
+    raise e
+finally:
+    train_callback(server_portal, train_job_name, dataset_name, 'persist', persist_status, time.time() - t_persist_begin, persist_extension)

@@ -1,0 +1,50 @@
+{% import 'macro.jinja2' as MRO with context %}
+{{ MRO.insert_tab()}}auc_value = round(metrics.roc_auc_score(y_test, y_pos_score), 4)
+{{ MRO.insert_tab()}}accuracy_value = round(metrics.accuracy_score(y_test, y_pred), 4)
+{{ MRO.insert_tab()}}f1_value = round(metrics.f1_score(y_test, y_pred, average='binary', pos_label=pos_label), 4)
+{{ MRO.insert_tab()}}fbeta_value = round(metrics.fbeta_score(y_test, y_pred, beta=10, average='binary', pos_label=pos_label), 4)  # beta == 10 from aps
+{{ MRO.insert_tab()}}precision_value = round(metrics.precision_score(y_test, y_pred, average='binary', pos_label=pos_label), 4)
+{{ MRO.insert_tab()}}recall_value = round(metrics.recall_score(y_test, y_pred, average='binary', pos_label=pos_label), 4)
+{{ MRO.insert_tab()}}log_loss_value = round(metrics.log_loss(y_test, y_score), 4)
+{{ MRO.insert_tab()}}metrics_dict = {
+{{ MRO.insert_tab()}}    "accuracy": accuracy_value,
+{{ MRO.insert_tab()}}    "f1": f1_value,
+{{ MRO.insert_tab()}}    "fbeta": fbeta_value,
+{{ MRO.insert_tab()}}    "precision": precision_value,
+{{ MRO.insert_tab()}}    "recall": recall_value,
+{{ MRO.insert_tab()}}    # "auc": auc_value,
+{{ MRO.insert_tab()}}    "roc_auc": auc_value,
+{{ MRO.insert_tab()}}    "log_loss": log_loss_value
+{{ MRO.insert_tab()}}}
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}tn, fp, fn, tp = metrics.confusion_matrix(y_test, y_pred).ravel()
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}if classes[0] == pos_label:
+{{ MRO.insert_tab()}}    binary_label = \
+{{ MRO.insert_tab()}}        {
+{{ MRO.insert_tab()}}            "true": classes[0],
+{{ MRO.insert_tab()}}            "false": classes[1]
+{{ MRO.insert_tab()}}        }
+{{ MRO.insert_tab()}}else:
+{{ MRO.insert_tab()}}    binary_label = \
+{{ MRO.insert_tab()}}        {
+{{ MRO.insert_tab()}}            "true": classes[1],
+{{ MRO.insert_tab()}}            "false": classes[0]
+{{ MRO.insert_tab()}}        }
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}cm = {
+{{ MRO.insert_tab()}}    "tn": int(tn),
+{{ MRO.insert_tab()}}    "fp": int(fp),
+{{ MRO.insert_tab()}}    "fn": int(fn),
+{{ MRO.insert_tab()}}    "tp": int(tp),
+{{ MRO.insert_tab()}}    "label": binary_label
+{{ MRO.insert_tab()}}}
+{{ MRO.insert_tab()}}# all classes
+{{ MRO.insert_tab()}}fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pos_score, sample_weight=None, drop_intermediate=True, pos_label=pos_label)
+{{ MRO.insert_tab()}}
+{{ MRO.insert_tab()}}roc_curve = {
+{{ MRO.insert_tab()}}    "false_positive_rate": fpr.tolist(),
+{{ MRO.insert_tab()}}    "true_positive_rate": tpr.tolist(),
+{{ MRO.insert_tab()}}    "thresholds": thresholds.tolist()
+{{ MRO.insert_tab()}}}
+{{ MRO.insert_tab()}}performance = {"metrics": metrics_dict, "confusion_matrix": cm, "roc_curve": roc_curve}

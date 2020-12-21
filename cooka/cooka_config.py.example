@@ -1,0 +1,27 @@
+# Configuration file for cooka
+
+# HTTP Server port
+c.CookaApp.server_port = 8240
+
+# Language, zh_CN or en_US, auto; if is auto will read localization from use browser
+c.CookaApp.language = "auto"
+
+# Data to storage
+c.CookaApp.data_directory = "~/cooka"
+
+# Integrate with jupyter, Jupyter notebook work dir should at `c.CookaApp.data_directory`
+c.CookaApp.notebook_portal = "http://localhost:8888"
+
+# Default optimize metric
+c.CookaApp.optimize_metric = {
+    "multi_classification_optimize": "accuracy",
+    "binary_classification": "auc",
+    "regression": "rmse"
+}
+
+# Default trail nums
+c.CookaApp.max_trails = {
+    "performance": 50,
+    "quick": 10,
+    "minimal": 1
+}

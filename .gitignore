@@ -1,0 +1,51 @@
+.pytest_cache
+**/*.pyc
+.idea/
+cooka/*.sqlite3
+cooka.sqlite3
+.idea
+.vscode
+**/.DS_Store
+build
+dist
+*.egg-info
+venv
+.cache
+**/spark-warehouse
+.coverage/**
+**/dt_output
+tests/debug_model.py
+**/*.html
+coverage.xml
+.scannerwork
+.coverage
+cooka/web/test/learn.py
+tmp
+log
+catboost_info
+/node_modules
+
+cooka/assets
+models
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+**/node_modules
+/npm-debug.log*
+/yarn-error.log
+/yarn.lock
+/package-lock.json
+
+# production
+/dist
+
+# misc
+.DS_Store
+
+# umi
+.umi
+.umi-production
+
+packages/yarn-error.log
+packages/yarn.lock
