@@ -94,7 +94,7 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, step2Status
       setLoadingDataStatus(statusConfig['doing']);
       setLoadingDataTips(formatMessage({id: 'upload.loading'}))
 
-    } else if ( step2Status === 'failed' ) {
+    } else if ( step1Status === 'failed' ) {
       setLoadingDataStatus(statusConfig['undone']);
       setUploadTips(formatMessage({id: 'upload.fail'}))
     }

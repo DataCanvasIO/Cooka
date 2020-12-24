@@ -80,7 +80,7 @@ class ExperimentDao(BaseDao):
             return no_experiment
 
     def query_n_experiment(self, session, dataset_name):
-        sql = f"select count(distinct(no_experiment)) from cd_model where dataset_name = '{dataset_name}'"
+        sql = f"select count(distinct(no_experiment)) from {ExperimentEntity.__tablename__} where dataset_name = '{dataset_name}'"
         return session.execute(sql).fetchone()[0]
 
 

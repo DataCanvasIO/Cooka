@@ -186,25 +186,24 @@ class DatasetService:
             dataset = self.dataset_dao.require_by_name(s, dataset_name)
             dict_value = util.sqlalchemy_obj_to_dict(dataset)
             dict_value['file_path'] = util.relative_path(dataset.file_path)
-
-            if dataset.status == DatasetEntity.Status.Analyzed:
-                for i, f in enumerate(dict_value['features']):
-                    if f['type'] in [FeatureType.Categorical, FeatureType.Continuous]:
-                        if f['unique']['value'] > n_top_value:
-                            # calc top {n_count_value}
-                            extension = f['extension']
-                            sorted(extension['value_count'], key=lambda _: _['value'])
-
-                            top_value_count = extension['value_count'][: n_top_value]
-                            remain_value_count = extension['value_count'][n_top_value:]
-                            remain_count = 0
-                            for remain_dict in remain_value_count:
-                                remain_count = remain_count + remain_dict['value']
-
-                            top_value_count.append(
-                                FeatureValueCount(type="Remained_SUM", value=remain_count).to_dict()
-                            )
-                            dict_value['features'][i]['extension']['value_count'] = top_value_count
+            # if dataset.status == DatasetEntity.Status.Analyzed:
+            #     for i, f in enumerate(dict_value['features']):
+            #         if f['type'] in [FeatureType.Categorical, FeatureType.Continuous]:
+            #             if f['unique']['value'] > n_top_value:
+            #                 # calc top {n_count_value}
+            #                 extension = f['extension']
+            #                 sorted(extension['value_count'], key=lambda _: _['value'])
+            #
+            #                 top_value_count = extension['value_count'][: n_top_value]
+            #                 remain_value_count = extension['value_count'][n_top_value:]
+            #                 remain_count = 0
+            #                 for remain_dict in remain_value_count:
+            #                     remain_count = remain_count + remain_dict['value']
+            #
+            #                 top_value_count.append(
+            #                     FeatureValueCount(type="Remained_SUM", value=remain_count).to_dict()
+            #                 )
+            #                 dict_value['features'][i]['extension']['value_count'] = top_value_count
                             # extension['value_count'] = top_value_count
 
             # dict_value['detail'] = dict_value['extension']

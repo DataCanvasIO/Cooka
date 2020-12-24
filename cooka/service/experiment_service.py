@@ -82,12 +82,12 @@ class ExperimentService(object):
         return None
 
     @staticmethod
-    def calc_avg_trail_elapsed(model_name, model_status, trails):
+    def calc_avg_trail_elapsed(model_name, model_status, succeed_trails):
         total_elapsed = 0
-        if trails is not None and len(trails) > 0:
-            for trail in trails:
-                total_elapsed = total_elapsed + trail.elapsed
-            return total_elapsed / len(trails)
+        if succeed_trails is not None and len(succeed_trails) > 0:
+            for trail in succeed_trails:
+                total_elapsed = total_elapsed + trail.extension['elapsed']
+            return total_elapsed / len(succeed_trails)
         else:
             log.warning(f"Model = {model_name}, status={model_status} but has no trails, " +
                         "may be train script execute failed, see trail log for more detail.")
@@ -756,7 +756,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
             # Filter that failed trails
             succeed_trails = list(filter(lambda _: _.status == TrailStatus.Succeed, model.trails))
             if len(succeed_trails) > 0:
-                param_names = [k for k in succeed_trails[0].params]
+                param_names = [k for k in succeed_trails[0].extension['params']]
                 trail_data_dict_list = []
                 trail_params_values = []
                 trail_index = []

@@ -387,7 +387,6 @@ class ContinuousFeatureBin(Bean):
 class FeatureValueCount(Bean):
     type = ObjectField()
     value = IntegerField()
-    percentage = FloatField()
 
 
 class FeatureMode(Bean):
