@@ -1,0 +1,172 @@
+.titleContainer {
+  width: 100%;
+  height: 46px;
+  border: 1px solid red;
+}
+
+:global {
+  .ant-card {
+    margin-top: 16px;
+  }
+  .ant-card-extra, .ant-card-head-title {
+    padding: 0 !important;
+  }
+  .ant-tooltip{
+    .ant-tooltip-inner {
+      color: black;
+    }
+  }
+
+
+}
+
+.main {
+  width: 80%;
+  float: left;
+  border-right: 1px solid rgb(241,243,246);
+}
+
+.process {
+  width: 20%;
+}
+
+.fileUpload {
+  margin-top: 20px;
+}
+
+.tips {
+  color: rgb(196,196,196);
+}
+.process {
+  float: right;
+  padding: 0 20px;
+
+  .stepTitle {
+    margin-left: 10px;
+  }
+
+  .stepTips {
+    padding: 4px 26px;
+    color: rgb(196,196,196)
+  }
+}
+
+.bar {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  text-align: center;
+  line-height: 40px;
+  color: #ffffff;
+
+  .number {
+    background-color: rgb(0, 183, 182);
+    border-radius: 20px 0 0 20px;
+  }
+
+  .type {
+    background-color: rgb(0, 156, 234);
+  }
+
+  .date {
+    background-color: rgb(244, 148, 49);
+  }
+
+  .text {
+    background-color: rgb(125, 0, 249);
+    border-radius: 0 20px 20px 0;
+  }
+}
+
+.legend {
+  width: 100%;
+  line-height: 40px;
+  display: flex;
+  margin-top: 20px;
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+
+  .number {
+    width: 25%;
+
+    .numberCir {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0px 0px 20px #333333;
+      background-color: rgb(0, 183, 182);
+      vertical-align: middle;
+    }
+  }
+
+  .type {
+    width: 25%;
+
+    .typeCir {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0px 0px 20px #333333;
+      background-color: rgb(0, 156, 234);
+      vertical-align: middle;
+    }
+  }
+
+  .date {
+    width: 25%;
+
+    .dateCir {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0px 0px 20px #333333;
+      background-color: rgb(244, 148, 49);
+      vertical-align: middle;
+    }
+  }
+
+  .text {
+    width: 25%;
+
+    .textCir {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0px 0px 20px #333333;
+      background-color: rgb(125, 0, 249);
+      vertical-align: middle;
+    }
+  }
+}
+
+.symbol {
+  font-size: 14px;
+  margin-left: 20px;
+}
+
+.comment {
+  font-size: 12px;
+  color: #c4c4c4;
+  margin-left: 20px;
+}
+
+
+.ant-tooltip-inner {
+  color: yellow;
+  background-color: green;
+}
+
+.ant-tooltip-placement-bottom .ant-tooltip-arrow, .ant-tooltip-placement-bottomLeft .ant-tooltip-arrow, .ant-tooltip-placement-bottomRight .ant-tooltip-arrow {
+  border-bottom-color: green;
+}
