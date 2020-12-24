@@ -82,6 +82,7 @@ class TrainTrailCallback(Callback):
                 if not isinstance(param_value, bool):
                     params_dict[param_name] = param_value
         return params_dict
+
     def ensure_number(self, value, var_name):
         if value is None:
              raise ValueError(f"Var {var_name} can not be None.")
@@ -97,19 +98,23 @@ class TrainTrailCallback(Callback):
 
         trail_extension = {
             "trail_no": trail_no,
-            "reward": reward,
-            "elapsed": elapsed,
-            "params": self.get_space_params(space)
+            "status": 'succeed',
+            "extension": {
+                "reward": reward,
+                "elapsed": elapsed,
+                "params": self.get_space_params(space)
+            }
         }
         train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trail_extension)
 
     def on_skip_trail(self, hyper_model, space, trail_no, reason, reward, improved, elapsed):
-        pass
-        # trail_extension = {
-        #     "trail_no": trail_no,
-        #     "elapsed": elapsed,
-        #     "params": self.get_space_params(space),
-        #     "message": str(reason)
-        # }
-        # train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trail_extension)
+        trail_extension = {
+            "trail_no": trail_no,
+            "status": 'skip',
+            "extension": {
+                "reason": str(reason)
+            }
+        }
+        train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trail_extension)
+
 {% endif %}

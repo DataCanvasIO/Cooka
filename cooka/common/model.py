@@ -6,7 +6,10 @@ from os import path as P
 from cooka.common import util
 
 
-FeatureNormalStatus = 'normal'
+STATUS_FEATURE_NORMAL = 'normal'
+
+STATUS_SUCCEED = "succeed"
+STATUS_FAILED = "failed"
 
 
 class FeatureUnique(Bean):
@@ -26,7 +29,7 @@ class FeatureUnique(Bean):
             if percentage > 90:
                 return FeatureUnique.Status.ID_ness
             else:
-                return FeatureNormalStatus
+                return STATUS_FEATURE_NORMAL
 
 
 class FeatureMissing(Bean):
@@ -42,7 +45,7 @@ class FeatureMissing(Bean):
         if percentage > 70:
             return FeatureMissing.Status.TooHigh
         else:
-            return FeatureNormalStatus
+            return STATUS_FEATURE_NORMAL
 
 
 class FeatureCorrelation(Bean):
@@ -58,13 +61,13 @@ class FeatureCorrelation(Bean):
         _c = abs(correlation)
         if _c > 0.5:
             if is_target_col is True:
-                return FeatureNormalStatus
+                return STATUS_FEATURE_NORMAL
             else:
                 return FeatureCorrelation.Status.TooHigh
         elif _c < 0.01:
             return FeatureCorrelation.Status.TooLow
         else:
-            return FeatureNormalStatus
+            return STATUS_FEATURE_NORMAL
 
 
 class Feature(Bean):
@@ -165,7 +168,6 @@ class TrainStep(JobStep):
         """
         Load = 'load'
         Optimize = 'optimize'
-        OptimizeStart = 'optimize_start'
         Searched = 'searched'
         FinalTrain = 'final_train'
         Evaluate = 'evaluate'
@@ -228,9 +230,16 @@ class ModelFeature(Bean):
 
 class TrainTrail(Bean):
     trail_no = IntegerField()
-    reward = FloatField()
-    elapsed = FloatField()
-    params = DictField()
+    status = StringField()
+    extension = DictField()
+
+    # if status is succeed, extension is :
+    # reward = FloatField()
+    # elapsed = FloatField()
+    # params = DictField()
+
+    # is status is failed, extension is:
+    # reason = StringField()
 
 
 class Model(Bean):
@@ -297,9 +306,14 @@ class Model(Bean):
 
 
 class ModelStatusType(Bean):
-    Succeed = "succeed"
-    Failed = "failed"
+    Succeed = STATUS_SUCCEED
+    Failed = STATUS_FAILED
     Running = "running"
+
+
+class TrailStatus:
+    Succeed = STATUS_SUCCEED
+    Failed = STATUS_FAILED
 
 
 class CrossValidation(Bean):

@@ -3,7 +3,7 @@ from cooka.common import util
 from cooka.common.exceptions import EntityNotExistsException
 from cooka.common.model import JobStep, Model, PredictStepType
 from cooka.dao import db
-from cooka.dao.dao import ModelDao, DatasetDao
+from cooka.dao.dao import ExperimentDao, DatasetDao
 from cooka.dao.entity import MessageEntity
 from cooka.common import consts
 import sys, os
@@ -13,7 +13,7 @@ from os import path as P
 
 class ModelServingService:
 
-    model_dao = ModelDao()
+    model_dao = ExperimentDao()
     dataset_dao = DatasetDao()
 
     def predict(self, dataset_name, model_name, req_dict: dict):

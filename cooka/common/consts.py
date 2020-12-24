@@ -2,13 +2,13 @@ from os import path as P
 
 from traitlets.config import Application
 from traitlets.traitlets import (
-    Bool, Unicode, Integer, List, Dict
+    Bool, Unicode, Integer, Dict
 )
 
 
 # -- Load config
 class CookaApp(Application):
-    server_port = Integer(8240).tag(config=True)
+    server_port = Integer(8000).tag(config=True)
     language = Unicode("en_US").tag(config=True)
     data_directory = Unicode("~/cooka").tag(config=True)
     notebook_portal = Unicode("http://localhost:8888").tag(config=True)

@@ -79,40 +79,42 @@ It can also extend the search space to support more feature engineering methods 
 
 ## Installation 
 
+### Use pip
+
 The python version should be >= 3.6, for CentOS , install the system package:
 
 ```shell script
-sudo yum install -y gcc gcc-c++ graphviz
-```
-
-for ubuntu:
-```shell script
-sudo apt-get update
-sudo apt-get install -y gcc g++ graphviz
-```
-
-Then install Cooka from [PYPI](https://pypi.org):
-```shell script
+pip install --upgrade pip
 pip install cooka
-```
-
-[node>=8.0.0](https://nodejs.org/en/) is also required to build from source code: 
-```shell script
-python setup.py install
 ```
 
 Start the web server：
 ```shell script
 cooka server
 ```
-Then open `http://< server:8140 >` with your browser to use cooka.
 
-By default, the cooka configuration file is at `~/.config/cooka/cooka.py`,  to generate a profile template:
+Then open `http://<server:8140>` with your browser to use cooka.
+
+By default, the cooka configuration file is at `~/.config/cooka/cooka.py`,  to generate a template:
 ```shell script
-cooka --generate-config > ~/.config/cooka/cooka.py
+mkdir -p ~/.config/cooka/
+cooka generate-config > ~/.config/cooka/cooka.py
 ```
 
- 
+### Use Docker
+
+Launch a Cooka docker container:
+
+```shell script
+docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip>:8888"  datacanvas/cooka
+```
+
+Open `http://<external_ip:8000>` with your browser to use cooka.
+
+See more documents：
+1. [Install from source code](docs/pages/install_from_source.md)
+2. [Integrate with Notebook](docs/pages/install_with_jupyter.md)
+
 ## DataCanvas
 
 ![](docs/img/dc_logo_1.png)

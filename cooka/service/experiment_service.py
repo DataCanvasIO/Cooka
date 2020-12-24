@@ -2,10 +2,11 @@
 from collections import OrderedDict
 from cooka.common import consts
 from cooka.common.exceptions import EntityNotExistsException
-from cooka.common.model import ExperimentConf, TrainJobConf, FrameworkType, JobStep, TrainStep, CrossValidation, TrainValidationHoldout, Model, ModelStatusType, \
-    AnalyzeStep, FeatureType, FeatureValueCount, SampleConf, TrainValidationHoldoutDefault
-from cooka.dao.dao import ModelDao, DatasetDao
-from cooka.dao.entity import ModelEntity, MessageEntity
+from cooka.common.model import ExperimentConf, TrainJobConf, FrameworkType, JobStep, TrainStep, CrossValidation, \
+    TrainValidationHoldout, Model, ModelStatusType, \
+    AnalyzeStep, FeatureType, FeatureValueCount, SampleConf, TrainValidationHoldoutDefault, TrailStatus
+from cooka.dao.dao import ExperimentDao, DatasetDao
+from cooka.dao.entity import ExperimentEntity, MessageEntity
 from cooka.dao import db
 from cooka.common import util
 import abc
@@ -27,7 +28,7 @@ import pandas as pd
 
 class ExperimentService(object):
 
-    model_dao = ModelDao()
+    model_dao = ExperimentDao()
     dataset_dao = DatasetDao()
     dataset_service = DatasetService()
 
@@ -38,18 +39,18 @@ class ExperimentService(object):
             "experiment_conf": experiment_conf.to_dict(),
             "train_job_conf": train_job_conf.to_dict(),
         }
-        gbm_model = ModelEntity(name=model_name,
-                                framework=train_job_conf.framework,
-                                dataset_name=experiment_conf.dataset_name,
-                                no_experiment=no_experiment,
-                                inputs=input_features,
-                                task_type=experiment_conf.task_type,
-                                model_path=util.model_dir(experiment_conf.dataset_name, model_name),
-                                status=ModelStatusType.Running,
-                                train_job_name=train_job_conf.name,
-                                extension=extension,
-                                create_datetime=now,
-                                last_update_datetime=now)
+        gbm_model = ExperimentEntity(name=model_name,
+                                     framework=train_job_conf.framework,
+                                     dataset_name=experiment_conf.dataset_name,
+                                     no_experiment=no_experiment,
+                                     inputs=input_features,
+                                     task_type=experiment_conf.task_type,
+                                     model_path=util.model_dir(experiment_conf.dataset_name, model_name),
+                                     status=ModelStatusType.Running,
+                                     train_job_name=train_job_conf.name,
+                                     extension=extension,
+                                     create_datetime=now,
+                                     last_update_datetime=now)
         session.add(gbm_model)
 
     def _infer_task_type(self, f:Feature):
@@ -90,7 +91,7 @@ class ExperimentService(object):
         else:
             log.warning(f"Model = {model_name}, status={model_status} but has no trails, " +
                         "may be train script execute failed, see trail log for more detail.")
-            return None
+            return 0
 
     def find_running_model(self):
         with db.open_session() as s:
@@ -98,38 +99,42 @@ class ExperimentService(object):
 
     @staticmethod
     def calc_remain_time(model: Model):
-        model_train_process = model.progress
-        if model_train_process is None or model_train_process in [TrainStep.Types.Load, TrainStep.Types.OptimizeStart]:
-            estimated_remaining_time = None
-        elif model_train_process in [TrainStep.Types.Optimize]:  # in this stage already has a trail finished, before this stage has no evaluate remaining time
-            # 1. calc avg elapsed
-            avg_elapsed = ExperimentService.calc_avg_trail_elapsed(model.name, model_train_process, model.trails)
+        if model.status in [ModelStatusType.Failed, ModelStatusType.Succeed]:
+            return 0  # finished
+        elif model.status == ModelStatusType.Running:
+            model_train_process = model.progress
+            if model_train_process is None or model_train_process in [TrainStep.Types.Load]:
+                estimated_remaining_time = None
+            elif model_train_process in [TrainStep.Types.Optimize]:  # in this stage already has a trail finished, before this stage has no evaluate remaining time
+                # 1. calc avg elapsed
+                avg_elapsed = ExperimentService.calc_avg_trail_elapsed(model.name, model_train_process, model.trails)
 
-            # 2. calc estimated remaining time
-            model_extension = model.extension
-            train_mode = model_extension['experiment_conf']["train_mode"]  # extension must has experiment_conf and train_mode and not None
-            max_trails = consts.TRAIN_MODE_MAX_TRAILS_MAPPING[train_mode]  # must has {train_mode}
-            train_trail_no = model.train_trail_no
-            estimated_remaining_time = (max_trails - train_trail_no) * avg_elapsed
+                # 2. calc estimated remaining time
+                model_extension = model.extension
+                train_mode = model_extension['experiment_conf']["train_mode"]  # extension must has experiment_conf and train_mode and not None
+                max_trails = consts.TRAIN_MODE_MAX_TRAILS_MAPPING[train_mode]  # must has {train_mode}
+                train_trail_no = model.train_trail_no
+                estimated_remaining_time = (max_trails - train_trail_no) * avg_elapsed
 
-            # 3. plus final train time and evaluate/persist time
-            estimated_remaining_time + avg_elapsed + 30
+                # 3. plus final train time and evaluate/persist time
+                estimated_remaining_time + avg_elapsed + 30
 
-        elif model_train_process in [TrainStep.Types.Searched]:
-            avg_elapsed = ExperimentService.calc_avg_trail_elapsed(model.name, model_train_process, model.trails)
-            # plus final train/evaluate/persist time
-            estimated_remaining_time = avg_elapsed + 30
+            elif model_train_process in [TrainStep.Types.Searched]:
+                avg_elapsed = ExperimentService.calc_avg_trail_elapsed(model.name, model_train_process, model.trails)
+                # plus final train/evaluate/persist time
+                estimated_remaining_time = avg_elapsed + 30
 
-        elif model_train_process in [TrainStep.Types.FinalTrain, TrainStep.Types.Evaluate]:
-            # plus final train/evaluate/persist time
-            estimated_remaining_time = 30
+            elif model_train_process in [TrainStep.Types.FinalTrain, TrainStep.Types.Evaluate]:
+                # plus final train/evaluate/persist time
+                estimated_remaining_time = 30
 
-        elif model_train_process in [TrainStep.Types.Persist]:  # finished
-            estimated_remaining_time = 0  # remaining 0 seconds means finished.
+            elif model_train_process in [TrainStep.Types.Persist]:  # finished
+                estimated_remaining_time = 0  # remaining 0 seconds means finished.
+            else:
+                raise ValueError(f"Unseen model status: {model_train_process} ")
+            return estimated_remaining_time
         else:
-            raise ValueError(f"Unseen model status: {model_train_process} ")
-
-        return estimated_remaining_time
+            raise ValueError(f"Unseen model status {model.status}")
 
     def get_experiments(self, dataset_name, page_num, page_size):
         # 1. validation params
@@ -699,8 +704,8 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
     def _update_model(self, session, model_name, progress, values):
         values['last_update_datetime'] = util.get_now_datetime()
         values['progress'] = progress
-        affected = session.query(ModelEntity) \
-            .filter(ModelEntity.name == model_name) \
+        affected = session.query(ExperimentEntity) \
+            .filter(ExperimentEntity.name == model_name) \
             .update(values)
         if affected != 1:  # rollback them all
             raise Exception(f"Update error, affected rows={affected}")
@@ -709,7 +714,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         if current_progress is None:  # has no progress at beginning
             return
         # todo copy to analyze job
-        state_order = [TrainStep.Types.Load, TrainStep.Types.OptimizeStart, TrainStep.Types.Searched, TrainStep.Types.FinalTrain, TrainStep.Types.Evaluate, TrainStep.Types.Persist]
+        state_order = [TrainStep.Types.Load, TrainStep.Types.Searched, TrainStep.Types.FinalTrain, TrainStep.Types.Evaluate, TrainStep.Types.Persist]
 
         i = state_order.index(current_progress)  # may cause a error due state error, like: ValueError: 'c' is not in list
         if i == len(state_order) - 1:
@@ -724,10 +729,10 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         model_entity = self.model_dao.find_by_name(s, model_name)
 
         if model_entity is None:
-            raise EntityNotExistsException(ModelEntity, model_name)
+            raise EntityNotExistsException(ExperimentEntity, model_name)
         return model_entity.to_model_bean()
 
-    def retrieve_model(self, model_name):
+    def retrieve(self, model_name):
 
         def _replace_NaN(v):
             if v is None:
@@ -743,36 +748,48 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
         # handle trails
         if model.trails is not None and len(model.trails)>0:
-            param_names = [k for k in model.trails[0].params]
-            trail_data_dict_list = []
-
-            trail_params_values = []
-            trail_index = []
+            failed_trails = {}
             for t in model.trails:
-                param_values = [_replace_NaN(t.params.get(n)) for n in param_names]
-                trail_params_values.append(param_values)
-                trail_index.append(t.trail_no)
-            df_train_params = pd.DataFrame(data=trail_params_values, columns=param_names)
-            # remove if all is None
-            df_train_params.dropna(axis=1, how='all', inplace=True)
+                if t.status == TrailStatus.Failed:
+                    failed_trails[t.trail_no] = t.extension['reason']
 
-            for i, t in enumerate(model.trails):
-                trail_data_dict = {"reward": t.reward, "params": [_replace_NaN(_) for _ in df_train_params.iloc[i].tolist()], "elapsed": t.elapsed}
-                trail_data_dict_list.append(trail_data_dict)
+            # Filter that failed trails
+            succeed_trails = list(filter(lambda _: _.status == TrailStatus.Succeed, model.trails))
+            if len(succeed_trails) > 0:
+                param_names = [k for k in succeed_trails[0].params]
+                trail_data_dict_list = []
+                trail_params_values = []
+                trail_index = []
+                for t in succeed_trails:
+                    param_values = [_replace_NaN(t.extension['params'].get(n)) for n in param_names]
+                    trail_params_values.append(param_values)
+                    trail_index.append(t.trail_no)
+                df_train_params = pd.DataFrame(data=trail_params_values, columns=param_names)
 
-            if len(df_train_params.columns.values) > 0:  # ensure not all params is None
-                trails_dict = {
-                    "param_names": df_train_params.columns.tolist(),
-                    "data": trail_data_dict_list
-                }
+                # remove if all is None
+                df_train_params.dropna(axis=1, how='all', inplace=True)
+                for i, t in enumerate(succeed_trails):
+                    trail_extension = t.extension
+                    trail_data_dict = {"reward": trail_extension['reward'], "params": [_replace_NaN(_) for _ in df_train_params.iloc[i].tolist()], "elapsed": trail_extension['elapsed']}
+                    trail_data_dict_list.append(trail_data_dict)
+
+                if len(df_train_params.columns.values) > 0:  # ensure not all params is None
+                    trails_dict = {
+                        "param_names": df_train_params.columns.tolist(),
+                        "data": trail_data_dict_list
+                    }
+                else:
+                    trails_dict = {}
             else:
                 trails_dict = {}
         else:
             trails_dict = {}
+            failed_trails = {}
 
         model_dict = model.to_dict()
         # update trails
         model_dict['trails'] = trails_dict
+        model_dict['failed_trails'] = failed_trails
         model_dict['model_path'] = util.relative_path(model_dict['model_path'])
         model_dict['escaped'] = model.escaped_time_by_seconds()
         model_dict['log_file_path'] = model.log_file_path()
@@ -803,7 +820,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         step_status = util.require_in_dict(req_dict, 'status', str)
         step_extension = util.get_from_dict(req_dict, 'extension', dict)
 
-        if step_type not in [TrainStep.Types.Load, TrainStep.Types.Optimize, TrainStep.Types.OptimizeStart, TrainStep.Types.Persist, TrainStep.Types.Evaluate, TrainStep.Types.FinalTrain, TrainStep.Types.Searched]:
+        if step_type not in [TrainStep.Types.Load, TrainStep.Types.Optimize, TrainStep.Types.Persist, TrainStep.Types.Evaluate, TrainStep.Types.FinalTrain, TrainStep.Types.Searched]:
             raise ValueError(f"Unknown step type = {step_type}")
 
         if step_status not in [JobStep.Status.Succeed, JobStep.Status.Failed]:
@@ -814,11 +831,12 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
             # [2.1].  check temporary model exists
             model = self.model_dao.find_by_train_job_name(s, train_job_name)
             model_name = model.name
+
             # [2.2]. check event type, one type one record
             messages = s.query(MessageEntity).filter(MessageEntity.author == train_job_name).all()
             for m in messages:
                 if step_type == util.loads(m.content).get('type'):
-                    if step_type not in [TrainStep.Types.OptimizeStart, TrainStep.Types.Optimize]:
+                    if step_type not in [TrainStep.Types.Optimize]:
                         raise Exception(f"Event type = {step_type} already exists .")
 
             # [2.3]. create a new message
@@ -829,40 +847,48 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
             # [2.4]. handle analyze event
             current_progress = model.progress
             # todo check in code body self._check_progress_change(step_type, current_progress)  # add failed status
-            if step_type == TrainStep.Types.Evaluate:
-                if step_status == JobStep.Status.Succeed:
-                    self._update_model(s, model_name, step_type, {"performance": step_extension['performance']})
-                else:
-                    self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed, "finish_datetime": util.get_now_datetime()})
 
-            elif step_type == TrainStep.Types.Load:
+            if step_type == TrainStep.Types.Load:
                 if step_status == JobStep.Status.Succeed:
                     self._update_model(s, model_name, step_type, {"status": ModelStatusType.Running})
                 else:
                     self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed, "finish_datetime": util.get_now_datetime()})
 
-            elif step_type == TrainStep.Types.OptimizeStart:
-                pass
-                # train_trail_no = step_extension.get('trail_no')
-                # if train_trail_no is None or not isinstance(train_trail_no, int):
-                #     raise ValueError(f"Param trail_no can not be None and should be int but is : {train_trail_no}")
-                # # upload trail number
-                # self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no})
-
             elif step_type == TrainStep.Types.Optimize:
+                # Note: this step is always succeed
                 train_trail_no = step_extension.get('trail_no')
-                # update trails
                 # load current trail and append new
                 trails = model.trails
                 if model.trails is None:
                     trails = []
                 trails.append(step_extension)
-                self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "score": step_extension.get('reward'), "trails": trails})
+                trail_status = step_extension['status']
+                trail_extension = step_extension['extension']
+                if trail_status == TrailStatus.Succeed:
+                    self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "score": trail_extension.get('reward'), "trails": trails})
+                elif trail_status == TrailStatus.Failed:
+                    # does not update score
+                    self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "trails": trails})
+                else:
+                    raise ValueError(f"Unseen trail status {trail_status} .")
+
+            elif step_type == TrainStep.Types.Searched:
+                self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed})
+
+            elif step_type == TrainStep.Types.Evaluate:
+                if step_status == JobStep.Status.Succeed:
+                    self._update_model(s, model_name, step_type, {"performance": step_extension['performance']})
+                else:
+                    self._update_model(s, model_name, step_type,
+                                       {"status": ModelStatusType.Failed, "finish_datetime": util.get_now_datetime()})
 
             elif step_type == TrainStep.Types.Persist:
-                model_file_size = step_extension['model_file_size']
-                self._update_model(s, model_name, step_type, {"model_file_size": model_file_size,
-                                                              "status": ModelStatusType.Succeed,
-                                                              "finish_datetime": util.get_now_datetime()})
+                if step_status == JobStep.Status.Succeed:
+                    model_file_size = step_extension['model_file_size']
+                    self._update_model(s, model_name, step_type, {"model_file_size": model_file_size,
+                                                                  "status": ModelStatusType.Succeed,
+                                                                  "finish_datetime": util.get_now_datetime()})
+                else:
+                    self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed})
             else:
-                self._update_model(s, model_name, step_type, {})
+                raise ValueError(f"Unseen step type {step_type} of model {model_name}")
