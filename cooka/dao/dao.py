@@ -2,7 +2,7 @@
 from cooka.common import util
 from cooka.common.exceptions import EntityNotExistsException
 from cooka.common.model import Model, ModelStatusType
-from cooka.dao.entity import ModelEntity, DatasetEntity
+from cooka.dao.entity import ExperimentEntity, DatasetEntity
 from sqlalchemy.sql import func
 
 
@@ -25,10 +25,10 @@ class BaseDao:
                 return None
 
 
-class ModelDao(BaseDao):
+class ExperimentDao(BaseDao):
 
-    def find_by_name(self, session, model_name) -> ModelEntity:
-        model = session.query(ModelEntity).filter(ModelEntity.name == model_name).all()
+    def find_by_name(self, session, model_name) -> ExperimentEntity:
+        model = session.query(ExperimentEntity).filter(ExperimentEntity.name == model_name).all()
         return self.require_one(model, model_name)
 
     def require_by_name(self, s, model_name):
@@ -40,32 +40,32 @@ class ModelDao(BaseDao):
     def find_by_dataset_name(self, session, dataset_name, page_num, page_size):
         offset = (page_num - 1) * page_size
         query = session\
-            .query(ModelEntity)\
-            .filter(ModelEntity.dataset_name == dataset_name)
+            .query(ExperimentEntity)\
+            .filter(ExperimentEntity.dataset_name == dataset_name)
         total = query.count()
-        models = query.order_by(ModelEntity.create_datetime.desc()) \
+        models = query.order_by(ExperimentEntity.create_datetime.desc()) \
             .limit(page_size).offset(offset).all()
 
         return [m.to_model_bean() for m in models], total
 
     def find_running_model(self, session):
         models = session \
-            .query(ModelEntity) \
-            .filter(ModelEntity.status == ModelStatusType.Running) \
-            .order_by(ModelEntity.create_datetime.desc()) \
+            .query(ExperimentEntity) \
+            .filter(ExperimentEntity.status == ModelStatusType.Running) \
+            .order_by(ExperimentEntity.create_datetime.desc()) \
             .all()
         return [m.to_model_bean() for m in models]
 
     def update_model_by_name(self, session, model_name, properties):
         n_affect = session \
-            .query(ModelEntity) \
-            .filter(ModelEntity.name == model_name) \
+            .query(ExperimentEntity) \
+            .filter(ExperimentEntity.name == model_name) \
             .update(properties)
         if n_affect != 1:
             raise Exception(f"Update model = {model_name} status failed, affect rows = {n_affect}, properties = {properties}")
 
     def find_by_train_job_name(self, session, train_job_name):
-        models = session.query(ModelEntity).filter(ModelEntity.train_job_name == train_job_name).all()
+        models = session.query(ExperimentEntity).filter(ExperimentEntity.train_job_name == train_job_name).all()
         one = self.checkout_one(models)
 
         if one is None:
@@ -73,14 +73,14 @@ class ModelDao(BaseDao):
         return one
 
     def get_max_experiment(self,session, dataset_name):
-        no_experiment = session.query(func.max(ModelEntity.no_experiment)).filter(ModelEntity.dataset_name == dataset_name).one_or_none()[0]
+        no_experiment = session.query(func.max(ExperimentEntity.no_experiment)).filter(ExperimentEntity.dataset_name == dataset_name).one_or_none()[0]
         if no_experiment is None:
             return 0  # start from 1
         else:
             return no_experiment
 
     def query_n_experiment(self, session, dataset_name):
-        sql = f"select count(distinct(no_experiment)) from cd_model where dataset_name = '{dataset_name}'"
+        sql = f"select count(distinct(no_experiment)) from {ExperimentEntity.__tablename__} where dataset_name = '{dataset_name}'"
         return session.execute(sql).fetchone()[0]
 
 

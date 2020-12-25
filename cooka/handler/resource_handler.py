@@ -167,9 +167,20 @@ class TextResourceTailHandler(AbstractTextResourceHandler):
 
 class AssetsHandler(StaticFileHandler):
 
+    MissingResource = ['favicon.ico']
+
     async def get(self, path, **kwargs):
-        if path in ["umi.js", "umi.css"]:
-            static_path = path
+
+        if path in self.MissingResource:
+            raise tornado.web.HTTPError(404, f"File {path} is missing")
+
+        if path in ['', '/']:
+            resource_path = "index.html"
         else:
-            static_path = "index.html"
-        await super(AssetsHandler, self).get(static_path)
+            absolute_path = self.get_absolute_path(self.root, self.parse_url_path(path))
+            if not P.exists(absolute_path):
+                logger.info(f"URI {path} not found, use index.html instead ")
+                resource_path = "index.html"  # handle 404
+            else:
+                resource_path = path
+        await super(AssetsHandler, self).get(resource_path)

@@ -79,44 +79,40 @@ Web页面截图：
 
 ## 安装 
 
-需要python版本不低于3.6，对于centos安装系统依赖包：
-```shell script
-sudo yum install -y gcc gcc-c++ graphviz
-```
+### 通过pip安装
 
-对于ubuntu：
+需要python版本不低于3.6，从[PYPI](https://pypi.org)中安装Cooka:
 ```shell script
-sudo apt-get update
-sudo apt-get install -y gcc gcc-c++ graphviz
-```
-
-从[PYPI](https://pypi.org)中安装Cooka:
-```shell script
+pip install --upgrade pip
 pip install cooka
-```
-
-从源码构建还需要 [node>=8.0.0](https://nodejs.org/en/),
-```shell script
-python setup.py install
 ```
 
 启动Web服务：
 ```shell script
 cooka server
 ```
-然后使用浏览器访问`http://<server:8140>`来使用Cooka。
+然后使用浏览器访问`http://<server_ip:8000>`来使用Cooka。
 
 Cooka配置文件默认在`~/.config/cooka/cooka.py`，生成配置文件模板：
 
 ```shell script
-cooka --generate-config > ~/.config/cooka/cooka.py
+mkdir -p ~/.config/cooka/
+cooka generate-config > ~/.config/cooka/cooka.py
 ```
 
+### 使用Docker部署Cooka
+```shell script
+docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip>:8888"  datacanvas/cooka
+```
+然后使用浏览器访问`http://<external_ip:8000>`来使用Cooka。
+
+
+更多文档：
+1. [使用源码安装](docs/pages/install_from_source.md)
+2. [整合Jupyter Notebook](docs/pages/install_with_jupyter.md)
 
 ## DataCanvas
 
 ![](docs/img/dc_logo_1.png)
 
 Cooka is an open source project created by [DataCanvas](https://www.datacanvas.com/). 
-
-

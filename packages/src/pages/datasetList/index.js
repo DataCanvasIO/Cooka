@@ -26,7 +26,7 @@ const DatasetList = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const dispatch = useDispatch();
-  const data = useSelector(state => state.datasetlist.data);
+  const data = useSelector(state => state.datasetlist.data)
   const pagination = useSelector(state => state.datasetlist.pagination);
   useEffect(() => {
     dispatch({

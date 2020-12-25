@@ -6,6 +6,7 @@ import { withRouter } from 'umi';
 import styles from '../index.less';
 import { formatMessage } from 'umi-plugin-locale';
 import { makeCsvFileTip, makeSampleDiv } from '@/pages/common/createDataset';
+import { SampleStrategy } from '@/pages/common/appConst';
 
 
 const antIcon = <LoadingOutlined style={{ fontSize: 16 }} spin />;
@@ -90,28 +91,30 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, step2Status
       setUploadStatus(statusConfig['done']);
       setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: copyTook.toFixed(2), fileSize:  "10MB" }) }`) // todo fixme
       setLoadingDataStatus(statusConfig['doing']);
-      setLoadingDataTips(formatMessage({id: 'upload.analysising'}))
+      setLoadingDataTips(formatMessage({id: 'upload.loading'}))
 
-    } else if ( step2Status === 'failed' ) {
+    } else if ( step1Status === 'failed' ) {
       setLoadingDataStatus(statusConfig['undone']);
       setUploadTips(formatMessage({id: 'upload.fail'}))
-
     }
+
     if (step2Status === 'succeed') {
       setLoadingDataStatus(statusConfig['done']);
-      setLoadingDataTips(`${formatMessage({id: 'upload.spend'})}${loadingTook.toFixed(2)}s，${formatMessage({id: 'upload.total'})}${n_rows}${formatMessage({id: 'upload.cols'})}${n_cols}${formatMessage({id: 'upload.rows'})}，${formatMessage({id: 'upload.loadstep'})}${n_rows_used}${formatMessage({id: 'upload.cols'})}${n_cols_used}${formatMessage({id: 'upload.rows'})}${formatMessage({id: 'upload.runAnalysis'})}`);
+      setLoadingDataTips(`${formatMessage({id: 'upload.hintLoadData'}, {elapsed: loadingTook.toFixed(2), nRows: n_rows, nColumns: n_cols, nRowsUsed: n_rows_used})  }`);
+
       setAnalysisDataStatus(statusConfig['doing']);
-      setAnalysisDataStatus(formatMessage({id: 'upload.analysising'}))
+      setAnalysisDataTips(formatMessage({id: 'upload.analysising'}))
+
     } else if ( step2Status === 'failed' ) {
       setLoadingDataStatus(statusConfig['undone']);
       setLoadingDataTips(formatMessage({id: 'upload.fail'}))
-
     }
+
     if (step3Status === 'succeed') {
       setAnalysisDataStatus(statusConfig['done']);
       setLoadingDataStatus(statusConfig['done']);
-      setLoadingDataTips(`${formatMessage({id: 'upload.hintLoadData'}, {elapsed: loadingTook.toFixed(2), nRows: n_rows, nColumns: n_cols, nRowsUsed: n_rows_used})  }`);
       setAnalysisDataTips(`${formatMessage({id: 'upload.hintAnalysis'}, {elapsed: analysisTook.toFixed(2), nContinuous: continuous, nCategorical:categorical,  nDatetime: datetime})}`);
+
     } else if (step3Status === 'failed') {
       setAnalysisDataStatus(statusConfig['undone']);
       setAnalysisDataTips(formatMessage({id: 'import.fail'}));
@@ -207,7 +210,9 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, step2Status
   return (
     <>
       <div className={styles.main}>
+
         {makeSampleDiv(setSampleStrategy, sampleStrategy, form, onChange, value)}
+
         <div className={styles.fileUpload}>
             <dl>
               <dt>{formatMessage({id: 'import.address'})}</dt>

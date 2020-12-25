@@ -48,7 +48,7 @@ class ModelDetailHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, dataset_name, model_name, *args, **kwargs):
-        m = self.experiment_service.retrieve_model(model_name)
+        m = self.experiment_service.retrieve(model_name)
         self.response_json(m)
 
 

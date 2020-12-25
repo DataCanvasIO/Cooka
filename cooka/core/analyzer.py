@@ -1,7 +1,7 @@
 # DataFrames
 import os
 
-from cooka.common import util
+from cooka.common import util, consts
 from cooka.common.serializer import ListBeanField, Bean
 import pandas as pd
 from cooka.common.log import log_core as logger
@@ -128,7 +128,21 @@ class PandasAnalyzer(Analyzer):
             # 2. describe
             series_d = series.describe()
             feature_value_count = pd.value_counts(series)
-            value_count = [FeatureValueCount(type=k, value=v, percentage=v/series.shape[0]) for k, v in feature_value_count.items()]
+
+            # feature_value_count, 按个数进行统计
+            feature_value_count_sorted = feature_value_count.sort_values(ascending=False)
+
+            if feature_value_count_sorted.shape[0] > consts.MAX_DISTINCT_VALUES:
+                feature_value_count_limited = feature_value_count_sorted.iloc[:consts.MAX_DISTINCT_VALUES]
+                others_feature_values_sum = feature_value_count_sorted.iloc[consts.MAX_DISTINCT_VALUES:].sum()
+                value_count = [FeatureValueCount(type=k, value=int(v)) for k, v in
+                               feature_value_count_limited.items()]
+
+                remained_feature_count = FeatureValueCount(type=consts.KEY_REMAINED_FEATURE_VALUES_SUM, value=int(others_feature_values_sum))
+                value_count.append(remained_feature_count)
+            else:
+                value_count = [FeatureValueCount(type=k, value=int(v)) for k, v in feature_value_count_sorted.items()]
+
             extension = \
                 ContinuousFeatureExtension(bins=bins,
                                            min=series_d['min'],
@@ -145,7 +159,10 @@ class PandasAnalyzer(Analyzer):
             mode_count = int(feature_value_count[mode_value])
             mode = FeatureMode(value=str(mode_value), count=mode_count, percentage=round(mode_count/self.df.shape[0] * 100, 2))  # todo add unit test
 
-            value_count = [FeatureValueCount(type=str(k), value=v, percentage=v/series.shape[0]) for k, v in feature_value_count.items()]
+            # limit value count
+            feature_value_count_limited = feature_value_count.sort_values(ascending=False).iloc[:consts.MAX_DISTINCT_VALUES]
+
+            value_count = [FeatureValueCount(type=str(k), value=int(v)) for k, v in feature_value_count_limited.items()]
             extension = \
                 CategoricalFeatureExtension(value_count=value_count, mode=mode)
 

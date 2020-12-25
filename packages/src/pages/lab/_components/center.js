@@ -326,9 +326,9 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
   }
 
   const formatTrainMode = {
-    [Config.trainMode.Quick]: formatMessage({id: 'train.quick'}),
-    [Config.trainMode.Performance]: formatMessage({id: 'train.performance'}),
-    [Config.trainMode.Minimal]: formatMessage({id: 'train.minimal'}),
+    [Config.TrainMode.Quick]: formatMessage({id: 'train.quick'}),
+    [Config.TrainMode.Performance]: formatMessage({id: 'train.performance'}),
+    [Config.TrainMode.Minimal]: formatMessage({id: 'train.minimal'}),
   }
 
 

@@ -5,7 +5,7 @@ import pandas as pd
 from os import path as P
 import sys
 
-from cooka.dao.dao import DatasetDao, ModelDao
+from cooka.dao.dao import DatasetDao, ExperimentDao
 from cooka.dao import db
 from cooka.dao.entity import DatasetEntity, MessageEntity
 
@@ -19,7 +19,7 @@ from cooka.common.model import AnalyzeJobConf, AnalyzeStep, JobStep, SampleConf,
 class DatasetService:
 
     dataset_dao = DatasetDao()
-    model_dao = ModelDao()
+    model_dao = ExperimentDao()
 
     def add_analyze_process_step(self, dataset_name, analyze_job_name, step: JobStep):
         step_type = step.type
@@ -28,7 +28,7 @@ class DatasetService:
             d = s.query(DatasetEntity).filter(DatasetEntity.name == dataset_name).first()
             if d is None:
                 raise EntityNotExistsException(DatasetEntity, dataset_name)
-
+            dataset_file_path = d.file_path
             # 1.2. check event type, one type one record
             messages = s.query(MessageEntity).filter(MessageEntity.author == analyze_job_name).all()
             for m in messages:
@@ -38,23 +38,26 @@ class DatasetService:
         # 2. handle event
         with db.open_session() as s:
             # 2.1. create a new message
+            # add recommend dataset name if analyze succeed
+            if step_type == AnalyzeStep.Types.Analyzed and step.status == JobStep.Status.Succeed:
+                step.extension['recommend_dataset_name'] = self.choose_dataset_name(P.basename(dataset_file_path), False)
+
             content = util.dumps(step.to_dict())
+
             message = MessageEntity(id=util.short_uuid(), author=analyze_job_name, content=content, create_datetime=util.get_now_datetime())
             s.add(message)
 
             # 2.2. handle analyze event
             if step_type == AnalyzeStep.Types.Analyzed:
                 # update temporary dataset
-                # todo handle failed analyze
                 if step.status == JobStep.Status.Succeed:
                     hints = step.extension.pop("hints")
                     d_stats = DatasetStats.load_dict(step.extension)
-
                     features_str = [f.to_dict() for f in d_stats.features]
                     update_fields = \
                         {
                             "has_header": d_stats.has_header,
-                            "extension": step.extension,
+                            "extension": {"sample_conf": step.extension['sample_conf']},  # for sample hint
                             "n_cols": d_stats.n_cols,
                             "n_rows": d_stats.n_rows,
                             "features": features_str,
@@ -183,25 +186,24 @@ class DatasetService:
             dataset = self.dataset_dao.require_by_name(s, dataset_name)
             dict_value = util.sqlalchemy_obj_to_dict(dataset)
             dict_value['file_path'] = util.relative_path(dataset.file_path)
-
-            if dataset.status == DatasetEntity.Status.Analyzed:
-                for i, f in enumerate(dict_value['features']):
-                    if f['type'] in [FeatureType.Categorical, FeatureType.Continuous]:
-                        if f['unique']['value'] > n_top_value:
-                            # calc top {n_count_value}
-                            extension = f['extension']
-                            sorted(extension['value_count'], key=lambda _: _['value'])
-
-                            top_value_count = extension['value_count'][: n_top_value]
-                            remain_value_count = extension['value_count'][n_top_value:]
-                            remain_count = 0
-                            for remain_dict in remain_value_count:
-                                remain_count = remain_count + remain_dict['value']
-
-                            top_value_count.append(
-                                FeatureValueCount(type="Remained_SUM", value=remain_count).to_dict()
-                            )
-                            dict_value['features'][i]['extension']['value_count'] = top_value_count
+            # if dataset.status == DatasetEntity.Status.Analyzed:
+            #     for i, f in enumerate(dict_value['features']):
+            #         if f['type'] in [FeatureType.Categorical, FeatureType.Continuous]:
+            #             if f['unique']['value'] > n_top_value:
+            #                 # calc top {n_count_value}
+            #                 extension = f['extension']
+            #                 sorted(extension['value_count'], key=lambda _: _['value'])
+            #
+            #                 top_value_count = extension['value_count'][: n_top_value]
+            #                 remain_value_count = extension['value_count'][n_top_value:]
+            #                 remain_count = 0
+            #                 for remain_dict in remain_value_count:
+            #                     remain_count = remain_count + remain_dict['value']
+            #
+            #                 top_value_count.append(
+            #                     FeatureValueCount(type="Remained_SUM", value=remain_count).to_dict()
+            #                 )
+            #                 dict_value['features'][i]['extension']['value_count'] = top_value_count
                             # extension['value_count'] = top_value_count
 
             # dict_value['detail'] = dict_value['extension']
@@ -293,21 +295,25 @@ class DatasetService:
             exists_file = P.exists(P.join(consts.PATH_DATABASE, dataset_name))
             return exists_in_db or exists_file
 
-    def choose_temporary_dataset_name(self, file_name):
+    def choose_dataset_name(self, file_name, is_temporary):
         # 1. cut suffix
         file_name = util.cut_suffix(file_name)
+
+        if is_temporary is True:
+            prefix = "temporary_"
+        else:
+            prefix = ''
 
         # 2. try 1000 times use num name
         for i in range(1000):
             if i == 0:
                 candidate_name = file_name
             else:
-                candidate_name = f"{file_name}_{i}"
+                candidate_name = f"{prefix}{file_name}_{i}"
             if not self.is_dataset_exists(candidate_name):
                 return candidate_name
-
-        # 3. if all num name used, try datetime name
-        return f'{file_name}_{util.human_datetime()}'
+        # 3. if a file has over 1000 dataset, use timestamp named
+        return f'{prefix}{file_name}_{util.human_datetime()}'
 
     @staticmethod
     def replace_None(s):
@@ -319,7 +325,7 @@ class DatasetService:
     def _create_temporary_dataset(self, source_type, file_path, took, sample_conf: SampleConf):
         now = util.get_now_datetime()
         file_name = P.basename(file_path)
-        temporary_dataset_name = self.choose_temporary_dataset_name(file_name)  # use a long name
+        temporary_dataset_name = self.choose_dataset_name(file_name, True)  # use a long name
         analyze_job_name = util.analyze_data_job_name(util.cut_suffix(file_name), now)
         file_size = P.getsize(file_path)
 
@@ -330,7 +336,6 @@ class DatasetService:
                            status=DatasetEntity.Status.Created,
                            source_type=source_type,
                            file_path=file_path,
-                           file_name=file_name,
                            create_datetime=now, last_update_datetime=now)
         with db.open_session() as s:
             s.add(td)

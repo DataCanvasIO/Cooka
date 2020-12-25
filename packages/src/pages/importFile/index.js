@@ -11,7 +11,7 @@ import { formatMessage } from 'umi-plugin-locale';
 import { CreateDatasetForm } from '@/pages/common/createDataset';
 
 
-const ImportFile = ({ importFile: { showTitle, datasetName, step3Status, params }, dispatch }) => {
+const ImportFile = ({ importFile: { showTitle, datasetName, step3Status, params, recommendDatasetName }, dispatch }) => {
   const contentConfig = {
     a: (<Importpage />),
     b: (<Preview datasetName={datasetName} />),
@@ -27,10 +27,10 @@ const ImportFile = ({ importFile: { showTitle, datasetName, step3Status, params 
     if('succeed' === step3Status){
       form.setFieldsValue({
         btn: false,
-        datasetName: datasetName,
+        datasetName: recommendDatasetName,
       });
     }
-  }, [form, datasetName, step3Status]);
+  }, [form, datasetName, step3Status, recommendDatasetName]);
 
   const isGrey = datasetName && datasetName.length > 0 ? false : true; // 创建按钮是否置灰
   // Create Events

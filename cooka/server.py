@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from types import CodeType
+
 import tornado.ioloop
 import tornado.web
 
@@ -18,6 +20,7 @@ from cooka.handler.model_serving_handler import BatchPredictJobHandler, BatchPre
 from cooka.handler.sys_hander import ConfigHandler
 from cooka.service.process_monitor import ProcessMonitor
 import os
+import argparse
 
 
 class CookaWebApplication(web.Application):
@@ -90,10 +93,6 @@ def start_server():
     pm.start()
 
     # 3. start io loop
-    logger.info(f"Cooka running at: {consts.SERVER_PORTAL}")
+    logger.info(f"Cooka running at: http://0.0.0.0:{consts.SERVER_PORT}")
     tornado.ioloop.IOLoop.instance().start()
 
-
-if __name__ == "__main__":
-    # todo add argurment to generate config
-    start_server()

@@ -9,26 +9,6 @@ from deeptables.models.deepmodel import IgnoreCaseDict
 from cooka.common import consts
 from os import path as P
 
-class Process(Base):
-    __tablename__ = 'cd_process'
-
-    id = Column(String, primary_key=True, )
-    command = Column(String(4096))
-    logfile = Column(String(4096), nullable=True)
-    status = Column(String(128))
-    pid = Column(Integer(), nullable=True)  # has no pid before started
-    create_datetime = Column(DateTime())
-    last_update_datetime = Column(DateTime(), nullable=True)
-    message = Column(Text(), nullable=True)  # update
-
-    returncode = Column(Integer(), nullable=True)  # update
-    duration = Column(Float(), nullable=True)  # update
-
-    class Status:
-        Ready = 'ready'
-        Running = 'running'
-        Finished = 'finished'
-
 
 class MessageEntity(Base):
     __tablename__ = 'cd_message'
@@ -40,10 +20,8 @@ class MessageEntity(Base):
 
 class DatasetEntity(Base):
     __tablename__ = 'cd_dataset'
-    # note: Two key as primary
     name = Column(String(128), primary_key=True)
-    is_temporary = Column(Boolean(), primary_key=True)
-
+    is_temporary = Column(Boolean())
     label_col = Column(String(128), nullable=True)
     status = Column(String(128))
     file_size = Column(Integer())
@@ -55,7 +33,6 @@ class DatasetEntity(Base):
     feature_summary = Column(JSON(), nullable=True)
     source_type = Column(String(128))
     file_path = Column(String(4096))
-    file_name = Column(String(4096))
     extension = Column(JSON(), nullable=True)  # update result
     create_datetime = Column(DateTime())
     last_update_datetime = Column(DateTime())
@@ -88,8 +65,8 @@ class DatasetEntity(Base):
                          create_datetime=self.create_datetime)
 
 
-class ModelEntity(Base):
-    __tablename__ = 'cd_model'
+class ExperimentEntity(Base):
+    __tablename__ = 'cd_experiment'
     # note: Two key as primary
     name = Column(String(128), primary_key=True)
     dataset_name = Column(String(128))

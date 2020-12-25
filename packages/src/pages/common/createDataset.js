@@ -6,6 +6,7 @@ import React from 'react';
 import { formatMessage } from 'umi-plugin-locale';
 import router from 'umi/router';
 import { Button } from 'antd';
+import { SampleStrategy } from '@/pages/common/appConst';
 
 
 function makeRandomRows(form) {
@@ -43,48 +44,47 @@ function makeWholeData() {
 
 
 function makeByPercentage(onChange, value) {
-  const byPercentage =
-    <>
-    <dl>
-      <dt>{formatMessage({id: 'upload.nPercent'})}</dt>
-    </dl>
-    <Row>
-      <Col span={12}>
-        <Slider
-          min={0}
-          max={100}
-          onChange={onChange}
-          value={typeof value === 'number' ? value : 0}
-          step={1}
-          tooltipVisible={false}
-        />
-      </Col>
-      <Col span={4}>
-        <InputNumber
-          min={0}
-          max={100}
-          style={{ margin: '0 16px' }}
-          step={1}
-          value={value}
-          formatter={value => `${value}%`}
-          onChange={onChange}
-        />
-      </Col>
-    </Row>
+  return <>
+      <dl>
+        <dt>{formatMessage({id: 'upload.nPercent'})}</dt>
+      </dl>
+      <Row>
+        <Col span={12}>
+          <Slider
+            min={0}
+            max={100}
+            onChange={onChange}
+            value={typeof value === 'number' ? value : 0}
+            step={1}
+            tooltipVisible={false}
+          />
+        </Col>
+        <Col span={4}>
+          <InputNumber
+            min={0}
+            max={100}
+            style={{ margin: '0 16px' }}
+            step={1}
+            value={value}
+            formatter={value => `${value}%`}
+            onChange={onChange}
+          />
+        </Col>
+      </Row>
   </>
-
-  return byPercentage
-
 }
 
 
 function makeSamplingTab(sampleStrategy, form, onChange, value){
-  if(sampleStrategy === 'random_rows'){
+
+  if(sampleStrategy === SampleStrategy.RandomRows){
     return makeRandomRows(form);
-  }else if(sampleStrategy === 'by_percentage'){
+  }else if(sampleStrategy === SampleStrategy.ByPercentage){
     return makeByPercentage(onChange, value)
-  }else {
+  } else if(sampleStrategy === SampleStrategy.WholeData){
     return makeWholeData()
+  }else{
+    console.error("Unseen sample strategy " + sampleStrategy);
   }
 }
 
@@ -100,9 +100,9 @@ export function makeSampleDiv(setSampleStrategy, sampleStrategy, form, onChange,
   const analysisTitle = (
     <>
       <Radio.Group onChange={handleChange} defaultValue={sampleStrategy} style={{ marginTop: 12 }}>
-        <Radio value='whole_data'> {formatMessage({id: 'upload.wholeData'})}</Radio>
-        <Radio value='random_rows' style={{ marginLeft: 50 }}>{formatMessage({id: 'upload.col'})}</Radio>
-        <Radio value='percentage' style={{ marginLeft: 50 }}>{formatMessage({id: 'upload.percent'})}</Radio>
+        <Radio value={SampleStrategy.WholeData}> {formatMessage({id: 'upload.wholeData'})}</Radio>
+        <Radio value={SampleStrategy.RandomRows} style={{ marginLeft: 50 }}>{formatMessage({id: 'upload.col'})}</Radio>
+        <Radio value={SampleStrategy.ByPercentage} style={{ marginLeft: 50 }}>{formatMessage({id: 'upload.percent'})}</Radio>
       </Radio.Group>
     </>
   );
