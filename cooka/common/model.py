@@ -58,16 +58,19 @@ class FeatureCorrelation(Bean):
 
     @staticmethod
     def calc_status(correlation, is_target_col):
-        _c = abs(correlation)
-        if _c > 0.5:
-            if is_target_col is True:
-                return STATUS_FEATURE_NORMAL
-            else:
-                return FeatureCorrelation.Status.TooHigh
-        elif _c < 0.01:
-            return FeatureCorrelation.Status.TooLow
-        else:
+        if correlation is None:
             return STATUS_FEATURE_NORMAL
+        else:
+            _c = abs(correlation)
+            if _c > 0.5:
+                if is_target_col is True:
+                    return STATUS_FEATURE_NORMAL
+                else:
+                    return FeatureCorrelation.Status.TooHigh
+            elif _c < 0.01:
+                return FeatureCorrelation.Status.TooLow
+            else:
+                return STATUS_FEATURE_NORMAL
 
 
 class Feature(Bean):
@@ -314,6 +317,7 @@ class ModelStatusType(Bean):
 class TrailStatus:
     Succeed = STATUS_SUCCEED
     Failed = STATUS_FAILED
+    Skip = 'skip'
 
 
 class CrossValidation(Bean):

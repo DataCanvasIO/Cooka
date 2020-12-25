@@ -91,7 +91,13 @@ class DatasetService:
                     f.correlation = FeatureCorrelation(value=correlation, status=FeatureCorrelation.calc_status(correlation, request_label_col==f.name))
 
                 # 4. sort features by  abs correlation
-                features = sorted(features, key=lambda f: abs(f.correlation.value), reverse=True)
+                def sort_key(f):
+                    if f.correlation.value is None:
+                        return 0
+                    else:
+                        return abs(f.correlation.value)
+
+                features = sorted(features, key=sort_key, reverse=True)
 
                 feature_dict_list = []
                 for f in features:

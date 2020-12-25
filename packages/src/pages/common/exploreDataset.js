@@ -207,7 +207,7 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
         setSampleInfo(sampleInfoStr);
       }
     })
-  }, [])
+  }, [datasetName])
 
   // 过滤
   const handleSearch = (e) => {
@@ -310,7 +310,8 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
     title: makeTableHeader('explore.correlation', 'explore.hintCorrelation'),
     dataIndex: 'correlation',
     render: (val) => {
-      const correlation = val.value;
+      const correlation = val !== null? val.value: null;
+
       const makeCorrelationValueBlock = () => {
         let v ;
         if(correlation !== null && correlation !== undefined){

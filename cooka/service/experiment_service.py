@@ -471,22 +471,24 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
         return train_job_conf.to_dict()
 
-    def _handle_label_col(self, dataset_name, label_col, file_path):
+    def _handle_label_col(self, dataset_name, task_type, label_col, file_path):
         # calc correlation
         # 1. update label col, Avoiding that http request send first and not label_col not updated
         with db.open_session() as s:
             self.dataset_dao.update_by_name(s, dataset_name, {"label_col": label_col})
 
-        # 2. start a process
+        # 2. start a process to analyze correlation
         analyze_pearson_job_name = util.analyze_data_job_name(P.basename(file_path))
         std_log = P.join(util.dataset_dir(dataset_name), f"{analyze_pearson_job_name}.log")
+        if task_type == TaskType.Regression: # only for regression task and continuous feature
+            command = f"nohup {sys.executable} {util.script_path('analyze_correlation_job.py')} --dataset_name={dataset_name} --label_col={label_col} --job_name={analyze_pearson_job_name} --server_portal={consts.SERVER_PORTAL} 1>{std_log} 2>&1"
+            calc_correlation_process = subprocess.Popen(["bash", "-c", command], stdout=subprocess.PIPE)
 
-        command = f"nohup {sys.executable} {util.script_path('analyze_correlation_job.py')} --dataset_name={dataset_name} --label_col={label_col} --job_name={analyze_pearson_job_name} --server_portal={consts.SERVER_PORTAL} 1>{std_log} 2>&1"
-        calc_correlation_process = subprocess.Popen(["bash", "-c", command], stdout=subprocess.PIPE)
-
-        log.info(f"Run calculate pearson command: \n{command}")
-        log.info(f"Log file:\ntail -f  {std_log}")
-        log.info(f"Process id is {calc_correlation_process.pid}")
+            log.info(f"Run calculate pearson command: \n{command}")
+            log.info(f"Log file:\ntail -f  {std_log}")
+            log.info(f"Process id is {calc_correlation_process.pid}")
+        else:
+            log.info(f"Note a regression task, skip calc correlation.")
 
     def experiment(self, req_dict: dict):
         # 1. read params
@@ -537,24 +539,15 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
             # 2.2. generate new experiment name
             no_experiment = self.model_dao.get_max_experiment(s, dataset_name) + 1
 
-        # 3. ensure dataset label is latest
-        if dataset_stats.label_col is None:
-            log.info(f"Dataset {dataset_name} label_col not set now, update to {label_col}")
-            self._handle_label_col(dataset_name, label_col, dataset_stats.file_path)
-
-        if dataset_stats.label_col != label_col:
-            log.info(f"Dataset {dataset_name} label_col current is {dataset_stats.label_col}, but this experiment update to {label_col}")
-            self._handle_label_col(dataset_name, label_col, dataset_stats.file_path)
-
-        # 4. calc task type
-        # 4.1. find label
+        # 3. calc task type
+        # 3.1. find label
         label_f = self._find_feature(dataset_stats.features, label_col)
         if label_f is None:
             raise ValueError(f"Label col = {label_col} is not in dataset {dataset_name} .")
 
         task_type = self._infer_task_type(label_f)
 
-        # 4.2. check pos_label
+        # 3.2. check pos_label
         if task_type == TaskType.BinaryClassification:
             if pos_label is None:
                 raise ValueError("Pos label can not be None when it's binary-classify")
@@ -562,6 +555,15 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                 if isinstance(pos_label, str):
                     if len(pos_label) < 1:
                         raise ValueError("Pos label can not be empty when it's binary-classify")
+
+        # 4. ensure dataset label is latest
+        if dataset_stats.label_col is None:
+            log.info(f"Dataset {dataset_name} label_col not set now, update to {label_col}")
+            self._handle_label_col(dataset_name, task_type, label_col, dataset_stats.file_path)
+
+        if dataset_stats.label_col != label_col:
+            log.info(f"Dataset {dataset_name} label_col current is {dataset_stats.label_col}, but this experiment update to {label_col}")
+            self._handle_label_col(dataset_name, task_type, label_col, dataset_stats.file_path)
 
         # 5. run experiment
         if not dataset_stats.has_header:
@@ -820,17 +822,19 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         step_status = util.require_in_dict(req_dict, 'status', str)
         step_extension = util.get_from_dict(req_dict, 'extension', dict)
 
-        if step_type not in [TrainStep.Types.Load, TrainStep.Types.Optimize, TrainStep.Types.Persist, TrainStep.Types.Evaluate, TrainStep.Types.FinalTrain, TrainStep.Types.Searched]:
-            raise ValueError(f"Unknown step type = {step_type}")
-
         if step_status not in [JobStep.Status.Succeed, JobStep.Status.Failed]:
             raise ValueError(f"Unknown status = {step_status}")
 
         # [2]. save message
         with db.open_session() as s:
+
             # [2.1].  check temporary model exists
             model = self.model_dao.find_by_train_job_name(s, train_job_name)
             model_name = model.name
+
+            def handle_step_failed():
+                self._update_model(s, model_name, step_type,
+                                   {"status": ModelStatusType.Failed, "finish_datetime": util.get_now_datetime()})
 
             # [2.2]. check event type, one type one record
             messages = s.query(MessageEntity).filter(MessageEntity.author == train_job_name).all()
@@ -852,7 +856,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                 if step_status == JobStep.Status.Succeed:
                     self._update_model(s, model_name, step_type, {"status": ModelStatusType.Running})
                 else:
-                    self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed, "finish_datetime": util.get_now_datetime()})
+                    handle_step_failed()
 
             elif step_type == TrainStep.Types.Optimize:
                 # Note: this step is always succeed
@@ -866,21 +870,23 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                 trail_extension = step_extension['extension']
                 if trail_status == TrailStatus.Succeed:
                     self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "score": trail_extension.get('reward'), "trails": trails})
-                elif trail_status == TrailStatus.Failed:
+                elif trail_status in [TrailStatus.Failed, TrailStatus.Skip]:
                     # does not update score
                     self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "trails": trails})
                 else:
                     raise ValueError(f"Unseen trail status {trail_status} .")
 
             elif step_type == TrainStep.Types.Searched:
-                self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed})
+                if step_status == JobStep.Status.Succeed:
+                    self._update_model(s, model_name, step_type, {})
+                else:
+                    handle_step_failed()
 
             elif step_type == TrainStep.Types.Evaluate:
                 if step_status == JobStep.Status.Succeed:
                     self._update_model(s, model_name, step_type, {"performance": step_extension['performance']})
                 else:
-                    self._update_model(s, model_name, step_type,
-                                       {"status": ModelStatusType.Failed, "finish_datetime": util.get_now_datetime()})
+                    handle_step_failed()
 
             elif step_type == TrainStep.Types.Persist:
                 if step_status == JobStep.Status.Succeed:
@@ -889,6 +895,6 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                                                                   "status": ModelStatusType.Succeed,
                                                                   "finish_datetime": util.get_now_datetime()})
                 else:
-                    self._update_model(s, model_name, step_type, {"status": ModelStatusType.Failed})
+                    handle_step_failed()
             else:
                 raise ValueError(f"Unseen step type {step_type} of model {model_name}")
