@@ -27,6 +27,10 @@ catboost_info
 
 /cooka/assets
 /models
+cooka/experiments/
+cooka/test/experiments/
+cooka/workdir/
+experiments
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
