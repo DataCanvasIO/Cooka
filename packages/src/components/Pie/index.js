@@ -2,7 +2,12 @@ import React from 'react';
 import { PieChart } from 'bizcharts';
 
 class Pie extends React.Component {
-
+  shouldComponentUpdate(props, nextProps) {
+    console.log(props, nextProps)
+    // if (props.data !== nextProps.data) {
+    //   return true;
+    // }
+  }
   render() {
     const { data } = this.props;
     return (

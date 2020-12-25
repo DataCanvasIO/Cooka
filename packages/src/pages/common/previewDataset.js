@@ -30,7 +30,7 @@ const Preview = ({dataset: { data = [], headers, file_path, pagination }, dispat
       <List.Item style={{display: 'flex',justifyContent: 'space-between' }}>
         {
           item && item.map((i)=>{
-            return <div style={{ flex:1 }}>{i}</div>
+            return <div style={{ flex:1, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>{i}</div>
           })
         }
       </List.Item>
@@ -57,32 +57,35 @@ const Preview = ({dataset: { data = [], headers, file_path, pagination }, dispat
     })
   }
 
+  const width = headers ? (headers.length * 150) : 0;
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
         <span style={{ color: '#c4c4c4' }}>{formatMessage({ id: 'preview.viewOriginFile'})}</span>
         <span style={{ color: '#1890ff', cursor: 'pointer', marginLeft: 10 }} onClick={viewOriginFile}>{formatMessage({ id: 'preview.view'})}</span>
       </div>
-      <div style={{display: 'flex',justifyContent: 'space-between', height: '46px', lineHeight: '46px', backgroundColor: 'rgb(249, 249, 249)', color: 'rgba(0,0,0,0.85)', fontWeight: 500}}>
-        {
-          headers?.map((item)=>{
-            return <div style={{flex:1}}>{item}</div>
-          })
-        }
+      <div style={{ width: '100%', overflow: 'auto'}}>
+        <div style={{display: 'flex',justifyContent: 'space-between', height: '46px', lineHeight: '46px', backgroundColor: 'rgb(249, 249, 249)', color: 'rgba(0,0,0,0.85)', fontWeight: 500, width }}>
+          {
+            headers?.map((item)=>{
+              return <div style={{ flex:1, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item}</div>
+            })
+          }
+        </div>
+        <div className={styles.infiniteContainer} style={{ height: useWindowSize().innerHeight - 400, width }}>
+          <InfiniteScroll
+            initialLoad={false}
+            pageStart={0}
+            loadMore={handleInfiniteOnLoad}
+            hasMore={!loading && hasMore}
+            useWindow={false}
+          >
+            <List
+              dataSource={data}
+              renderItem={renderTableContent}
+            />
+          </InfiniteScroll>
       </div>
-      <div className={styles.infiniteContainer} style={{ height: useWindowSize().innerHeight - 400 }}>
-        <InfiniteScroll
-          initialLoad={false}
-          pageStart={0}
-          loadMore={handleInfiniteOnLoad}
-          hasMore={!loading && hasMore}
-          useWindow={false}
-        >
-          <List
-            dataSource={data}
-            renderItem={renderTableContent}
-          />
-        </InfiniteScroll>
       </div>
     </div>
   )

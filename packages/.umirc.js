@@ -36,8 +36,8 @@ export default {
   },
   proxy: {
     '/api': {
-      target: 'http://localhost:8240/',
-      // target: 'http://172.20.51.5:8240/',
+      // target: 'http://localhost:8240/',
+      target: 'http://172.20.51.202:8240/',
       changeOrigin: true,
       pathRewrite: { '^/api': '/api' },
     }
