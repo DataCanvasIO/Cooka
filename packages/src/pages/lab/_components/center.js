@@ -1,67 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Collapse, Tabs, Spin, Empty, Dropdown, Menu, Tooltip, Button, Popover, List } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Collapse, Dropdown, Menu, Spin, Table, Tabs, Tooltip } from 'antd';
 import { random } from 'lodash';
-import {
-  CodeOutlined,
-  FileTextOutlined,
-  LoadingOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  ExclamationCircleOutlined, CheckCircleOutlined,
-} from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, LoadingOutlined } from '@ant-design/icons';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
-import { convertByteUnits, getDuration, makeQuestionToolTip, makeStepsDict } from '@/utils/util';
+import { convertByteUnits, getDuration, makeTableHeader, makeToolTip, makeToolTipFromMsgId } from '@/utils/util';
 import Performance from './performance';
 import Prediction from './prediction';
 import Params from './params';
 import { formatMessage } from 'umi-plugin-locale';
-import _ from 'lodash';
-import { getTrainingList, getPredictJob, getModelDetail, batchPredict } from '@/services/dataset';
-import { makeToolTipFromMsgId, makeToolTip, makeTableHeader } from '@/utils/util';
-import * as Config  from '@/pages/common/appConst';
-import 'antd-table-infinity/index.css'
-import { PredictStepType, StepStatus } from '@/pages/common/appConst';
-import { showNotification } from '@/utils/notice';
+import { getTrainingList } from '@/services/dataset';
+import * as Config from '@/pages/common/appConst';
 
-const { Panel } = Collapse;
 const { TabPane } = Tabs;
 const antIcon = <LoadingOutlined style={{ fontSize: 16 }} spin />;
 
-let timer;
+let experimentListInterval;
 
-let predictTimer;
 
 const Center = ({ train: { defaultPanel = null }, location: { query: { datasetName } }}) => {
   const [rows, setRows] = useState([]);
   const [listData, setListData] = useState([]);
   const [data, setData] = useState([]);
   const [notebookPortal, setNotebookPortal] = useState('');
-  const [obj, setObj] = useState({
-    current: -1,
-    step1: {
-    },
-    step2: {
-      loadingStatus: '',
-      n_cols: '',
-      n_rows: '',
-      loadTook: ''
-    },
-    step3: {
-      readingStatus: '',
-      readTook: '',
-      loadModelSize: ''
-    },
-    step4: {
-      predictStatus: '',
-      predictTook: ''
-    },
-    step5: {
-      resultStatus: '',
-      resultTook: '',
-      outputPath: ''
-    }
-  });
 
   const handleFetchList = async () => {
     const params = { datasetName }
@@ -77,20 +38,22 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
     setNotebookPortal(res.notebook_portal);
 
     const statusArray = res.experiments.map(v => v.status)
+
     if(!statusArray.includes('running')) {
-      clearInterval(timer);
-      timer = null;
+      clearInterval(experimentListInterval);
+      experimentListInterval = null;
     }
   }
 
-
   useEffect(() => {
     handleFetchList();
-    if (timer !== null){
-      clearInterval(timer);  // fix multiple interval running
+
+    if (experimentListInterval !== null && experimentListInterval !== undefined){
+      clearInterval(experimentListInterval);  // fix multiple interval running
     }
-    timer = setInterval(handleFetchList, Config.REFRESH_EXPERIMENT_LIST_TIMEOUT)
-  }, [handleFetchList])
+
+    experimentListInterval = setInterval(handleFetchList, Config.REFRESH_EXPERIMENT_LIST_TIMEOUT)
+  }, [handleFetchList])  // useEffect as page init
 
 
   const callback = (key) => {
@@ -114,10 +77,6 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
     load: 'load',
     load_model: 'load_model'
   }
-
-
-
-
 
   const localTrainMode = (mode) => {
     if (mode === 'minimal') {
@@ -395,7 +354,6 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
                       <Prediction
                         modelName={record.name}
                         taskStatus={record.status}
-                        data={record.obj ? record.obj : {...obj}}
                       />
                     }
                   </TabPane>
@@ -419,6 +377,8 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
   )
 }
 
-export default withRouter(connect(({ center, train}) => (
-  { center, train}
+export default withRouter(connect(({train}) => (
+  {train}
 ))(Center));
+
+// export default withRouter(Center);

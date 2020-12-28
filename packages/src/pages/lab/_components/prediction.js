@@ -40,7 +40,6 @@ const Prediction = ({ indexParam, modelName, taskStatus, location: { query: { da
   };
 
   const checkBatchPredictJob = (datasetName, modelName, batchPredictJobName) => {
-
     getPredictJob(datasetName, modelName, batchPredictJobName).then(response => {
 
       if (response !== null && response !== undefined) {
@@ -152,6 +151,9 @@ const Prediction = ({ indexParam, modelName, taskStatus, location: { query: { da
 
   const handleUpload = (datasetName, modelName, file_path, upload_took) => {
 
+    console.error("开启定时器: 11111");
+    console.error("2开启定时器: " + predictTimer);
+
     // 构建预测请求
     const reqBatchPredictParams = {
       file_path: file_path,
@@ -168,9 +170,15 @@ const Prediction = ({ indexParam, modelName, taskStatus, location: { query: { da
       if (predictTimer !== null){
         stopBatchPredictJobInterval()
       }
+
       predictTimer = setInterval(() => {
+        console.error("1开启定时器: " + predictTimer);
         checkBatchPredictJob(datasetName, modelName, pollResponseData.batch_predict_job_name);
       }, 1000);
+
+      console.error("开启定时器: " + predictTimer);
+
+
     });
   };
 

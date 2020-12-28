@@ -4,7 +4,7 @@ import time
 import pandas as pd
 from os import path as P
 import sys
-
+import numpy as np
 from cooka.dao.dao import DatasetDao, ExperimentDao
 from cooka.dao import db
 from cooka.dao.entity import DatasetEntity, MessageEntity
@@ -446,7 +446,11 @@ class DatasetService:
             start_line_no = (current_page - 1) * page_size + 1  # start from 1
             df_index = page_df.index = pd.RangeIndex(start_line_no, start_line_no + page_df.shape[0])
             page_df.index = df_index
+
+            # 5.2. replace NaN to null
+            page_df.replace(np.NaN, 'NULL', inplace=True)
             values = page_df.to_records(index=True).tolist()
+
             return RespPreviewDataset(headers=dataset_headers, rows=values, count=dataset_stats.n_rows, file_path=relative_file_path)
         except StopIteration:
             return RespPreviewDataset(headers=dataset_headers, rows=None, count=dataset_stats.n_rows, file_path=relative_file_path)
