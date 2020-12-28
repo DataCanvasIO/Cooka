@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import moment from 'moment';
 import router from 'umi/router'
-import { ConvertByteUnits, useWindowSize } from '@/utils/util';
+import { convertByteUnits, useWindowSize } from '@/utils/util';
 import styles from './index.less'
 import InfiniteScroll from 'react-infinite-scroller';
 import { formatMessage } from 'umi-plugin-locale';
@@ -222,7 +222,7 @@ const DatasetList = () => {
         <div className={styles.name}>{name}</div>
         <div className={styles.rows}>{String(item.n_rows).replace(reg2, ',')}</div>
         <div className={styles.cols}>{item.n_cols}</div>
-        <div className={styles.fileSize}>{ConvertByteUnits(item.file_size)}</div>
+        <div className={styles.fileSize}>{convertByteUnits(item.file_size)}</div>
         <div className={styles.experimentTime}>{experimentTime}</div>
         <div className={styles.createTime}>{moment(item.create_datetime).fromNow()}</div>
         <div className={styles.option}>{option}</div>

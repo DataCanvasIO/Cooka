@@ -68,3 +68,14 @@ export const ZetNotification = (response) => {
   };
   notification.error(args);
 };
+
+
+export const showNotification = (message) => {
+  const key = UUID();
+  const args = {
+    key,
+    message,
+    duration: 10,
+  };
+  notification.error(args);
+};

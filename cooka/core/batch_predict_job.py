@@ -122,6 +122,12 @@ t_evaluate_start = time.time()
 evaluate_status = JobStep.Status.Succeed
 try:
     y_pred = model.predict(X)
+    # dt regression model return (n, 1)
+    import numpy as np
+    if not isinstance(y_pred, np.ndarray):
+        y_pred = np.ndarray(y_pred)
+    if len(y_pred.shape) == 2:
+        y_pred = y_pred.reshape((-1, ))  # reshape to (1, n) to  (n, )
     # proba = dt_model.predict_proba(X)
 except Exception as e:
     evaluate_status = JobStep.Status.Failed

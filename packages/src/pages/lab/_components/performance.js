@@ -5,7 +5,7 @@ import { withRouter } from 'umi';
 import { formatMessage } from 'umi-plugin-locale';
 import { connect } from 'dva';
 import styles from './index.less';
-import { getTrainingList, getModelDetail, predictModel, getBatchPredictJobname } from '@/services/dataset';
+import { getTrainingList, getModelDetail, getPredictJob, batchPredict } from '@/services/dataset';
 import { makeToolTipFromMsgId, makeToolTip, makeTableHeader } from '@/utils/util';
 
 const MetricsConfig = [
@@ -50,7 +50,7 @@ const Performance = ({ modelName, location: { query: { datasetName } }, key }) =
         setTaskType(res.task_type)
       }
     })
-  }, [modelName])
+  }, [datasetName, modelName])
 
   // Roc Chart Data
   let dataCurve = [];

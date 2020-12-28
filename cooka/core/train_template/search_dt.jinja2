@@ -1,7 +1,7 @@
 {% import 'macro.jinja2' as MRO with context %}
 {% if train_mode == "performance" %}
 {{ MRO.insert_tab()}}# performance space
-{{ MRO.insert_tab()}}def performance_space():
+{{ MRO.insert_tab()}}def search_space():
 {{ MRO.insert_tab()}}    space = HyperSpace()
 {{ MRO.insert_tab()}}    with space.as_default():
 {{ MRO.insert_tab()}}        p_nets = MultipleChoice(

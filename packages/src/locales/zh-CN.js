@@ -190,8 +190,11 @@ export default {
   'center.titleEngine': '引擎',
   'center.hintTargetCol': '目标列是{targetCol}',
 
-
-
+  'center.batchPredict.processTip.upload': '文件大小{fileSize}，耗时{took}s',
+  'center.batchPredict.processTip.loadData': '读取到{nRows}行{nCols}列，耗时{took}s',
+  'center.batchPredict.processTip.loadModel': '模型大小{modelSize}，耗时{took}s',
+  'center.batchPredict.processTip.evaluate': '耗时{took}s',
+  'center.batchPredict.processTip.writeResult': '下载预测结果',
 
   // extra stuff
   'extra.dataset': '数据集',

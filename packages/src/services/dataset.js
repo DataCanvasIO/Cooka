@@ -79,13 +79,13 @@ export function getModelDetail(params) {
 }
 
 // 模型中心 -- 获取预测name
-export function getBatchPredictJobname(params) {
-  return request.post(`api/dataset/${params['datasetName']}/feature-series/default/model/${params['modelName']}/batch-predict-job`, params['param']);
+export function batchPredict(datasetName, modelName, reqParams) {
+  return request.post(`api/dataset/${datasetName}/feature-series/default/model/${modelName}/batch-predict-job`, reqParams);
 }
 
 // 模型中心 -- 轮询预测状态
-export function predictModel(params) {
-  return request.get(`api/dataset/${params['datasetName']}/feature-series/default/model/${params['modelName']}/batch-predict-job/${params['batch_predict_job_name']}`);
+export function getPredictJob(datasetName, modelName, batch_predict_job_name) {
+  return request.get(`api/dataset/${datasetName}/feature-series/default/model/${modelName}/batch-predict-job/${batch_predict_job_name}`);
 }
 
 

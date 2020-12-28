@@ -166,6 +166,14 @@ export default {
   'center.predictData': 'Evaluate data',
   'center.result': 'Write result',
   'center.upload': 'Upload file',
+
+  'center.batchPredict.processTip.upload': 'File size is {fileSize}, took {took}s',
+  'center.batchPredict.processTip.loadData': 'Data shape is ({nRows}, {nCols}), took {took}s',
+  'center.batchPredict.processTip.loadModel': 'Model size is {modelSize}, took {took}s',
+  'center.batchPredict.processTip.evaluate': 'Took {took}s',
+  'center.batchPredict.processTip.writeResult': 'Download result',
+
+
   'center.readed': 'Read',
   'center.rows': 'row',
   'center.cols': 'columns',

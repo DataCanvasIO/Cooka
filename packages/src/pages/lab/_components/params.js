@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Line from './Line';
 import { withRouter } from 'umi';
 import { formatMessage } from 'umi-plugin-locale';
-import { getTrainingList, getModelDetail, predictModel, getBatchPredictJobname } from '@/services/dataset';
+import { getTrainingList, getModelDetail, getPredictJob, batchPredict } from '@/services/dataset';
 
 
 const Params = ({ modelName, location: { query: { datasetName } } }) => {
@@ -21,7 +21,7 @@ const Params = ({ modelName, location: { query: { datasetName } } }) => {
         setData(res.trails);
       }
     })
-  }, [modelName])
+  }, [datasetName, modelName])
   return (
     <div>
       {

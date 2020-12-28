@@ -549,7 +549,7 @@ export const getRandomColor = function() {
 
 //  字节单位自适应转换
 
-export const ConvertByteUnits = (bytes) => {
+export const convertByteUnits = (bytes) => {
   if (isNaN(bytes)) {
     return '';
   }
@@ -680,3 +680,37 @@ export const makeTableHeader = (headerMsgId, headerTipMsgId, formatTipArgs={}) =
     {formatMessage({id: headerMsgId})}{makeToolTipFromMsgId(headerTipMsgId, formatTipArgs)}
   </>
 }
+
+
+
+
+/**
+ *{
+ *  type: 'upload',
+ *   extension: {
+ *      file_size: "10KB"
+ *  },
+ * took: 100
+ *}
+ *
+ * Convert to :
+ *
+ * {
+ *   upload: {
+ *     extension: {
+ *       file_size: "10KB"
+ *     },
+ *     type: 'upload',
+ *     took: 100
+ *   }
+ * }
+ * @param steps
+ */
+export function makeStepsDict(steps) {
+  const result = {};
+  for (var step of steps){
+    result[step.type] = step;
+  }
+  return result;
+}
+

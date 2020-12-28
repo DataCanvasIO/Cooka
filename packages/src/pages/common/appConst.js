@@ -16,3 +16,19 @@ export const SampleStrategy = {
   ByPercentage : 'by_percentage',
   WholeData: 'whole_data'
 }
+
+
+export const StepStatus = {
+  Succeed : 'succeed',
+  Failed : 'failed'
+}
+
+
+export const PredictStepType = {
+  Upload: 'upload',
+  Load: 'load',
+  LoadModel: 'load_model',
+  CheckDataType: 'check_data_type',
+  Evaluate: 'evaluate',
+  WriteResult: 'write_result',
+}

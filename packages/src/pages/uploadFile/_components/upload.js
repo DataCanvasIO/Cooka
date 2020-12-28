@@ -5,7 +5,7 @@ import { connect } from 'dva';
 import { withRouter } from 'umi';
 import styles from '../index.less';
 import { formatMessage } from 'umi-plugin-locale';
-import { ConvertByteUnits } from '@/utils/util';
+import { convertByteUnits, makeStepsDict } from '@/utils/util';
 import {makeSampleDiv, makeCsvFileTip} from '@/pages/common/createDataset'
 
 const { Dragger } = Upload;
@@ -24,25 +24,6 @@ const StepType = {
   analyze: 'analyzed',
 };
 
-/**
- * 将分析任务详情的接口返回的数据包装成 k-v形式，例如：
- * {
- *   upload: {
- *     extension: {
- *       file_size: "10KB"
- *     },
- *     took: 100
- *   }
- * }
- * @param responseData
- */
-function parseStepProcess(responseData) {
-  const result = {};
-  for (var step of responseData.steps){
-    result[step.type] = step;
-  }
-  return result;
-}
 
 const Uploadpage = ({ dispatch, location,  uploadFile: { responseData }}) => {
   const [form] = Form.useForm();
@@ -59,14 +40,14 @@ const Uploadpage = ({ dispatch, location,  uploadFile: { responseData }}) => {
   useEffect(() => {
 
     if(responseData !== null && responseData !== undefined){
-      const stepsObject = parseStepProcess(responseData);
+      const stepsObject = makeStepsDict(responseData.steps);
       const uploadStep = stepsObject[StepType.upload];
 
       if(uploadStep !== undefined && uploadStep !== null){
         // 处理上传步骤
         if(uploadStep.status === 'succeed'){
           setUploadStatus(statusConfig.done);
-          setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: uploadStep.took.toFixed(2), fileSize: ConvertByteUnits(uploadStep.extension.file_size)})}`);
+          setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: uploadStep.took.toFixed(2), fileSize: convertByteUnits(uploadStep.extension.file_size)})}`);
 
           setLoadingDataStatus(statusConfig.doing);  // 下一个步骤置为运行中
           setLoadingDataTips(formatMessage({id: 'upload.loading'}));

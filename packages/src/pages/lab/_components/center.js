@@ -11,16 +11,18 @@ import {
 } from '@ant-design/icons';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
-import { ConvertByteUnits, getDuration, makeQuestionToolTip } from '@/utils/util';
+import { convertByteUnits, getDuration, makeQuestionToolTip, makeStepsDict } from '@/utils/util';
 import Performance from './performance';
 import Prediction from './prediction';
 import Params from './params';
 import { formatMessage } from 'umi-plugin-locale';
 import _ from 'lodash';
-import { getTrainingList, predictModel, getModelDetail, getBatchPredictJobname } from '@/services/dataset';
+import { getTrainingList, getPredictJob, getModelDetail, batchPredict } from '@/services/dataset';
 import { makeToolTipFromMsgId, makeToolTip, makeTableHeader } from '@/utils/util';
 import * as Config  from '@/pages/common/appConst';
 import 'antd-table-infinity/index.css'
+import { PredictStepType, StepStatus } from '@/pages/common/appConst';
+import { showNotification } from '@/utils/notice';
 
 const { Panel } = Collapse;
 const { TabPane } = Tabs;
@@ -88,7 +90,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
       clearInterval(timer);  // fix multiple interval running
     }
     timer = setInterval(handleFetchList, Config.REFRESH_EXPERIMENT_LIST_TIMEOUT)
-  }, [])
+  }, [handleFetchList])
 
 
   const callback = (key) => {
@@ -113,184 +115,9 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
     load_model: 'load_model'
   }
 
-  const handleFetchPredictModal = (param, indexParam) => {
-    predictModel(param).then(originRes => {
-      const result = originRes.data;
-      const { steps } = result;
-      // 加载成功
-      if (steps.length === 2 || steps.length === 3 || steps.length === 4 || steps.length === 5 && steps[1].status === 'succeed') {
-        const { extension: { n_cols = '', n_rows = '' }, took = '', status = '' } = steps[1];
-        const step2Obj = {
-          ...obj,
-          current: 1,
-          step2: {
-            loadingStatus: status,
-            n_cols,
-            n_rows,
-            loadTook: took.toFixed(2)
-          }
-        }
-        let copyListData = _.cloneDeep(listData);
-        const {index, key} = indexParam;
-        copyListData.forEach(v => {
-          if(v.no_experiment === index){
-            v.obj = step2Obj;
-          }
-        })
-        // copyListData[index].models[key].obj = step2Obj;
-        setListData(copyListData);
-      } else if (steps.length === 2 && steps[1].status === 'failed') {  // failed
-        // const { message = '' } = steps[1];
-        // setloadingInfo(message);
-        // setStatus('error');
-        // return;
-      }
-      // 读取模型成功
-      if (steps.length === 3 || steps.length === 4 || steps.length === 5 && steps[2].status === 'succeed') {
-        const { extension: { model_size = '' }, took = '', status = '' } = steps[2];
-        const step3Obj = {
-          ...obj,
-          current:2,
-          step3: {
-            readingStatus: status,
-            readTook: took.toFixed(2),
-            loadModelSize: model_size?ConvertByteUnits(model_size): '-'
-          }
-        }
-        let copyListData = _.cloneDeep(listData);
-        const {index, key} = indexParam;
-        // copyListData[index].models[key].obj = step3Obj;
-        copyListData.forEach(v => {
-          if(v.no_experiment === index){
-            v.obj = step3Obj;
-          }
-        })
-        setListData(copyListData);
-      } else if (steps.length === 3 && steps[2].status === 'failed') {  // failed
-        const { message = '', status = '' } = steps[2];
-        // yield put({
-        //   type: 'save',
-        //   payload: {
-        //     readingStatus: status,
-        //     current: 2,
-        //     readErrorMsg: message
-        //   }
-        // });
-        return
-      }
-      // 预测数据成功
-      if (steps.length === 4 || steps.length === 5 && steps[3].status === 'succeed') {
-        const { took = '', status = '' } = steps[3];
-        const step4Obj = {
-          ...obj,
-          current:3,
-          step4: {
-            predictStatus: status,
-            predictTook: took.toFixed(2),
-          }
-        }
-        let copyListData = _.cloneDeep(listData);
-        const {index, key} = indexParam;
 
-        copyListData.forEach(v => {
-          if(v.no_experiment === index){
-            v.obj = step4Obj;
-          }
-        })
-        // copyListData[index].models[key].obj = step4Obj;
-        setListData(copyListData);
-      } else if (steps.length === 4 && steps[3].status === 'failed') {  // failed
-        const { message = '', status = '' } = steps[3];
-        // yield put({
-        //   type: 'save',
-        //   payload: {
-        //     predictStatus: status,
-        //     current: 3,
-        //     predictErrorMsg: message
-        //   }
-        // });
-        return
-      }
-      // 写出结果成功
-      if (steps.length === 5 && steps[4].status === 'succeed') {
-        const { extension: { output_path = '' }, took = '', status = '' } = steps[4];
-        const step5Obj = {
-          ...obj,
-          current:4,
-          step5: {
-            resultStatus: status,
-            resultTook: took.toFixed(2),
-            outputPath: output_path
-          }
-        }
-        let copyListData = _.cloneDeep(listData);
-        const {index, key} = indexParam;
 
-        copyListData.forEach(v => {
-          if(v.no_experiment === index){
-            v.obj = step5Obj;
-          }
-        })
-        // copyListData[index].models[key].obj = step5Obj;
-        setListData(copyListData);
-        clear();
-      } else if (steps.length === 5 && steps[4].status === 'failed') {  // failed
-        const { message = '', status = '' } = steps[4];
-        // yield put({
-        //   type: 'save',
-        //   payload: {
-        //     resultStatus: status,
-        //     current: 5,
-        //     resultErrorMsg: message
-        //   }
-        // });
-        return
-      }
-    // }
-      // if (done) {
-      //   clearInterval(predictTimer);
-      //   predictTimer = null;
-      // }
-    });
-  }
 
-  const clear = () => {
-    clearInterval(predictTimer);
-    predictTimer = null;
-  }
-
-  const handleUploadSuccess = (stepObj, params, indexParam) => {
-    setObj({
-      ...obj,
-      stepObj,
-    })
-    let copyListData = _.cloneDeep(listData);
-    const {index, key} = indexParam;
-    // 给模型加一个obj属性用来控制上传, index 就是实验的序号，根据序号，更新这个实验，然后重新设置listData
-
-    copyListData.forEach(v => {
-      if(v.no_experiment === index){
-        v.obj = obj;
-      }
-    })
-
-    // copyListData[index].models[key].obj = obj;
-
-    setListData(copyListData);
-    getBatchPredictJobname(params).then((originJobname) => {
-      const jobname = originJobname.data;
-      const param = {
-        datasetName,
-        modelName: params.modelName,
-        batch_predict_job_name: jobname.batch_predict_job_name
-      }
-      handleFetchPredictModal(param, indexParam);
-      predictTimer = setInterval(() => {
-        handleFetchPredictModal(param, indexParam)
-      }, 1000);
-    })
-
-  }
 
   const localTrainMode = (mode) => {
     if (mode === 'minimal') {
@@ -444,7 +271,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
       render: (val) => {
         if (val) {
           return (
-            <span>{ConvertByteUnits(val)}</span>
+            <span>{convertByteUnits(val)}</span>
           )
         } else {
           return (
@@ -568,8 +395,6 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
                       <Prediction
                         modelName={record.name}
                         taskStatus={record.status}
-                        handleUpload={handleUploadSuccess}
-                        indexParam={{key: record.key, index: record.no_experiment}} // todo fix index
                         data={record.obj ? record.obj : {...obj}}
                       />
                     }
