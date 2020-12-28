@@ -7,6 +7,7 @@ import styles from '../index.less';
 import { formatMessage } from 'umi-plugin-locale';
 import { makeCsvFileTip, makeSampleDiv } from '@/pages/common/createDataset';
 import { SampleStrategy } from '@/pages/common/appConst';
+import { convertByteUnits } from '@/utils/util';
 
 
 const antIcon = <LoadingOutlined style={{ fontSize: 16 }} spin />;
@@ -70,7 +71,7 @@ export class TipInput extends React.Component {
 
 
 
-const Uploadpage = ({dispatch, location,  importFile: { step1Status, step2Status, step3Status, uploadTook,
+const Uploadpage = ({dispatch, location,  importFile: { step1Status, copiedFileSize, step2Status, step3Status, uploadTook,
   n_cols, n_cols_used, n_rows, n_rows_used, loadingTook, categorical, continuous,
   datetime, analysisTook, testImportFileResponse, copyTook }}) => {
 
@@ -89,7 +90,7 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, step2Status
   useEffect(() => {
     if (step1Status === 'succeed') {
       setUploadStatus(statusConfig['done']);
-      setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: copyTook.toFixed(2), fileSize:  "10MB" }) }`) // todo fixme
+      setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: copyTook.toFixed(2), fileSize:  convertByteUnits(copiedFileSize) }) }`) // todo fixme
       setLoadingDataStatus(statusConfig['doing']);
       setLoadingDataTips(formatMessage({id: 'upload.loading'}))
 
@@ -119,7 +120,7 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, step2Status
       setAnalysisDataStatus(statusConfig['undone']);
       setAnalysisDataTips(formatMessage({id: 'import.fail'}));
     }
-  },[step1Status, step2Status, step3Status, uploadTook, n_cols, n_cols_used, n_rows, n_rows_used, loadingTook, categorical, continuous, datetime, analysisTook, copyTook])
+  },[step1Status, step2Status, step3Status, uploadTook, n_cols, n_cols_used, n_rows, n_rows_used, loadingTook, categorical, continuous, datetime, analysisTook, copyTook, copiedFileSize])
 
 
 

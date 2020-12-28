@@ -33,8 +33,10 @@ const Prediction = ({ indexParam, modelName, taskStatus, location: { query: { da
   let predictTimer;
 
   const stopBatchPredictJobInterval = () => {
-    clearInterval(predictTimer);
-    predictTimer = null;
+    if (predictTimer !== null){
+      clearInterval(predictTimer);
+      predictTimer = null;
+    }
   };
 
   const checkBatchPredictJob = (datasetName, modelName, batchPredictJobName) => {
@@ -161,6 +163,11 @@ const Prediction = ({ indexParam, modelName, taskStatus, location: { query: { da
       const pollResponseData = pollResponse.data;
       // 轮询处理任务状态
       checkBatchPredictJob(datasetName, modelName, pollResponseData.batch_predict_job_name);
+
+      // ensure only one running interval
+      if (predictTimer !== null){
+        stopBatchPredictJobInterval()
+      }
       predictTimer = setInterval(() => {
         checkBatchPredictJob(datasetName, modelName, pollResponseData.batch_predict_job_name);
       }, 1000);

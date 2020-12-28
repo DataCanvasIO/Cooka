@@ -172,7 +172,8 @@ export default {
             type: 'save',
             payload: {
               step1Status: res.steps[0]['status'],
-              copyTook: res.steps[0]['took']
+              copyTook: res.steps[0]['took'],
+              copiedFileSize: res.steps[0].extension.file_size
             }
           })
         }

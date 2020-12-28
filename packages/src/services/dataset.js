@@ -32,7 +32,7 @@ export function getTempDateRetrieve(params) {
 
 // 检测文件路径
 export function testImportFile(params) {
-  return request.post('/api/dataset/test-import-file', params, false);
+  return request.post('/api/dataset/test-import-file', params, null, false);
 }
 
 // 创建数据集
