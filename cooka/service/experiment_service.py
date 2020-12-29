@@ -422,12 +422,11 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
         return raw_python_content, notebook_content
 
-    def run_train_job(self, framework, conf: ExperimentConf, no_experiment: int, model_input_features:list, n_rows: int):
+    def run_train_job(self, conf: ExperimentConf, no_experiment: int, model_input_features:list, n_rows: int):
+        framework = conf.engine
 
         # 1. create train conf
         job_name = f"train_job_{conf.dataset_name}_{framework}_{util.human_datetime()}"
-
-        brevity_framework_dict = {FrameworkType.DeepTables: "dt", FrameworkType.GBM: "gbm"}
 
         model_name = util.model_name(conf.dataset_name, no_experiment)  #f"{conf.dataset_name}_{no_experiment}"
 
@@ -541,7 +540,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
         # 3. calc task type
         # 3.1. find label
-        label_f = self._find_feature(dataset_stats.features, label_col)
+        label_f: Feature = self._find_feature(dataset_stats.features, label_col)
         if label_f is None:
             raise ValueError(f"Label col = {label_col} is not in dataset {dataset_name} .")
 
@@ -575,6 +574,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                               dataset_has_header=dataset_stats.has_header,
                               dataset_default_headers=dataset_default_headers,
                               train_mode=train_mode,
+                              engine=experiment_engine,
                               label_col=label_col,
                               pos_label=pos_label,
                               task_type=task_type,
@@ -586,12 +586,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
         model_input_features = list(map(lambda _: ModelFeature(name=_.name, type=_.type, data_type=_.data_type).to_dict(), filter(lambda _: _.name != label_f.name, dataset_stats.features)))
 
-        if experiment_engine == FrameworkType.GBM:
-            train_conf = self.run_train_job(FrameworkType.GBM, conf,
-                                            no_experiment, model_input_features,  dataset_stats.n_rows)
-        else:
-            train_conf = self.run_train_job(FrameworkType.DeepTables, conf, no_experiment, model_input_features,
-                                               dataset_stats.n_rows)
+        train_conf = self.run_train_job(conf, no_experiment, model_input_features,  dataset_stats.n_rows)
 
         return {
             "no_experiment": no_experiment,
@@ -659,6 +654,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                            task_type=task_type,
                            pos_label=pos_label,
                            train_mode=TrainMode.Quick,
+                           engine=FrameworkType.GBM,
                            partition_strategy=ExperimentConf.PartitionStrategy.TrainValidationHoldout,
                            train_validation_holdout=TrainValidationHoldoutDefault,
                            datetime_series_col=None)
@@ -696,6 +692,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                 "task_type": experiment_conf.task_type,
                 "pos_label": experiment_conf.pos_label,
                 "train_mode": experiment_conf.train_mode,
+                "engine": experiment_conf.engine,
                 "partition_strategy": ExperimentConf.PartitionStrategy.TrainValidationHoldout,
                 "train_validation_holdout": train_validation_holdout.to_dict() if train_validation_holdout is not None else None,
                 "cross_validation": cross_validation.to_dict() if cross_validation is not None else None,

@@ -367,7 +367,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
             } else if (record.status === 'failed') {
                 return (
                   // eslint-disable-next-line react/jsx-no-target-blank
-                  <div style={{ textAlign: 'center', color: '#c4c4c4' }}>{formatMessage({id: 'center.fail'})}<a href="https://github.com/DataCanvasIO/Hypernets/issues" target="_blank">{formatMessage({id: 'center.bug'})}</a></div>
+                  <div style={{ textAlign: 'center', color: '#c4c4c4' }}>{formatMessage({id: 'center.fail'})}<a onClick={() => {viewLog(record.log_file_path);}} target="_blank">{formatMessage({id: 'center.bug'})}</a></div>
                 )
             }
           },

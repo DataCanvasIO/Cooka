@@ -126,7 +126,7 @@ class Bean(metaclass=BeanMeta):
         construct_args = {}
 
         for field_name in cls._fields_name:
-            value = d[field_name]
+            value = d.get(field_name)
             field = getattr(cls, field_name)
             if value is None:
                 construct_args[field_name] = None

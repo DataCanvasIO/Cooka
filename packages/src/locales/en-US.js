@@ -181,7 +181,7 @@ export default {
   'center.download': 'Download result',
   'center.training': 'The model is in training, please check it later',
   'center.fail': 'model train failed，',
-  'center.bug': 'Report Bug',
+  'center.bug': 'view log',
   'center.success': 'File uploaded successfully',
   'center.big': 'File to big',
   'center.failUpload': 'File uploaded failed',

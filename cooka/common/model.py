@@ -348,6 +348,7 @@ class ExperimentConf(Bean):
     dataset_has_header = BooleanField()
     dataset_default_headers = ListObjectField()
     train_mode = StringField()
+    engine = StringField()
     label_col = StringField()
     pos_label = ObjectField()
     task_type = StringField()  # calc in frontend

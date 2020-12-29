@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Form, Select, Radio, Card, Row, Col, Slider, InputNumber, Button, Tooltip } from 'antd';
-import { QuestionCircleOutlined} from '@ant-design/icons';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, Card, Col, Form, InputNumber, Radio, Row, Select, Slider } from 'antd';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
 import { formatMessage } from 'umi-plugin-locale';
-import { Pie, HBChart, CookaSlider } from 'components';
-import LabelChart from './LabelChart/index.js'
+import { CookaSlider } from 'components';
+import LabelChart from './LabelChart/index.js';
 import styles from '../index.less';
-import { getRecommendConfig, interTasktype, getDataRetrieve } from '@/services/dataset';
+import { getDataRetrieve, getRecommendConfig, interTasktype } from '@/services/dataset';
 import { makeToolTipFromMsgId } from '@/utils/util';
-
+import { showNotification } from '@/utils/notice';
 
 
 const { Option } = Select;
 
 const defaultData = [{
-  name: `${formatMessage({id: 'extra.trainUnion'})}`,
+  name: `${formatMessage({ id: 'extra.trainUnion' })}`,
   // name: '训练集',
   count: 80,
   color: 'rgba(49, 154, 228, 1)',
@@ -97,81 +96,68 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
             item.extension.by_week.forEach((weekData, index) => {
               item.barWeekData.push({
                 time: week[index],
-                value: weekData
-              })
+                value: weekData,
+              });
             });
             item.extension.by_year.forEach((yearData, index) => {
               item.barYearData.push({
                 time: String(yearData['year']),
-                value: yearData['value']
-              })
-            })
+                value: yearData['value'],
+              });
+            });
           }
         })
       }
-      res && setFeatures(res.features)
-      // if (labelName) {
-      //   setLabelValue(labelName);
-      //   features.forEach(feature => {
-      //     if(feature.name === labelName) {
-      //       if (feature.type === 'continuous') {
-      //         setLabelData(feature.hData);
-      //       } else if (feature.type === 'categorical') {
-      //         setLabelData(feature.extension.value_count);
-      //       }
-      //       setLabelType(feature.type)
-      //     }
-      //   });
-      //   dispatch({
-      //     type: 'train/inferTasktype',
-      //     payload: {
-      //       datasetName,
-      //       params: {
-      //         feature_name: labelName,
-      //       },
-      //       callback:(res) => {
-      //         setTaskType(res.task_type);
-      //       }
-      //     }
-      //   })
-      // } else {
-        const reqRecommendConfParams = { datasetName: datasetName, param: {target_col: labelName} }
-        getRecommendConfig(reqRecommendConfParams).then((originRes) => {
-          const config = originRes.data;
+      res && setFeatures(res.features);
+
+      const reqRecommendConfParams = { datasetName: datasetName, param: { target_col: labelName } };
+
+      getRecommendConfig(reqRecommendConfParams).then((response) => {
+
+        if (response.code === 0) {
+          const config = response.data;
           const params = {
             datasetName,
             params: {
               feature_name: config.conf.label_col,
             },
-          }
+          };
+
           setLabelValue(config.conf.label_col);
           setPosValue(config.conf.pos_label);
           setMode(config.conf.train_mode);
+          setExperimentEngine(config.conf.engine);
           setDataType(config.conf.partition_strategy);
+
           defaultData[0].count = 80;
           defaultData[1].count = 10;
           defaultData[2].count = 10;
           setSliderData(defaultData);
           features.forEach(feature => {
-
-            if(feature.name === config.conf.label_col) {
-              setPosLabelValues(feature.extension.value_count)
+            if (feature.name === config.conf.label_col) {
+              setPosLabelValues(feature.extension.value_count);
               if (feature.type === 'continuous') {
                 setLabelData(feature.hData);
               } else if (feature.type === 'categorical') {
                 setLabelData(feature.extension.value_count);
               }
-              setLabelType(feature.type)
+              setLabelType(feature.type);
             }
           });
+
           interTasktype(params).then((originRes) => {
             const res = originRes.data;
             setTaskType(res.task_type);
-          })
-        })
+          });
+
+        } else {
+          const errorMsg = response.data.message;
+          showNotification(errorMsg);
+        }
+      })
       //}
     })
-  }, [labelName]);
+  }, [datasetName, labelName]);
 
 
   // 标签列 select

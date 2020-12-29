@@ -171,7 +171,7 @@ export default {
   'center.download': '下载结果',
   'center.training': '模型正在训练中，请稍后查看',
   'center.fail': '模型训练失败，',
-  'center.bug': '报告Bug',
+  'center.bug': '查看日志',
   'center.success': '文件上传成功',
   'center.big': '文件太大',
   'center.failUpload': '文件上传失败',

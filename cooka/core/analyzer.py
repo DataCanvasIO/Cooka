@@ -46,7 +46,7 @@ class PandasAnalyzer(Analyzer):
         if sample_conf.sample_strategy == SampleConf.Strategy.RandomRows:
             sample_chunksize = sample_conf.n_rows
 
-        elif sample_conf.sample_strategy ==  SampleConf.Strategy.Percentage:
+        elif sample_conf.sample_strategy == SampleConf.Strategy.Percentage:
             sample_chunksize = round(self.n_rows * sample_conf.percentage / 100)
 
         elif sample_conf.sample_strategy == SampleConf.Strategy.WholeData:

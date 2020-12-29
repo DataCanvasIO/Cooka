@@ -9,7 +9,7 @@ dataset_has_header = {{ dataset_has_header }}
 
 dataset_default_headers = {{ MRO.handle_None(dataset_default_headers, False) }}
 label_col = "{{ label_col }}"
-pos_label = {{ MRO.handle_None(pos_label, True) }}
+pos_label = {{ MRO.handle_None(pos_label, pos_label_is_str) }}
 train_mode = "{{ train_mode }}"
 framework = "{{ framework }}"
 partition_strategy = "{{ partition_strategy }}"
