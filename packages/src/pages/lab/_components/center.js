@@ -5,6 +5,8 @@ import { CheckOutlined, CloseOutlined, LoadingOutlined } from '@ant-design/icons
 import { connect } from 'dva';
 import { withRouter } from 'umi';
 import { convertByteUnits, getDuration, makeTableHeader, makeToolTip, makeToolTipFromMsgId } from '@/utils/util';
+
+import  {useRef } from 'react';
 import Performance from './performance';
 import Prediction from './prediction';
 import Params from './params';
@@ -24,37 +26,36 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
   const [data, setData] = useState([]);
   const [notebookPortal, setNotebookPortal] = useState('');
 
-  const handleFetchList = async () => {
+  const handleFetchList = () => {
     const params = { datasetName }
-    const originRes = await getTrainingList(params);
-    const res = originRes.data;
+    getTrainingList(params).then(response => {
 
-    // fix expand one item make effect to all(need a field named 'key' )
-    setListData(res.experiments.map(v => {
-      v.key = v.no_experiment;
-      return v;
-    }));
+      const res = response.data;
+      // fix expand one item make effect to all(need a field named 'key' )
+      setListData(res.experiments.map(v => {
+        v.key = v.no_experiment;
+        return v;
+      }));
 
-    setNotebookPortal(res.notebook_portal);
+      setNotebookPortal(res.notebook_portal);
 
-    const statusArray = res.experiments.map(v => v.status)
+      const statusArray = res.experiments.map(v => v.status)
 
-    if(!statusArray.includes('running')) {
-      clearInterval(experimentListInterval);
-      experimentListInterval = null;
-    }
+      if(!statusArray.includes('running')) {
+        clearInterval(experimentListInterval);
+        experimentListInterval = null;
+      }
+    });
+
   }
 
   useEffect(() => {
     handleFetchList();
-
     if (experimentListInterval !== null && experimentListInterval !== undefined){
       clearInterval(experimentListInterval);  // fix multiple interval running
     }
-
     experimentListInterval = setInterval(handleFetchList, Config.REFRESH_EXPERIMENT_LIST_TIMEOUT)
-  }, [handleFetchList])  // useEffect as page init
-
+  }, [handleFetchList]);
 
   const callback = (key) => {
     console.log(key);
