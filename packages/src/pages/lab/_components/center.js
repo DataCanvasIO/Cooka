@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Collapse, Dropdown, Menu, Spin, Table, Tabs, Tooltip } from 'antd';
-import { random } from 'lodash';
+import React from 'react';
+import { Dropdown, Menu, Spin, Table, Tabs, Tooltip } from 'antd';
 import { CheckOutlined, CloseOutlined, LoadingOutlined } from '@ant-design/icons';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
 import { convertByteUnits, getDuration, makeTableHeader, makeToolTip, makeToolTipFromMsgId } from '@/utils/util';
-
-import  {useRef } from 'react';
 import Performance from './performance';
 import Prediction from './prediction';
 import Params from './params';
@@ -20,106 +17,118 @@ const antIcon = <LoadingOutlined style={{ fontSize: 16 }} spin />;
 let experimentListInterval;
 
 
-const Center = ({ train: { defaultPanel = null }, location: { query: { datasetName } }}) => {
-  const [rows, setRows] = useState([]);
-  const [listData, setListData] = useState([]);
-  const [data, setData] = useState([]);
-  const [notebookPortal, setNotebookPortal] = useState('');
+class Center extends React.Component {
 
-  const handleFetchList = () => {
-    const params = { datasetName }
-    getTrainingList(params).then(response => {
+  batchPredictStepType = {
+    upload: 'upload',
+    load: 'load',
+    load_model: 'load_model',
+  };
+  metricDisplayMapping = {
+    auc: 'AUC',
+    accuracy: 'Accuracy',
+    rmse: 'RMSE',
+  };
+  formatTrainMode = {
+    [Config.TrainMode.Quick]: formatMessage({ id: 'train.quick' }),
+    [Config.TrainMode.Performance]: formatMessage({ id: 'train.performance' }),
+    [Config.TrainMode.Minimal]: formatMessage({ id: 'train.minimal' }),
+  };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      listData: [],
+      notebookPortal: '',
+    };
+    this.datasetName = this.props.location.query.datasetName;
+  }
+
+  handleFetchList() {
+    const datasetName = this.datasetName;
+
+    getTrainingList(datasetName).then(response => {
       const res = response.data;
       // fix expand one item make effect to all(need a field named 'key' )
-      setListData(res.experiments.map(v => {
-        v.key = v.no_experiment;
-        return v;
-      }));
+      this.setState(
+        {
+          listData: res.experiments.map(v => {
+            v.key = v.no_experiment;
+            return v;
+          }),
+          notebookPortal: res.notebook_portal,
+        },
+      );
 
-      setNotebookPortal(res.notebook_portal);
-
-      const statusArray = res.experiments.map(v => v.status)
-
-      if(!statusArray.includes('running')) {
+      const statusArray = res.experiments.map(v => v.status);
+      if (!statusArray.includes('running')) {
         clearInterval(experimentListInterval);
         experimentListInterval = null;
       }
     });
-
   }
 
-  useEffect(() => {
-    handleFetchList();
-    if (experimentListInterval !== null && experimentListInterval !== undefined){
+  componentDidMount() {
+    if (experimentListInterval !== null && experimentListInterval !== undefined) {
       clearInterval(experimentListInterval);  // fix multiple interval running
     }
-    experimentListInterval = setInterval(handleFetchList, Config.REFRESH_EXPERIMENT_LIST_TIMEOUT)
-  }, [handleFetchList]);
-
-  const callback = (key) => {
-    console.log(key);
+    this.handleFetchList();
+    experimentListInterval = setInterval(this.handleFetchList.bind(this), Config.REFRESH_EXPERIMENT_LIST_TIMEOUT);
   }
 
-  const viewLog = (path) => {
-    window.open(`/api/resource/${path}?opt=head&n=1000`)
+  componentWillUnmount() {
+    if (this.timer != null) {
+      clearInterval(this.timer);
+    }
   }
 
-  const viewSourceCode = (path) => {
-    window.open(`/api/resource/${path}?opt=head&n=-1`)
-  }
+  viewLog = (path) => {
+    window.open(`/api/resource/${path}?opt=head&n=1000`);
+  };
 
-  const viewNotebook = (path) => {
-      window.open(`${notebookPortal}/notebooks/${path}`)
-  }
+  viewSourceCode = (path) => {
+    window.open(`/api/resource/${path}?opt=head&n=-1`);
+  };
 
-  const batchPredictStepType = {
-    upload: 'upload',
-    load: 'load',
-    load_model: 'load_model'
-  }
+  viewNotebook = (path) => {
+    window.open(`${this.state.notebookPortal}/notebooks/${path}`);
+  };
 
-  const localTrainMode = (mode) => {
+  localTrainMode = (mode) => {
     if (mode === 'minimal') {
-      return formatMessage({ id: 'train.minimal'})
+      return formatMessage({ id: 'train.minimal' });
     } else if (mode === 'quick') {
-      return formatMessage({ id: 'train.quick'})
+      return formatMessage({ id: 'train.quick' });
     } else if (mode === 'performance') {
-      return formatMessage({ id: 'train.performance'})
+      return formatMessage({ id: 'train.performance' });
     }
   };
-  const metricDisplayMapping = {
-    auc: "AUC",
-    accuracy: "Accuracy",
-    rmse: "RMSE"
-  }
 
-  const getOptionMenu = (record) => {
+  getOptionMenu = (record) => {
     return (
       <Menu>
         <Menu.Item>
-             <span style={{ color: '#1890ff', cursor: 'pointer'}}  onClick={() => {viewLog(record.log_file_path);}} >
-               {formatMessage({id: 'center.log'})}
+             <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => {
+               this.viewLog(record.log_file_path);
+             }}>
+               {formatMessage({ id: 'center.log' })}
              </span>
         </Menu.Item>
         <Menu.Item>
-          <span style={{ color: '#1890ff', cursor: 'pointer'}} onClick={() => {viewSourceCode(record.train_source_code_path);}} >{formatMessage({id: 'center.source'})}</span>
+          <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => {
+            this.viewSourceCode(record.train_source_code_path);
+          }}>{formatMessage({ id: 'center.source' })}</span>
         </Menu.Item>
         <Menu.Item>
-          <span style={{ color: '#1890ff', cursor: 'pointer'}} onClick={() => {viewNotebook(record.train_notebook_uri);}} >{formatMessage({id: 'center.titleNotebook'})}</span>
+          <span style={{ color: '#1890ff', cursor: 'pointer' }} onClick={() => {
+            this.viewNotebook(record.train_notebook_uri);
+          }}>{formatMessage({ id: 'center.titleNotebook' })}</span>
         </Menu.Item>
       </Menu>
     )
   }
 
-  const formatTrainMode = {
-    [Config.TrainMode.Quick]: formatMessage({id: 'train.quick'}),
-    [Config.TrainMode.Performance]: formatMessage({id: 'train.performance'}),
-    [Config.TrainMode.Minimal]: formatMessage({id: 'train.minimal'}),
-  }
-
-
-  const columns = [
+  columns = [
     {
       title: '',
       dataIndex: 'status',
@@ -127,8 +136,8 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
       render: (_, record) => {
         if (record.status === 'running') {
           return (
-            <Spin indicator={antIcon} />
-          )
+            <Spin indicator={antIcon}/>
+          );
         } else if (record.status === 'succeed') {
           return (
             <CheckOutlined style={{ fontSize: 16, color: 'green'}} />
@@ -155,7 +164,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
       dataIndex: 'train_mode',
       key: 'train_mode',
       render: (val) => {
-        return formatTrainMode[val];
+        return this.formatTrainMode[val];
       }
     },
     {
@@ -167,7 +176,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
         if (val) {
           return (
             <Tooltip placement="right" color={'white'} title={formatMessage({id: 'center.hintTargetCol'}, {targetCol: record.target_col})}>
-              <span>{val.toFixed(6)}({metricDisplayMapping[record.metric_name]})</span>
+              <span>{val.toFixed(6)}({this.metricDisplayMapping[record.metric_name]})</span>
             </Tooltip>
           )
         } else {
@@ -248,7 +257,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
       key: 'train_notebook_uri',
       render: (text, record, index) => {
         return (
-          <Dropdown overlay={getOptionMenu(record)} placement='bottomCenter'>
+          <Dropdown overlay={this.getOptionMenu(record)} placement='bottomCenter'>
             <a>...</a>
           </Dropdown>
         )
@@ -257,7 +266,7 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
 
   ];
 
-  const loadMoreContent = () => (
+  loadMoreContent = () => (
     <div
       style={{
         textAlign: 'center',
@@ -266,117 +275,60 @@ const Center = ({ train: { defaultPanel = null }, location: { query: { datasetNa
         border: '1px solid #e8e8e8',
       }}
     >
-      <Spin tip="Loading..." />
+      <Spin tip="Loading..."/>
     </div>
-  )
+  );
 
-  const getGuid = () =>
-    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      /* eslint-disable */
-      let r = (Math.random() * 16) | 0,
-        v = c == 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-
-  const fetchData = (startIndex = 0) =>
-    new Promise(resolve => {
-      setTimeout(() => {
-        resolve(
-          startIndex >= 500 // 总共只有500条数据
-            ? []
-            : Array.from({ length: 50 }).map((_, i) => {
-              // 每次返回100条
-              const index = startIndex + i;
-              return {
-                key: getGuid(),
-                index: `${index}`,
-                name: 'John Brown',
-                age: 32,
-                address: 'New York No. 1 Lake Park',
-              };
-            }),
-        );
-      }, random(0, 1.0) * 1000);
-    });
-
-  const columns1 = [
-    {
-      title: 'index',
-      dataIndex: 'index',
-      render: text => text,
-      width: 50,
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      width: 100,
-    },
-    {
-      title: 'Age',
-      width: 50,
-      dataIndex: 'age',
-    },
-    {
-      title: 'Address',
-      width: 200,
-      dataIndex: 'address',
-    },
-  ];
-  const handleFetch = ({ page, pageSize }) => {
-    console.warn('loading', { page, pageSize });
-
-    const startIndex = (page - 1) * pageSize;
-
-    fetchData(startIndex, pageSize).then(data =>
-        {setData(data)}
-    );
-  };
-
-
-  return (
-    <div>
-      <Table
-        dataSource={listData}
-        columns={columns}
-        pagination={false}
-        expandable={{
-          expandedRowRender: record => {
-            if (record.status === 'succeed' || record.status === 'running') {
-              return (
-                <Tabs onChange={callback} type="card">
-                  <TabPane tab={formatMessage({id: 'center.evaluate'})} key="1">
-                    <Performance
-                      modelName={record.name}
-                      key={record.key}
-                    />
-                  </TabPane>
-                  <TabPane tab={formatMessage({id: 'center.predict'})} key="2">
-                    {
-                      <Prediction
+  render() {
+    return (
+      <div>
+        <Table
+          dataSource={this.state.listData}
+          columns={this.columns}
+          pagination={false}
+          expandable={{
+            expandedRowRender: record => {
+              if (record.status === 'succeed' || record.status === 'running') {
+                return (
+                  <Tabs onChange={(key) => console.log(key)} type="card">
+                    <TabPane tab={formatMessage({ id: 'center.evaluate' })} key="1">
+                      <Performance
                         modelName={record.name}
-                        taskStatus={record.status}
+                        key={record.key}
                       />
-                    }
-                  </TabPane>
-                  <TabPane tab={formatMessage({id: 'center.param'})} key="3">
-                    <Params
-                      modelName={record.name}
-                    />
-                  </TabPane>
-                </Tabs>
-              )
-            } else if (record.status === 'failed') {
+                    </TabPane>
+                    <TabPane tab={formatMessage({ id: 'center.predict' })} key="2">
+                      {
+                        <Prediction
+                          modelName={record.name}
+                          taskStatus={record.status}
+                        />
+                      }
+                    </TabPane>
+                    <TabPane tab={formatMessage({ id: 'center.param' })} key="3">
+                      <Params
+                        modelName={record.name}
+                      />
+                    </TabPane>
+                  </Tabs>
+                );
+              } else if (record.status === 'failed') {
                 return (
                   // eslint-disable-next-line react/jsx-no-target-blank
-                  <div style={{ textAlign: 'center', color: '#c4c4c4' }}>{formatMessage({id: 'center.fail'})}<a onClick={() => {viewLog(record.log_file_path);}} target="_blank">{formatMessage({id: 'center.bug'})}</a></div>
-                )
-            }
-          },
-        }}
-      />
-    </div>
-  )
+                  <div style={{ textAlign: 'center', color: '#c4c4c4' }}>{formatMessage({ id: 'center.fail' })}<a
+                    onClick={() => {
+                      this.viewLog(record.log_file_path);
+                    }} target="_blank">{formatMessage({ id: 'center.bug' })}</a></div>
+                );
+              }
+            },
+          }}
+        />
+      </div>
+    );
+  }
 }
+
 
 export default withRouter(connect(({train}) => (
   {train}

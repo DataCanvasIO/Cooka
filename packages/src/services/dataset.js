@@ -69,8 +69,9 @@ export function getRecommendConfig(params) {
 }
 
 // 模型中心
-export function getTrainingList(params) {
-  return request.get(`api/dataset/${params['datasetName']}/feature-series/default/train-job`, params['param']);
+export function getTrainingList(datasetName) {
+  //
+  return request.get(`api/dataset/${datasetName}/feature-series/default/train-job`);
 }
 
 // 模型中心 -- 性能
