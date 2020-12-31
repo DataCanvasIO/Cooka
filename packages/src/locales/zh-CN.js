@@ -12,6 +12,7 @@ export default {
   'datasetlist.date': '日期',
   'datasetlist.option': '操作',
   'datasetlist.del': '删除',
+  'datasetlist.delSucceed': '删除成功',
   'datasetlist.uploadFile': '上传文件',
   'datasetlist.systemImport': '文件系统导入',
   'datasetlist.address': '地址',

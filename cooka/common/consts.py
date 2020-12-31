@@ -9,7 +9,7 @@ from traitlets.traitlets import (
 # -- Load config
 class CookaApp(Application):
     server_port = Integer(8000).tag(config=True)
-    language = Unicode("en_US").tag(config=True)
+    language = Unicode("use_client").tag(config=True)
     data_directory = Unicode("~/cooka").tag(config=True)
     notebook_portal = Unicode("http://localhost:8888").tag(config=True)
     optimize_metric = Dict(

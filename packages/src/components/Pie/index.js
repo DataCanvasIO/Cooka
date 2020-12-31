@@ -2,11 +2,10 @@ import React from 'react';
 import { PieChart } from 'bizcharts';
 
 class Pie extends React.Component {
+
   shouldComponentUpdate(props, nextProps) {
-    console.log(props, nextProps)
-    // if (props.data !== nextProps.data) {
-    //   return true;
-    // }
+    // this.props.updateWhenChange, 改变时是否刷新, 对于数据探查页面，那里就不需要刷新；对于训练那里需要
+    return this.props.updateWhenChange
   }
   render() {
     const { data } = this.props;

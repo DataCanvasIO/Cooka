@@ -24,7 +24,6 @@ export default {
   },
 
   effects: {
-    // get table data
     //  创建数据集成功后数据预览
     *queryTable({ payload = {} }, { call, put, select }) {
       const data = yield select(state => state.dataset.data);

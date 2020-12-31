@@ -1,5 +1,6 @@
 import { getDatasetList, deleteDataset } from '@/services/dataset';
 import { message } from 'antd';
+import { formatMessage } from 'umi-plugin-locale';
 
 export default {
   state: {
@@ -65,10 +66,12 @@ export default {
       const response = yield call(getDatasetList, params);
       const responseData = response.data;
 
+      const dropHistoryData = payload.dropHistoryData === undefined ? false:  payload.dropHistoryData
+
       yield put({
         type: 'save',
         payload: {
-          data: data.concat(responseData?.datasets),
+          data: dropHistoryData ? responseData?.datasets:data.concat(responseData?.datasets),
           pagination: {
             current: payload.pagination && payload.pagination.current,
             pageSize: payload.pagination && payload.pagination.pageSize,
@@ -140,6 +143,8 @@ export default {
         },
       });
     },
+
+
     *searchTableFirstPage(_, { put }) {
       yield put({
         type: 'searchTable',
@@ -175,10 +180,16 @@ export default {
       const originRes = yield call(deleteDataset, payload);
       const response = originRes.data;
       if(response) {
-        message.success('删除成功');
+        message.success(formatMessage({id: 'datasetlist.delSucceed'}));
         yield put({
-          type: 'queryTableFirstPage'
-        })
+          type: 'queryTable',
+          payload: {
+            pagination: {
+              current: 1,
+            },
+            dropHistoryData: true,
+          },
+        });
       }
     }
   },

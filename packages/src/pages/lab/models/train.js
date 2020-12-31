@@ -1,4 +1,4 @@
-import { interTasktype, train } from '@/services/dataset';
+import { interTaskType, train } from '@/services/dataset';
 
 const initializeState = {
 
@@ -14,7 +14,7 @@ export default {
   effects: {
     *inferTasktype({ payload }, { call, put }) {
       const callback = payload.callback;
-      const originRes = yield call(interTasktype, payload);
+      const originRes = yield call(interTaskType, payload);
       const res = originRes.data;
       if(res) {
         callback && callback(res)

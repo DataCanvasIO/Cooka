@@ -12,6 +12,7 @@ export default {
   'datasetlist.date': 'Datetime',
   'datasetlist.option': 'Action',
   'datasetlist.del': 'Delete',
+  'datasetlist.delSucceed': 'Deleted',
   'datasetlist.uploadFile': 'Upload',
   'datasetlist.systemImport': 'Import',
   'datasetlist.address': 'Path',

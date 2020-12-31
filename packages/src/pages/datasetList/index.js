@@ -28,12 +28,14 @@ const DatasetList = () => {
   const dispatch = useDispatch();
   const data = useSelector(state => state.datasetlist.data)
   const pagination = useSelector(state => state.datasetlist.pagination);
+
   useEffect(() => {
     dispatch({
       type: 'datasetlist/queryTableFirstPage',
       payload: {}
     })
   }, [dispatch]);
+
   const getNamePopoverContent = (record) => {
     const source_type_content = record.source_type === 'upload' ? `${formatMessage({id: 'datasetlist.uploadFile'})}` : `${formatMessage({id: 'datasetlist.systemImport'})}`
     return (

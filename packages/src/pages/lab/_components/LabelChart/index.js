@@ -6,7 +6,7 @@ const LabelChart = memo((props) => {
   const chartConfig = {
     categorical: (
     <div style={{ width: 500 }}>
-      <Pie data={labelData} />
+      <Pie data={labelData} updateWhenChange={true}/>
     </div>
     ),
     continuous: (

@@ -127,9 +127,10 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
   // const [originalData, setOriginalData] = useState([]);
 
   useEffect(() => {
-    const params = { datasetName };
-    getDataRetrieve(params).then((originRes) => {
-      const res = originRes.data;
+
+    getDataRetrieve(datasetName).then((response) => {
+      const res = response.data;
+
       if (res) {
         setLoading(false);
         const number = res.feature_summary.continuous;
@@ -408,11 +409,12 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
         dataSource={featuresData}
         pagination={false}
         expandable={{
+          expandRowByClick: false,
           expandedRowRender: record => {
             if (record.type === 'continuous') {
               const barChartConfig = {
                 a: (<HBChart hData={record.hData} />),
-                b: (<div style={{width: 600}}><Pie data={record.extension.value_count} /></div>),
+                b: (<div style={{width: 600}}><Pie data={record.extension.value_count} updateWhenChange={false}/></div>),
               }
               return (
                 <React.Fragment>
@@ -435,7 +437,7 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
                 <React.Fragment>
                   <p><span style={{ fontWeight: 'bold' }}>{`${formatMessage({id: 'explore.usual'})}`}: </span>{record.extension.mode.value}({record.extension.mode.percentage}%)</p>
                   <div style={{ width: 600 }}>
-                    <Pie data={record.extension.value_count} />
+                    <Pie data={record.extension.value_count} updateWhenChange={false} />
                   </div>
                 </React.Fragment>
               )

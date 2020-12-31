@@ -10,23 +10,30 @@ import moment from 'moment';
 import logo from '../assets/logo.png'
 import { formatMessage } from 'umi-plugin-locale';
 import { getSystemConfig } from '@/services/systemConfig';
+import { showNotification } from '@/utils/notice';
+
+import { ServiceException, TYPE_DEFAULT_ERROR }  from '@/exception';
 
 const { Header, Content, Footer } = Layout;
 
 let currentLocal = zhCN;
 
 request.get('/api/sysconfig').then((originRes) => {
+
   if (originRes == null){
-    return ;
+    throw ServiceException(TYPE_DEFAULT_ERROR, "Read system config error, response is null ")
   }
+
   const res = originRes.data;
-  if (res?.LANG === 'use_client') {
+
+  if (res.LANG === 'use_client') {
     localStorage.setItem('intlLang', navigator.language)
-    if (navigator.language === 'zh') {
+    if (navigator.language === 'zh-CN') {
       currentLocal = zhCN;
       setLocale('zh-CN');
       moment.locale('zh-cn');
     } else {
+      console.warn("Not zh_CN language ,use english. ");
       currentLocal = enUS;
       setLocale('en-US');
       moment.locale('en-us');

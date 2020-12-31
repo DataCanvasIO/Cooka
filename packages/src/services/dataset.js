@@ -46,16 +46,16 @@ export function getDataPreview(params) {
 }
 
 // 创建数据集成功后的数据探查
-export function getDataRetrieve(params) {
+export function getDataRetrieve(datasetName) {
   const param = {
     n_top_value: 10
   };
-  return request.get(`api/dataset/${params['datasetName']}`, param);
+  return request.get(`api/dataset/${datasetName}`, param);
 }
 
 // 任务类型推断
-export function interTasktype(params) {
-  return request.post(`api/dataset/${params['datasetName']}/infer-task-type`, params['params']);
+export function interTaskType(datasetName, target) {
+  return request.post(`api/dataset/${datasetName}/infer-task-type`, { feature_name: target, });
 }
 
 // 模型训练
@@ -64,8 +64,8 @@ export function train(params) {
 }
 
 // 模型训练自动选取参数
-export function getRecommendConfig(params) {
-  return request.post(`api/dataset/${params['datasetName']}/feature-series/default/recommend-train-conf`, params['param'])
+export function getRecommendConfig(datasetName, target_col) {
+  return request.post(`api/dataset/${datasetName}/feature-series/default/recommend-train-conf`, { target_col: target_col })
 }
 
 // 模型中心

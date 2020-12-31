@@ -6,9 +6,10 @@ import { formatMessage } from 'umi-plugin-locale';
 import { CookaSlider } from 'components';
 import LabelChart from './LabelChart/index.js';
 import styles from '../index.less';
-import { getDataRetrieve, getRecommendConfig, interTasktype } from '@/services/dataset';
+import { getDataRetrieve, getRecommendConfig, interTaskType } from '@/services/dataset';
 import { makeToolTipFromMsgId } from '@/utils/util';
 import { showNotification } from '@/utils/notice';
+import { setLabel } from 'echarts/src/chart/bar/helper';
 
 
 const { Option } = Select;
@@ -40,7 +41,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   const [posLabelValues, setPosLabelValues] = useState(null);  // 正样本选择数据
   const [labelType, setLabelType] = useState('');   // 标签的 type
   const [experimentEngine, setExperimentEngine] = useState(frameworkTypes[0]);   // 标签的 type
-  const [labelValue, setLabelValue] = useState('')  // 选择的标签列名
+  const [target, setTarget] = useState(labelName);  // 选择的标签列名
   const [posValue, setPosValue] = useState('');
   const [taskType, setTaskType] = useState(''); // 是否是二分类模型
   const [mode, setMode] = useState('quick');
@@ -56,140 +57,132 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   const datetimeColArr = features?.filter(feature => feature.type === 'datetime') || [];
   const [form] = Form.useForm();
 
+
   // 如果从数据探查的 去训练 按钮进来的 需要将该标签列以及其图表默认展示
   useEffect(() => {
-    const params = { datasetName };
-    getDataRetrieve(params).then((originRes) => {
-      const res = originRes.data;
-      const features = res.features;
-      if (features.length) {
-        features.forEach((item, index) => {
-          item.key = index;
-          if (item.type === 'continuous') {
-            item.hData = [];
-            item.extension.bins.map((bin) => {
-              item.hData.push({
-                value: [bin.begin, bin.end],
-                count: bin.value
-              })
-            })
-          } else if (item.type === 'datetime') {
-            const hour = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
-            item.barHourData = [];
-            const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            item.barMonthData = [];
-            const week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            item.barWeekData = [];
-            item.barYearData = [];
-            item.extension.by_hour.forEach((hourData, index) => {
-              item.barHourData.push({
-                time: hour[index],
-                value: hourData
-              })
-            });
-            item.extension.by_month.forEach((monthData, index) => {
-              item.barMonthData.push({
-                time: month[index],
-                value: monthData
-              })
-            });
-            item.extension.by_week.forEach((weekData, index) => {
-              item.barWeekData.push({
-                time: week[index],
-                value: weekData,
-              });
-            });
-            item.extension.by_year.forEach((yearData, index) => {
-              item.barYearData.push({
-                time: String(yearData['year']),
-                value: yearData['value'],
-              });
-            });
-          }
-        })
+
+    getDataRetrieve(datasetName).then((originRes) => {
+      // 检查code
+      if(originRes.code !== 0){
+        showNotification('Response is: ' + JSON.stringify(originRes))
+        return
       }
-      res && setFeatures(res.features);
 
-      const reqRecommendConfParams = { datasetName: datasetName, param: { target_col: labelName } };
+      // 检查特征
+      const features = originRes.data.features;
+      if(features.length  <= 0){
+        showNotification('Features of  ' + datasetName + " is empty")
+        return
+      }
 
-      getRecommendConfig(reqRecommendConfParams).then((response) => {
-
-        if (response.code === 0) {
-          const config = response.data;
-          const params = {
-            datasetName,
-            params: {
-              feature_name: config.conf.label_col,
-            },
-          };
-
-          setLabelValue(config.conf.label_col);
-          setPosValue(config.conf.pos_label);
-          setMode(config.conf.train_mode);
-          setExperimentEngine(config.conf.engine);
-          setDataType(config.conf.partition_strategy);
-
-          defaultData[0].count = 80;
-          defaultData[1].count = 10;
-          defaultData[2].count = 10;
-          setSliderData(defaultData);
-          features.forEach(feature => {
-            if (feature.name === config.conf.label_col) {
-              setPosLabelValues(feature.extension.value_count);
-              if (feature.type === 'continuous') {
-                setLabelData(feature.hData);
-              } else if (feature.type === 'categorical') {
-                setLabelData(feature.extension.value_count);
-              }
-              setLabelType(feature.type);
-            }
+      // 包装数据
+      features.forEach((item, index) => {
+        item.key = index;
+        if (item.type === 'continuous') {
+          item.hData = [];
+          item.extension.bins.map((bin) => {
+            item.hData.push({
+              value: [bin.begin, bin.end],
+              count: bin.value
+            })
+          })
+        } else if (item.type === 'datetime') {
+          const hour = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
+          item.barHourData = [];
+          const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          item.barMonthData = [];
+          const week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          item.barWeekData = [];
+          item.barYearData = [];
+          item.extension.by_hour.forEach((hourData, index) => {
+            item.barHourData.push({
+              time: hour[index],
+              value: hourData
+            })
           });
-
-          interTasktype(params).then((originRes) => {
-            const res = originRes.data;
-            setTaskType(res.task_type);
+          item.extension.by_month.forEach((monthData, index) => {
+            item.barMonthData.push({
+              time: month[index],
+              value: monthData
+            })
           });
-
-        } else {
-          const errorMsg = response.data.message;
-          showNotification(errorMsg);
+          item.extension.by_week.forEach((weekData, index) => {
+            item.barWeekData.push({
+              time: week[index],
+              value: weekData,
+            });
+          });
+          item.extension.by_year.forEach((yearData, index) => {
+            item.barYearData.push({
+              time: String(yearData['year']),
+              value: yearData['value'],
+            });
+          });
         }
       })
-      //}
+
+      // 存储特征
+      setFeatures(features);
+
+      // 根据目标列和数据集和推荐参数
+      getRecommendConfig(datasetName, target).then((recommendConfigResponse) => {
+
+        if (recommendConfigResponse.code !== 0) {
+          showNotification('Response is: ' + JSON.stringify(recommendConfigResponse))
+          return
+        }
+
+        const config = recommendConfigResponse.data;
+
+        setTarget(config.conf.label_col);
+        setPosValue(config.conf.pos_label);
+        setMode(config.conf.train_mode);
+        setExperimentEngine(config.conf.engine);
+        setDataType(config.conf.partition_strategy);
+
+        defaultData[0].count = 80;
+        defaultData[1].count = 10;
+        defaultData[2].count = 10;
+        setSliderData(defaultData);
+
+        features.forEach(feature => {
+          if (feature.name === config.conf.label_col) {
+            setPosLabelValues(feature.extension.value_count);
+            if (feature.type === 'continuous') {
+              setLabelData(feature.hData);
+            } else if (feature.type === 'categorical') {
+              setLabelData(feature.extension.value_count);
+            }
+            setLabelType(feature.type);
+          }
+        });
+
+        interTaskType(datasetName, config.conf.label_col).then((originRes) => {
+          // todo check code
+          const res = originRes.data;
+          setTaskType(res.task_type);
+        });
+
+      })
+
     })
-  }, [datasetName, labelName]);
+  }, [datasetName, target, labelName]);
 
 
   // 标签列 select
   const handleLabelChange = (val) => {
     setLabelTipVisible(false);
-    setLabelValue(val);
-    features.forEach(feature => {
-      if(feature.name === val) {
-        if (feature.type === 'continuous') {
-          setLabelData(feature.hData);
-        } else if (feature.type === 'categorical') {
-          setLabelData(feature.extension.value_count);
-        }
-        setLabelType(feature.type)
-      }
-    });
-    dispatch({
-      type: 'train/inferTasktype',
-      payload: {
-        datasetName,
-        params: {
-          feature_name: val,
-        },
-        callback:(res) => {
-          setTaskType(res.task_type);
-        }
-      }
-    })
+
+    // 更新标签列, 标签列更新后会重新渲染页面，包括重新按执行的目标列进行参数推荐
+    setTarget(val);
   }
+
+
   const handleModeChange = (e) => {
     setMode(e.target.value)
   }
+
+
   const handleDataChange = (e) => {
     setDataType(e.target.value)
   }
@@ -329,7 +322,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
     const data = dataRef.current.getData();
 
     let param =  {
-      label_col: labelValue, // 标签列
+      label_col: target, // 标签列
       pos_label: posValue,
       train_mode: mode, // 训练模式
 
@@ -402,7 +395,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
               {makeBody(formatMessage({id: 'train.hintTarget'}))}
             </div>
             <span>
-              <Select value={labelValue} placeholder={formatMessage({id: 'train.select'})} style={{ width: 300, marginBottom: 20 }} onChange={handleLabelChange}>
+              <Select value={target} placeholder={formatMessage({id: 'train.select'})} style={{ width: 300, marginBottom: 20 }} onChange={handleLabelChange}>
                 {
                   labelColArr && labelColArr.map(label => {
                     return (

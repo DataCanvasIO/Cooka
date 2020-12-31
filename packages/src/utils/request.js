@@ -5,6 +5,8 @@ import { join as pathJoin } from 'path';
 import { stringify as qsStringify } from 'qs';
 // import router from 'umi/router';
 import { ZetNotification } from './notice';
+import { showNotification } from './notice';
+import { ServiceException } from '@/exception';
 // import './promise';
 const apiPrefix = '';
 
@@ -112,26 +114,12 @@ export function request(url, options, checkResponseCode) {
         return response;
     })
     .catch(e => {
-      const status = e.name;
-      if (status === 405) {
-        // @HACK
-        /* eslint-disable no-underscore-dangle */
-        window.g_app._store.dispatch({
-          type: 'user/frontEndLogout',
-        });
+      if( e instanceof ServiceException){
+        const msg = "Type: " + e.type + "; Reason: " + e.reason;
+        showNotification(msg);
+      }else{
+        showNotification(e);
       }
-      // environment should not be used
-      // if (status === 403) {
-      //   router.push('/exception/403');
-      //   return;
-      // }
-      // if (status <= 504 && status >= 500) {
-      //   router.push('/exception/500');
-      //   return;
-      // }
-      // if (status >= 404 && status < 422) {
-      //   router.push('/404');
-      // }
     });
 }
 
