@@ -1,4 +1,5 @@
 from os import path as P
+import psutil
 
 from traitlets.config import Application
 from traitlets.traitlets import (
@@ -6,12 +7,32 @@ from traitlets.traitlets import (
 )
 
 
+def _get_ip_addr():
+    info = psutil.net_if_addrs()
+    for k, v in info.items():
+        for item in v:
+            if item[0] == 2 and not item[1] == '127.0.0.1' :
+                # remove dhcp not ready
+                if "169.254."not in item[1]:
+                    return item[1]
+    return None
+
+
+def _get_default_notebook_portal():
+    ip_addr = _get_ip_addr()
+    if ip_addr is None:
+        return "http://localhost:8888"
+    else:
+        return f"http://{ip_addr}:8888"
+
+
 # -- Load config
 class CookaApp(Application):
     server_port = Integer(8000).tag(config=True)
     language = Unicode("use_client").tag(config=True)
     data_directory = Unicode("~/cooka").tag(config=True)
-    notebook_portal = Unicode("http://localhost:8888").tag(config=True)
+
+    notebook_portal = Unicode(_get_default_notebook_portal()).tag(config=True)
     optimize_metric = Dict(
         per_key_traits={
             "multi_classification_optimize": Unicode("accuracy").tag(config=True),

@@ -1,10 +1,16 @@
 {% import 'macro.jinja2' as MRO with context %}
-{{ MRO.insert_tab()}}accuracy_value = round(metrics.accuracy_score(y_test, y_pred), 4)
-{{ MRO.insert_tab()}}f1_value = round(metrics.f1_score(y_test, y_pred, average='micro',), 4)
-{{ MRO.insert_tab()}}fbeta_value = round(metrics.fbeta_score(y_test, y_pred, beta=10, average='micro'), 4)
-{{ MRO.insert_tab()}}precision_value = round(metrics.precision_score(y_test, y_pred, average='micro'), 4)
-{{ MRO.insert_tab()}}recall_value = round(metrics.recall_score(y_test, y_pred, average='micro'), 4)
-{{ MRO.insert_tab()}}log_loss_value = round(metrics.log_loss(y_test, y_score), 4)
+{{ MRO.insert_tab()}}accuracy_value = metrics.accuracy_score(y_test, y_pred)
+{{ MRO.insert_tab()}}f1_value = metrics.f1_score(y_test, y_pred, average='micro',)
+{{ MRO.insert_tab()}}fbeta_value = metrics.fbeta_score(y_test, y_pred, beta=10, average='micro')
+{{ MRO.insert_tab()}}precision_value = metrics.precision_score(y_test, y_pred, average='micro')
+{{ MRO.insert_tab()}}recall_value = metrics.recall_score(y_test, y_pred, average='micro')
+{% if framework == "DeepTables" %}
+{{ MRO.insert_tab()}}log_loss_value = metrics.log_loss(y_test, y_score, labels=estimator.model.classes_)
+{% elif framework == 'HyperGBM' %}
+{{ MRO.insert_tab()}}log_loss_value = metrics.log_loss(y_test, y_score, labels=estimator.classes_)
+{% else %}
+{{ MRO.insert_tab()}}log_loss_value = None
+{% endif %}
 {{ MRO.insert_tab()}}metrics_dict = {
 {{ MRO.insert_tab()}}    "accuracy": accuracy_value,
 {{ MRO.insert_tab()}}    "f1": f1_value,

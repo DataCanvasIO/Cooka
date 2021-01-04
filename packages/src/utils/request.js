@@ -97,18 +97,14 @@ export function request(url, options, checkResponseCode) {
     sessionId: localStorage.getItem('sessionId'),
     language: localStorage.getItem('intlLang'),
   };
-  return fetch(url, newOptions)
-    // .then((response) => (
-    //   changeLoadingStatus(response, loadingId)
-    // ))
-    .then(checkStatus)
+  return fetch(url, newOptions).then(checkStatus)
     .then((response) => {
       return response.json();
     })
     .then((response) => {
         if(checkResponseCode === true) {
           if(response.code !== 0){
-            ZetNotification(response);
+            throw Error(response);
            }
         }
         return response;

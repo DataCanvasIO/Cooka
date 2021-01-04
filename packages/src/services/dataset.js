@@ -70,7 +70,6 @@ export function getRecommendConfig(datasetName, target_col) {
 
 // 模型中心
 export function getTrainingList(datasetName) {
-  //
   return request.get(`api/dataset/${datasetName}/feature-series/default/train-job`);
 }
 
@@ -88,5 +87,3 @@ export function batchPredict(datasetName, modelName, reqParams) {
 export function getPredictJob(datasetName, modelName, batch_predict_job_name) {
   return request.get(`api/dataset/${datasetName}/feature-series/default/model/${modelName}/batch-predict-job/${batch_predict_job_name}`);
 }
-
-
