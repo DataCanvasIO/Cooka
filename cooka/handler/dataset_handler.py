@@ -104,15 +104,23 @@ class DatasetItemHandler(BaseHandler):
 
 class DatasetNameHandler(BaseHandler):
 
+    dataset_service = DatasetService()
+
     @gen.coroutine
-    def get(self, dataset_name, *args, **kwargs):
-        path_dataset = P.join(consts.PATH_DATASET, dataset_name, 'meta.json')
+    def post(self, dataset_name, *args, **kwargs):
 
-        if P.exists(path_dataset):
-            raise Exception(dataset_name)
+        # check it in db
+        with db.open_session() as s:
+            dataset = self.dataset_service.dataset_dao.find_by_name(s, dataset_name)
+            if dataset is not None:
+                raise ValueError(f"Dataset {dataset_name} already exists ")
 
-        # 5. to json and response
-        self.response_json({"datasets": -1})
+        # check it in file system
+        dataset_dir = util.dataset_dir(dataset_name)
+        if P.exists(dataset_dir):
+            raise ValueError(f"Path {dataset_dir} already exists even dataset {dataset_name} not exists ")
+
+        self.response_json({})
 
 
 class DatasetPreviewDataHandler(BaseHandler):
@@ -155,6 +163,8 @@ class TestImportFileHandler(BaseHandler):
 
         response = {}
         self.response_json(response)
+
+
 
 
 class TemporaryDatasetHandler(BaseHandler):
@@ -211,6 +221,7 @@ class DatasetAnalyzeProcessHandler(BaseHandler):
         response = \
             {
                 "analyze_job_name": analyze_job_name,
+                "temporary_dataset_name": dataset_name,
                 "steps": messages_dict_list
             }
         self.response_json(response)

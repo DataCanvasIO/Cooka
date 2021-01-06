@@ -43,7 +43,6 @@ class DatasetService:
                 step.extension['recommend_dataset_name'] = self.choose_dataset_name(P.basename(dataset_file_path), False)
 
             content = util.dumps(step.to_dict())
-
             message = MessageEntity(id=util.short_uuid(), author=analyze_job_name, content=content, create_datetime=util.get_now_datetime())
             s.add(message)
 

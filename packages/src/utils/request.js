@@ -97,26 +97,24 @@ export function request(url, options, checkResponseCode) {
     sessionId: localStorage.getItem('sessionId'),
     language: localStorage.getItem('intlLang'),
   };
-  return fetch(url, newOptions).then(checkStatus)
-    .then((response) => {
-      return response.json();
-    })
-    .then((response) => {
-        if(checkResponseCode === true) {
-          if(response.code !== 0){
-            throw Error(response);
-           }
-        }
-        return response;
-    })
-    .catch(e => {
-      if( e instanceof ServiceException){
-        const msg = "Type: " + e.type + "; Reason: " + e.reason;
-        showNotification(msg);
-      }else{
-        showNotification(e);
+  return fetch(url, newOptions).then(checkStatus).then(r => {
+    try {
+      return r.json();
+    }catch (e){
+      // 如果请求不是一个json 将会报错
+      return {
+        code: -2,
+        data: {}
       }
-    });
+    }
+  } ).then((jsonResponse) => {
+      if(checkResponseCode === true) {
+        if(jsonResponse.code !== 0){
+          showNotification(JSON.stringify(jsonResponse));
+        }
+      }
+      return jsonResponse;
+    })
 }
 
 /**

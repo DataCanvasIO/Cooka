@@ -163,55 +163,19 @@ export default {
     *getRetrieveData({ payload }, { call, put, select }) {
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       while (true) {
-        const originRes = yield call(getRetrieveData, payload);
-        const res = originRes.data;
-        yield call(delay, 500);
+        const pollJobResponse = yield call(getRetrieveData, payload);
+        const pollJobResponseData = pollJobResponse.data;
+        yield call(delay, 1000);
 
-        if (res.steps.length === 1 && res.steps[0]['status'] === 'succeed') {
-          yield put({
-            type: 'save',
-            payload: {
-              step1Status: res.steps[0]['status'],
-              copyTook: res.steps[0]['took'],
-              copiedFileSize: res.steps[0].extension.file_size
-            }
-          })
-        }
-        if (res.steps.length === 2 || res.steps.length === 3 && res.steps[1]['status'] === 'succeed') {
-          yield put({
-            type: 'save',
-            payload: {
-              step2Status: res.steps[1]['status'],
-              n_cols: res.steps[1]['extension']['n_cols'],
-              n_cols_used: res.steps[1]['extension']['n_cols_used'],
-              n_rows: res.steps[1]['extension']['n_rows'],
-              n_rows_used: res.steps[1]['extension']['n_rows_used'],
-              loadingTook: res.steps[1]['took']
-            }
-          })
-        } else if (res.steps.length === 2 || res.steps.length === 3 && res.steps[1]['status'] === 'failed') {
-          yield put({
-            type: 'save',
-            payload: {
-              step2Status: res.steps[1]['status'],
-            }
-          });
-          return;
-        }
-        if(res.steps.length === 3 && res.steps[2]['status'] === 'succeed') {
+        yield put({
+          type: 'save',
+          payload: {
+            pollJobResponse: pollJobResponse,
+          }
+        })
+
+        if(pollJobResponseData.steps.length === 3 && pollJobResponseData.steps[2]['status'] === 'succeed') {
           const params = yield select(state => state.importFile.params);
-          yield put({
-            type: 'save',
-            payload: {
-              step3Status: res.steps[2]['status'],
-              categorical: res.steps[2]['extension']['feature_summary']['categorical'],
-              continuous: res.steps[2]['extension']['feature_summary']['continuous'],
-              datetime: res.steps[2]['extension']['feature_summary']['datetime'],
-              analysisTook: res.steps[2]['took'],
-              showTitle: true , // 显示 数据预览和数据探查,
-              recommendDatasetName: res.steps[2]['extension']['recommend_dataset_name']
-            }
-          });
           yield put({
             type: 'getTempDataPreview',
             payload: {
@@ -222,19 +186,12 @@ export default {
               }
             }
           });
+
           yield put({
             type: 'getTempDateRetrieve',
             payload: params
           });
           return
-        } else if (res.steps.length === 3 && res.steps[2]['status'] === 'failed') {
-          yield put({
-            type: 'save',
-            payload: {
-              step3Status: res.steps[2]['status'],
-            }
-          });
-          return;
         }
       }
     },

@@ -68,22 +68,7 @@ export default {
 
       const originResponse = yield call(getDataPreview, params);
       const res = originResponse.data;
-      // res.headers.forEach((header) => {
-      //   columns.push({
-      //     title: header,
-      //     dataIndex: header
-      //   })
-      // })
-      // res.rows.forEach((row, idx) => {
-      //   dataSource[idx] = dataSource[idx] || {} ;
-      //   row.forEach((item, index) => {
-      //     dataSource[idx][res.headers[index]] = item
-      //   })
-      // });
-      // columns[0].fixed = 'left';
-      // columns[0].width = 150;
-      // columns[columns.length - 1].fixed = 'right';
-      // columns[columns.length - 1].width = 150;
+
       yield put({
         type: 'save',
         payload: {

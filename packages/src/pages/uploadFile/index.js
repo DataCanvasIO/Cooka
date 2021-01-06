@@ -3,72 +3,39 @@ import { Breadcrumb, Form, Input, Card, Button, Radio, Tooltip } from 'antd';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
 import router from 'umi/router';
-import Uploadpage from './_components/upload';
+import UploadPage from './_components/upload';
 import Preview from '@/pages/common/previewDataset'
 import Explore from '@/pages/common/exploreDataset';
 import styles from './index.less';
 import { formatMessage } from 'umi-plugin-locale';
-import {CreateDatasetForm} from '@/pages/common/createDataset';
+import CreateDatasetFromPage from '@/pages/uploadFile/_components/createDataseForm';
+import { makeStepsDict } from '@/utils/util';
 
-/**
- * 将分析任务详情的接口返回的数据包装成 k-v形式，例如：
- * {
- *   upload: {
- *     extension: {
- *       file_size: "10KB"
- *     },
- *     took: 100
- *   }
- * }
- * @param responseData
- */
-function parseStepProcess(responseData) {
-  const result = {};
-  for (var step of responseData.steps){
-    result[step.type] = step;
-  }
-  return result;
-}
+import { UploadStepType } from '@/pages/common/appConst';
 
-const StepType = {
-  upload: 'upload',
-  load:'load',
-  analyze: 'analyzed',
-};
 
-const UploadFile = ({ uploadFile: {datasetName, responseData }, dispatch }) => {
-  const [form] = Form.useForm();
+const UploadFile = ({ uploadFile: {datasetName, pollJobResponse }, dispatch }) => {
 
   const [defaultValue, setRadioValue] = useState('a');
   const [analyzeSucceed, setAnalyzeSucceed] = useState(false);
 
-  // 分析结束后返回数据集名称回显
   useEffect(() => {
-
-    if(responseData !== null && responseData !== undefined) {
-      const stepsObject = parseStepProcess(responseData);
-      const analyzeStep = stepsObject[StepType.analyze];
-
-      if(analyzeStep !== undefined && analyzeStep !== null){
-        if('succeed' === analyzeStep.status){
+    if (pollJobResponse !== null && pollJobResponse !== undefined) {
+      const responseData = pollJobResponse.data;
+      const stepsObject = makeStepsDict(responseData.steps);
+      const analyzeStep = stepsObject[UploadStepType.analyze];
+      if (analyzeStep !== undefined && analyzeStep !== null) {
+        if ('succeed' === analyzeStep.status) {
           setAnalyzeSucceed(true);
-          form.setFieldsValue({
-            btn: false,
-            datasetName: datasetName,
-          });
         }
       }
     }
-
-  }, [form, datasetName, responseData]);
-
-
-  // form, datasetName,
-  const datasetNameHtml = <CreateDatasetForm form={form} temporaryDatasetName={datasetName} dispatch={dispatch}/> ;
+  }, [pollJobResponse])
 
   const handleTitleChange = (e) => {
     setRadioValue(e.target.value);
   };
+
   const title = (
     <Radio.Group onChange={handleTitleChange} defaultValue={defaultValue}>
       <Radio.Button value="a">{formatMessage({id: 'upload.upload'})}</Radio.Button>
@@ -85,14 +52,15 @@ const UploadFile = ({ uploadFile: {datasetName, responseData }, dispatch }) => {
   );
 
   const contentConfig = {
-    a: (<Uploadpage />),
+    a: (<UploadPage />),
     b: (<Preview datasetName={datasetName}/>),
     c: (<Explore datasetNameFromParam={datasetName} isTemporary={true}/>)
   };
 
+  const datasetNameHtml = <CreateDatasetFromPage /> ;
+
   return (
     <Form
-      form={form}
       initialValues={
         {
           n_rows: 1000
@@ -109,12 +77,17 @@ const UploadFile = ({ uploadFile: {datasetName, responseData }, dispatch }) => {
         </Breadcrumb>
 
       </div>
+
       <Card title={title} extra={datasetNameHtml} style={{ paddingBottom: 60 }}>
         {contentConfig[defaultValue]}
       </Card>
+
     </Form>
   );
 }
+
 export default withRouter(connect(({ uploadFile }) => (
   { uploadFile }
 ))(UploadFile));
+
+// export default UploadFile;

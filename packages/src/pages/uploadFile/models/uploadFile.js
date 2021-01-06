@@ -142,82 +142,36 @@ export default {
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       // 解析请求不正确
       while (true) {
-        const originResponse = yield call(getRetrieveData, payload);
-        const res = originResponse.data;
+        const pollJobResponse = yield call(getRetrieveData, payload);
+        const pollJobResponseData = pollJobResponse.data;
         yield call(delay, 1000);
 
         yield put({
           type: 'save',
           payload: {
-            responseData: res,
-            datasetName: payload.payload
+            pollJobResponse: pollJobResponse,
           }
         })
 
-         if (res.steps.length === 2 || res.steps.length === 3  && res.steps[1]['status'] === 'succeed') {
-          // yield put({
-          //   type: 'save',
-          //   payload: {
-          //     responseData: res,
-          //     uploadStepStatus: res.steps[0]['status'],
-          //     step2Status: res.steps[1]['status'],
-          //     n_cols: res.steps[1]['extension']['n_cols'],
-          //     n_cols_used: res.steps[1]['extension']['n_cols_used'],
-          //     n_rows: res.steps[1]['extension']['n_rows'],
-          //     n_rows_used: res.steps[1]['extension']['n_rows_used'],
-          //     loadingTook: res.steps[1]['took']
-          //   }
-          // })
-        } else if (res.steps.length === 2 || res.steps.length === 3 && res.steps[1]['status'] === 'failed') {
-          // yield put({
-          //   type: 'save',
-          //   payload: {
-          //     step2Status: res.steps[1]['status'],
-          //   }
-          // });
-          // return;
-        }
-        if(res.steps.length === 3 && res.steps[2]['status'] === 'succeed') {
-          // yield put({
-          //   type: 'save',
-          //   payload: {
-          //     step3Status: res.steps[2]['status'],
-          //     categorical: res.steps[2]['extension']['feature_summary']['categorical'],
-          //     continuous: res.steps[2]['extension']['feature_summary']['continuous'],
-          //     datetime: res.steps[2]['extension']['feature_summary']['datetime'],
-          //     analysisTook: res.steps[2]['took'],
-          //     showTitle: true // 显示 数据预览和数据探查
-          //   }
-          // });
-
-
-
-          const params = yield select(state => state.uploadFile.params);
-          yield put({
-            type: 'getTempDataPreview',
-            payload: {
-              uriParams: params,
-              params: {
-                page_num: 1,
-                page_size: 10
+        const steps = pollJobResponseData.steps
+        if(steps.length === 3 && steps[2]['status'] === 'succeed') {
+           const params = yield select(state => state.uploadFile.params);
+            yield put({
+              type: 'getTempDataPreview',
+              payload: {
+                uriParams: params,
+                params: {
+                  page_num: 1,
+                  page_size: 10
+                }
               }
-            }
-          });
-          yield put({
-            type: 'getTempDateRetrieve',
-            payload: params
-          });
-          return
+            });
+            yield put({
+              type: 'getTempDateRetrieve',
+              payload: params
+            });
+            return
         }
-        // else if (res.steps.length === 3 && res.steps[2]['status'] === 'failed') {
-        //   yield put({
-        //     type: 'save',
-        //     payload: {
-        //       step3Status: res.steps[2]['status'],
-        //     }
-        //   });
-        //   return;
-        // }
       }
     },
     //

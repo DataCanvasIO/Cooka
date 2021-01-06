@@ -59,7 +59,7 @@ function BasicLayout(props) {
           <div className={styles.logo} style={{ cursor: 'pointer' }} onClick={ () => window.location.href = '/' }>
             <img src={logo} alt="logo"/>
           </div>
-          {/*<div className={styles.doc}>{formatMessage({id: 'extra.doc'})}</div>*/}
+          {<div className={styles.doc}>{formatMessage({id: 'extra.doc'})}</div>}
         </Header>
         <Content className={styles.content}>{props.children}</Content>
       </Layout>

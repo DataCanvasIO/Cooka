@@ -1,127 +1,111 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Card, Radio, Slider, InputNumber, Row, Col, message, Spin, Button, Tooltip } from 'antd';
-import { QuestionCircleOutlined, CheckOutlined, LoadingOutlined, MinusOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, Form, Input, Tooltip } from 'antd';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
 import styles from '../index.less';
 import { formatMessage } from 'umi-plugin-locale';
-import { makeCsvFileTip, makeSampleDiv } from '@/pages/common/createDataset';
-import { SampleStrategy } from '@/pages/common/appConst';
-import { convertByteUnits } from '@/utils/util';
+import { checkoutStepFromStepsDict, makeCsvFileTip, makeSampleDiv } from '@/pages/common/createDataset';
+import { ImportStepType, StepStatusIcon } from '@/pages/common/appConst';
+import { convertByteUnits, makeStepsDict } from '@/utils/util';
+import { testImportFile } from '@/services/dataset';
 
 
-const antIcon = <LoadingOutlined style={{ fontSize: 16 }} spin />;
-const statusConfig = {
-  todo: (<MinusOutlined style={{ fontSize: 16, color: '#000'}}/>),
-  doing: (<Spin indicator={antIcon} />),
-  done: (<CheckOutlined style={{ fontSize: 16, color: 'green'}} />),
-  undone: (<CloseOutlined style={{ fontSize: 16, color: 'red'}} />)
-};
-
-
-
-/**
- * 带有tip提示的输入框
- */
-export class TipInput extends React.Component {
-
-  constructor(props){
-    super(props);
-    this.value = props.value;
-    this.myOnChange = props.myOnChange;
-    // this.onChange = props.onChange; //
-    // this.onBlur = props.onBlur;
-  };
-
-  // '.' at the end or only '-' in the input box.
-  onBlur = () => {
-    const { value, onBlur, onChange } = this.props;
-    // let valueTemp = value;
-    // if (value.charAt(value.length - 1) === '.' || value === '-') {
-    //   valueTemp = value.slice(0, -1);
-    // }
-    // onChange(valueTemp.replace(/0*(\d+)/, '$1'));
-    // if (onBlur) {
-    //   onBlur();
-    // }
-  };
-
-  render() {
-    return (
-      <Tooltip
-        trigger={['focus']}
-        title={this.props.tipContent}
-        color={'#FFF2F0'}
-        placement="right"
-        overlayClassName="numeric-input"
-      >
-        <Input
-          style={{ width: 300} }
-          value={this.props.value}
-          onChange={this.myOnChange}
-          onBlur={this.onBlur}
-          placeholder="File path in server "
-          maxLength={256}
-          minLength={0}
-        />
-      </Tooltip>
-    );
-  }
-}
-
-
-
-const Uploadpage = ({dispatch, location,  importFile: { step1Status, copiedFileSize, step2Status, step3Status, uploadTook,
-  n_cols, n_cols_used, n_rows, n_rows_used, loadingTook, categorical, continuous,
-  datetime, analysisTook, testImportFileResponse, copyTook }}) => {
+const ImportFilePage = ({dispatch, location,  importFile: { pollJobResponse }}) => {
 
   const [form] = Form.useForm();
   const [sampleStrategy, setSampleStrategy] = useState('whole_data'); // 抽样分析类型
   const [value, setValue] = useState(50); // 抽样分析value值
-  const [uploadStatus, setUploadStatus] = useState(statusConfig['todo']);  // 上传icon状态
-  const [loadingDataStatus, setLoadingDataStatus] = useState(statusConfig['todo']); // 加载数据icon状态
-  const [analysisDataStatus, setAnalysisDataStatus] = useState(statusConfig['todo']); // 分析数据icon状态
+  const [uploadStatus, setUploadStatus] = useState(StepStatusIcon['todo']);  // 上传icon状态
+  const [loadingDataStatus, setLoadingDataStatus] = useState(StepStatusIcon['todo']); // 加载数据icon状态
+  const [analysisDataStatus, setAnalysisDataStatus] = useState(StepStatusIcon['todo']); // 分析数据icon状态
   const [uploadTips, setUploadTips] = useState(formatMessage({id: 'upload.prepare'})); // 上传文件提示
   const [loadingDataTips, setLoadingDataTips] = useState(formatMessage({id: 'upload.prepare'})); // 加载数据提示
   const [analysisDataTips, setAnalysisDataTips] = useState(formatMessage({id: 'upload.prepare'})); // 分析数据提示
   const [filePath, setFilePath] = useState('');
+  const [disableAnalyzeBtn, setDisableAnalyzeBtn] = useState(true);
+  const [inputFilePathTip, setInputFilePathTip] = useState(null);
+  const [inputFilePathTipVisible, setInputFilePathTipVisible] = useState(false);
 
+
+  const showFilePathTip = (tip) => {
+    setInputFilePathTip(tip);
+    setInputFilePathTipVisible(true);
+  }
+
+  const clearFilePathTip = () => {
+    setInputFilePathTipVisible(false);
+    setInputFilePathTip(null);
+  }
 
   useEffect(() => {
-    if (step1Status === 'succeed') {
-      setUploadStatus(statusConfig['done']);
-      setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: copyTook.toFixed(2), fileSize:  convertByteUnits(copiedFileSize) }) }`) // todo fixme
-      setLoadingDataStatus(statusConfig['doing']);
-      setLoadingDataTips(formatMessage({id: 'upload.loading'}))
 
-    } else if ( step1Status === 'failed' ) {
-      setLoadingDataStatus(statusConfig['undone']);
-      setUploadTips(formatMessage({id: 'upload.fail'}))
+    if(pollJobResponse !== null && pollJobResponse !== undefined) {
+      const responseData = pollJobResponse.data
+      const stepsDict = makeStepsDict(responseData.steps);
+
+      checkoutStepFromStepsDict(stepsDict, ImportStepType.copy, (copyStep) => {
+
+        const  copyTook = copyStep['took'];
+        const  copiedFileSize = copyStep.extension.file_size;
+
+        if(copyStep.status === 'succeed') {
+          setUploadStatus(StepStatusIcon['done']);
+          setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: copyTook.toFixed(2), fileSize:  convertByteUnits(copiedFileSize) }) }`) // todo fixme
+          setLoadingDataStatus(StepStatusIcon['doing']);
+          setLoadingDataTips(formatMessage({id: 'upload.loading'}))
+
+        } else if ( copyStep.status === 'failed' ) {
+          setLoadingDataStatus(StepStatusIcon['undone']);
+          setUploadTips(formatMessage({id: 'upload.fail'}))
+        }else{
+
+        }
+      })
+
+      checkoutStepFromStepsDict(stepsDict, ImportStepType.load, (loadStep) => {
+        const loadStepStatus = loadStep.status;
+        const  n_cols  = loadStep.extension.n_cols;
+        const  n_cols_used  = loadStep.extension.n_cols_used;
+        const  n_rows  = loadStep.extension.n_rows;
+        const  n_rows_used  = loadStep.extension.n_rows_used;
+        const  loadingTook  = loadStep.took;
+
+        if (loadStepStatus === 'succeed') {
+          setLoadingDataStatus(StepStatusIcon['done']);
+          setLoadingDataTips(`${formatMessage({id: 'upload.hintLoadData'}, {elapsed: loadingTook.toFixed(2), nRows: n_rows, nColumns: n_cols, nRowsUsed: n_rows_used})  }`);
+
+          setAnalysisDataStatus(StepStatusIcon['doing']);
+          setAnalysisDataTips(formatMessage({id: 'upload.analysising'}))
+
+        } else if ( loadStepStatus === 'failed' ) {
+          setLoadingDataStatus(StepStatusIcon['undone']);
+          setLoadingDataTips(formatMessage({id: 'upload.fail'}))
+        }
+
+      })
+
+      checkoutStepFromStepsDict(stepsDict, ImportStepType.analyze, (analyzeStep) => {
+
+        const  categorical = analyzeStep.extension.feature_summary.categorical;
+        const  continuous = analyzeStep.extension.feature_summary.continuous;
+        const  datetime = analyzeStep.extension.feature_summary.datetime;
+        const  analysisTook = analyzeStep.took;
+        const analyzeStepStatus = analyzeStep.status;
+
+        if (analyzeStepStatus === 'succeed') {
+          setAnalysisDataStatus(StepStatusIcon['done']);
+          setLoadingDataStatus(StepStatusIcon['done']);
+          setAnalysisDataTips(`${formatMessage({id: 'upload.hintAnalysis'}, {elapsed: analysisTook.toFixed(2), nContinuous: continuous, nCategorical:categorical,  nDatetime: datetime})}`);
+
+        } else if (analyzeStepStatus === 'failed') {
+          setAnalysisDataStatus(StepStatusIcon['undone']);
+          setAnalysisDataTips(formatMessage({id: 'import.fail'}));
+        }
+
+      })
     }
 
-    if (step2Status === 'succeed') {
-      setLoadingDataStatus(statusConfig['done']);
-      setLoadingDataTips(`${formatMessage({id: 'upload.hintLoadData'}, {elapsed: loadingTook.toFixed(2), nRows: n_rows, nColumns: n_cols, nRowsUsed: n_rows_used})  }`);
-
-      setAnalysisDataStatus(statusConfig['doing']);
-      setAnalysisDataTips(formatMessage({id: 'upload.analysising'}))
-
-    } else if ( step2Status === 'failed' ) {
-      setLoadingDataStatus(statusConfig['undone']);
-      setLoadingDataTips(formatMessage({id: 'upload.fail'}))
-    }
-
-    if (step3Status === 'succeed') {
-      setAnalysisDataStatus(statusConfig['done']);
-      setLoadingDataStatus(statusConfig['done']);
-      setAnalysisDataTips(`${formatMessage({id: 'upload.hintAnalysis'}, {elapsed: analysisTook.toFixed(2), nContinuous: continuous, nCategorical:categorical,  nDatetime: datetime})}`);
-
-    } else if (step3Status === 'failed') {
-      setAnalysisDataStatus(statusConfig['undone']);
-      setAnalysisDataTips(formatMessage({id: 'import.fail'}));
-    }
-  },[step1Status, step2Status, step3Status, uploadTook, n_cols, n_cols_used, n_rows, n_rows_used, loadingTook, categorical, continuous, datetime, analysisTook, copyTook, copiedFileSize])
-
+  },[pollJobResponse])
 
 
   const onChange = value => {
@@ -166,7 +150,7 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, copiedFileS
 
   //  handle analysis Button
   const handleAnalyses = () => {
-    setUploadStatus(statusConfig['doing']);
+    setUploadStatus(StepStatusIcon['doing']);
     const text = sampleStrategy === 'random_rows' ? {
       n_rows: form.getFieldsValue().n_rows,
       percentage: '',
@@ -187,27 +171,31 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, copiedFileS
     })
   };
 
-  let testImportFileReason;
-  const testFileIsValid = testImportFileResponse.valid;
-  if (!testFileIsValid){
-    testImportFileReason = testImportFileResponse.reason;
-  }else{
-    testImportFileReason = null
-  }
-
-  // 处理分析按钮事件
   const handleFilePathOnChange = e => {
     const { value } = e.target;
     setFilePath(value);
-    if (value != null && value.length > 0) {
-      dispatch({
-        type: 'importFile/testImportFile',
-        payload: {
-          path: value
+    if (value !== null && value !== undefined && value.length > 0) {
+      testImportFile(value).then(response => {
+        if(response.code === 0){
+          setDisableAnalyzeBtn(false);
+          clearFilePathTip();
+        }else{
+          const testMsg = response.data.message;
+          console.info("hhhhh")
+          console.info(testMsg);
+          console.info(inputFilePathTipVisible);
+
+          showFilePathTip(testMsg);
+          setDisableAnalyzeBtn(true);
         }
-      });
+      })
     }
   };
+
+  const handleFilePathOnBlur = e => {
+
+  }
+
   return (
     <>
       <div className={styles.main}>
@@ -221,10 +209,28 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, copiedFileS
 
           <Card style={{ width: '85%' }}>
             {makeCsvFileTip()}
-            <TipInput myOnChange={handleFilePathOnChange} value={filePath} tipContent={testImportFileReason} >
-            </TipInput>
+            <Tooltip
+            trigger={['focus']}
+            title={inputFilePathTip}
+            visible={inputFilePathTipVisible}
+            color={'#FFF2F0'}
+            placement="right">
+              <Input
+              style={{ width: 300} }
+              onChange={handleFilePathOnChange}
+              onBlur={handleFilePathOnBlur}
+              placeholder="File path in server "
+              maxLength={256}
+              minLength={0}
+              />
+            </Tooltip>
             <br/>
-            <Button type="primary" disabled={!testFileIsValid} style={{ marginTop: 10 }} onClick={ () => handleAnalyses()} >{formatMessage({id: 'import.analysis'})}</Button>
+            <Button type="primary"
+                    disabled={disableAnalyzeBtn}
+                    style={{ marginTop: 10 }}
+                    onClick={handleAnalyses}>
+              {formatMessage({id: 'import.analysis'})}
+            </Button>
           </Card>
         </div>
       </div>
@@ -259,4 +265,4 @@ const Uploadpage = ({dispatch, location,  importFile: { step1Status, copiedFileS
 
 export default withRouter(connect(({ importFile }) => (
   { importFile }
-))(Uploadpage));
+))(ImportFilePage));

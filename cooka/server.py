@@ -14,7 +14,7 @@ from cooka.dao.entity import initialize_database
 
 from cooka.handler.dataset_handler import TemporaryDatasetHandler, DatasetAnalyzeProcessHandler, InferTaskTypeHandler
 from cooka.handler.resource_handler import TextResourceHeadHandler, TextResourceTailHandler, ResourceHandler, AssetsHandler, StreamResourceHandler
-from cooka.handler.dataset_handler import DatasetHandler, DatasetItemHandler, DatasetPreviewDataHandler, TestImportFileHandler
+from cooka.handler.dataset_handler import DatasetHandler, DatasetItemHandler, DatasetPreviewDataHandler, TestImportFileHandler, DatasetNameHandler
 from cooka.handler.experiment_handler import ModelDetailHandler, ExperimentHandler, ModelTrainProcessHandler, RecommendTrainConfigurationHandler
 from cooka.handler.model_serving_handler import BatchPredictJobHandler, BatchPredictJobItemHandler
 from cooka.handler.sys_hander import ConfigHandler
@@ -54,6 +54,7 @@ class CookaWebApplication(web.Application):
 
             (r"/api/dataset/(?P<dataset_name>.+)/preview", DatasetPreviewDataHandler),
             (r"/api/dataset/(?P<dataset_name>.+)/infer-task-type", InferTaskTypeHandler),
+            (r"/api/dataset/(?P<dataset_name>.+)/check-name", DatasetNameHandler),
 
             (r'/api/dataset/(?P<dataset_name>.+)/feature-series/default/train-job', ExperimentHandler),
             (r'/api/dataset/(?P<dataset_name>.+)/feature-series/default/recommend-train-conf', RecommendTrainConfigurationHandler),

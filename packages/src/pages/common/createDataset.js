@@ -1,13 +1,16 @@
 import styles from '@/pages/uploadFile/index.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Card, Col,  Icon, Input, InputNumber, Radio, Row, Slider, Tooltip } from 'antd/lib/index';
-import { Form } from 'antd';
-import React from 'react';
+import { Card, Col, Input, InputNumber, Radio, Row, Slider, Tooltip } from 'antd/lib/index';
+import { Button, Form } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { formatMessage } from 'umi-plugin-locale';
 import router from 'umi/router';
-import { Button } from 'antd';
-import { SampleStrategy } from '@/pages/common/appConst';
-
+import { SampleStrategy, UploadStepType } from '@/pages/common/appConst';
+import { makeStepsDict } from '@/utils/util';
+import { checkDatasetName } from '@/services/dataset';
+import { showNotification } from '@/utils/notice';
+import { withRouter } from 'umi';
+import { connect } from 'dva';
 
 function makeRandomRows(form) {
 
@@ -139,164 +142,175 @@ export function makeCsvFileTip() {
 
 }
 
+export function checkoutStepFromStepsDict(stepsDict, stepType, handler){
+  const destStep = stepsDict[stepType];
+  if(destStep !== undefined && destStep !== null){
+    handler(destStep)
+  }
+}
+
+export function checkoutStepFromResponse(jobResponse, stepType, handler){
+
+  if(jobResponse !== null && jobResponse !== undefined) {
+    const responseData = jobResponse.data
+    const stepsDict = makeStepsDict(responseData.steps);
+    checkoutStepFromStepsDict(stepsDict, stepType, handler);
+  }
+
+}
+
+
 
 // ------------------创建数据集----------------------
+export const CreateDatasetFormPage = ({ dispatch,  pollJobResponse }) => {
 
-/**
- * 带有tip提示的输入框
- */
-class DatasetNameInput extends React.Component {
-  /**
-   *
-   * @param props
-   * @param props.value 给组件设置值用的，可以是对象
-   * @param props.onChange Form.Item 的onChange逻辑，用来进行验证的，自定义组件要调用
-   * @param props.analyzeSucceed 是否分析成功，用来设置按钮状态
-   */
-  constructor(props){
-    super(props);
-    this.state = {
-      tipContent: null,  // tip提示
+  const [tipContent, setTipContent] = useState();
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [disableButton, setDisableButton] = useState(true);
+  const [disableInput, setDisableInput] = useState(true);
+  const [inputDatasetName, setInputDatasetName] = useState(null);
+  const [temporaryDatasetName, setTemporaryDatasetName] = useState(null);
+
+
+  const showTooltip = (title) => {
+    setTooltipVisible(true);
+    setTipContent(title);
+  }
+
+  const clearTooltip = () => {
+    setTipContent(null);
+    if(tooltipVisible !== false){
+      setTooltipVisible(false);
     }
   }
 
+  // const [tipContent, setTipContent] = useState(null);
 
-  /**
-   * 处理输入框变更事件
-   * @param inputValue
-   */
-  inputOnChange(inputValueEvent){
+  useEffect(() => {
+    // enabled input if analyze succeed
+    if(pollJobResponse !== null && pollJobResponse !== undefined) {
+      const responseData = pollJobResponse.data
+      const stepsObject = makeStepsDict(responseData.steps);
+      const analyzeStep = stepsObject[UploadStepType.analyze];
+      if(analyzeStep !== undefined && analyzeStep !== null){
+        if (analyzeStep.status === 'succeed') {
+          setDisableInput(false);
+          setDisableButton(false);
+          setInputDatasetName(analyzeStep.extension.recommend_dataset_name);
+          setTemporaryDatasetName(responseData.temporary_dataset_name);
+        }
+      }
+    }
+  }, [pollJobResponse])
+
+
+  const inputOnChange = (inputValueEvent) => {
+
     const inputValue = inputValueEvent.target.value;
-    // 1. 调用Form.Item的onChange方法
-    this.props.onChange(inputValue);
-    // this.props.value = inputValue; // 更新输入框
+    setInputDatasetName(inputValue);
 
-    // 2. 检查输入的数据是否合法, 如果合法变更按钮状态，如果不合法，使用Tip 提示原因
-    if(inputValue === null || inputValue.length < 1){
-      // 2.1. 输入的数据为空，提示必选，并置灰 创建按钮
-      this.setState({
-        tipContent: formatMessage({ id: 'extra.inputName'}),
-      });
-      this.props.form.setFieldsValue({
-        btn: true
+    if(inputValue === null || inputValue.length < 1) {
+      showTooltip(formatMessage({ id: 'extra.inputName' }))
+      setDisableButton(true);
+      return
+    }
+
+    const rule = /^[A-Za-z0-9_-]+$/;
+    if(rule.test(inputValue)){
+      // check backend
+      checkDatasetName(inputValue).then(checkResponse => {
+        // 内容改变后只有这一种情况可以提交
+        if (checkResponse.code === 0){
+          clearTooltip()
+          setDisableButton(false);
+        }else{
+          showTooltip(checkResponse.data.message);
+          setDisableButton(true);
+        }
       })
     }else{
-      const rule = /^[A-Za-z0-9_-]+$/;
-      if(rule.test(inputValue)){
-        // 2.2. 验证通过，创建按钮的状态由分析结果决定
-        this.setState({
-          tipContent: null,  // 验证通过清除 tip提示
-        });
-        this.props.form.setFieldsValue({
-          btn: false
-        })
-      }else{
-        // 2.3. 校验不通过，创建按钮不可选
-        this.setState({
-          tipContent: formatMessage({id: 'extra.rule'})
-        });
-        this.props.form.setFieldsValue({
-          btn: true
-        })
+      showTooltip(formatMessage({id: 'extra.rule'}))
+      setDisableButton(true);
+    }
+  }
+
+  const inputBlur = (inputValueEvent) => {
+    inputOnChange(inputValueEvent);
+    setTooltipVisible(false);
+    console.info("hhhh");
+    console.info(tipContent);
+  }
+
+  const inputFocus = (inputValueEvent) => {
+    inputOnChange(inputValueEvent);
+    if(tipContent !== null && tipContent !== undefined && tipContent.length > 0){
+      if(tooltipVisible !== true){
+        setTooltipVisible(true);
       }
     }
   }
 
 
-  render() {
-    return (
-      <>
-        <Tooltip
-          trigger={['focus']}
-          title={this.state.tipContent}
-          color={'#FFF2F0'}
-          placement="bottomLeft"
-          style={{ width: '50%'} }
-        >
-          <Input
-            style={{ width: '100%'} }
-            value={this.props.value}
-            onChange={this.inputOnChange.bind(this)}
-            placeholder="Dataset name "
-            maxLength={256}
-            minLength={0}
-          />
-        </Tooltip>
+  const handleCreate = () => {
+    const datasetName = inputDatasetName
 
-      </>
-    );
-  }
-}
-
-class EditButton extends React.Component{
-
-
-
-  render() {
-    return <Button
-      style={{float: 'right', marginTop: 20 }}
-      type="primary"
-      disabled={this.props.value}
-      onClick={this.props.onClick}>
-      {formatMessage({id: 'extra.create'})}
-    </Button>
-
-
-  }
-}
-
-export class CreateDatasetForm extends React.Component{
-
-  /***
-   * @param props.form: 表单对象，用于在组件外操作表单
-   * @param props.temporaryDatasetName: 数据集名称，分析成功后填充表单
-   * @param props.analyzeSucceed: 是否分析数据成功，只有成功时才能创建数据集
-   */
-  constructor(props){
-    // form, temporaryDatasetName, analyzeSucceed
-    super(props);
-    this.state = {
-      ready2create: false,
-    }
-  }
-
-
-  /**
-   * 创建数据集按钮事件
-   */
-  handleCreate(){
-    if (this.props.temporaryDatasetName === null || this.props.temporaryDatasetName.length < 1){
-      console.error("Property temporaryDatasetName is empty, please check is analyze succeed.");
+    if (datasetName === null || datasetName.length < 1){
+      showNotification("数据集名称为空");
       return;
     }
-    this.props.dispatch({
+
+    if (temporaryDatasetName === null || temporaryDatasetName.length < 1){
+      showNotification("未检测到数据集分析成功");
+      return;
+    }
+
+
+    dispatch({
       type: 'dataset/createDataset',
       payload: {
-        dataset_name: this.props.form.getFieldValue()['datasetName'],
-        temporary_dataset_name: this.props.temporaryDatasetName,
+        dataset_name: datasetName,
+        temporary_dataset_name: temporaryDatasetName,
         callback: () => {
-          router.push(`/lab?datasetName=${this.props.form.getFieldValue()['datasetName']}`);
+          router.push(`/lab?datasetName=${datasetName}`);
         }
       }
     })
   };
 
-  render() {
-
-    return <Form form={this.props.form} initialValues={ {datasetName: this.props.datasetName, btn: true} } >
-      <Form.Item
-        style={{ float: 'left', marginRight: 10, marginTop: 20, width: 300 }}
-        label={formatMessage({ id: 'extra.name'})}
-        name='datasetName'>
-        <DatasetNameInput form={this.props.form} onClick={this.handleCreate.bind(this)} />
-      </Form.Item>
-
-      <Form.Item name='btn'>
-        <EditButton onClick={this.handleCreate.bind(this)}/>
-      </Form.Item>
-    </Form>
-
-  }
-
+  return (
+    <>
+      <span> {formatMessage({ id: 'extra.name'})} </span>
+      <span>
+        <Tooltip
+          title={tipContent}
+          color={'#FFF2F0'}
+          placement="bottomLeft"
+          visible={tooltipVisible}
+          style={{ width: '50%'} }
+        >
+          <Input
+            style={{ width: '50%'} }
+            value={inputDatasetName}
+            onFocus={inputFocus.bind(this)}
+            onChange={inputOnChange.bind(this)}
+            onBlur={inputBlur.bind(this)}
+            disabled={disableInput}
+            placeholder="Dataset name "
+            maxLength={256}
+            minLength={0}
+          />
+        </Tooltip>
+          </span>
+      <span>
+          <Button
+            style={{float: 'right' }}
+            type="primary"
+            disabled={disableButton}
+            onClick={handleCreate}>
+          {formatMessage({id: 'extra.create'})}
+        </Button>
+        </span>
+    </>
+  )
 }
 

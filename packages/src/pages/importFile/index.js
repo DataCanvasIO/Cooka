@@ -3,45 +3,56 @@ import { Breadcrumb, Form, Input, Card, Button, Radio } from 'antd';
 import { connect } from 'dva';
 import { withRouter } from 'umi';
 import router from 'umi/router';
-import Importpage from './_components/import';
+import ImportFilePage from './_components/import';
 import Preview from '@/pages/common/previewDataset';
 import Explore from '@/pages/common/exploreDataset';
+import {checkoutStepFromResponse} from '@/pages/common/createDataset';
 import styles from './index.less';
 import { formatMessage } from 'umi-plugin-locale';
-import { CreateDatasetForm } from '@/pages/common/createDataset';
+import CreateDatasetFormPage from '@/pages/importFile/_components/createDatasetForm';
+import { UploadStepType } from '@/pages/common/appConst';
+
+const ImportFile = ({ importFile: { pollJobResponse }, dispatch }) => {
 
 
-const ImportFile = ({ importFile: { showTitle, datasetName, step3Status, params, recommendDatasetName }, dispatch }) => {
-  const contentConfig = {
-    a: (<Importpage />),
-    b: (<Preview datasetName={datasetName} />),
-    c: (<Explore datasetNameFromParam={datasetName} isTemporary={true} />)
-  }
   const [form] = Form.useForm();
   const [defaultValue, setRadioValue] = useState('a');
-  const [datasetNameVal, setDatasetNameVal] = useState(datasetName);
+  const [datasetNameVal, setDatasetNameVal] = useState(null);
+  const [temporaryDatasetName, setTemporaryDatasetName] = useState(null);
+  const [userInputDatasetName, setUserInputDatasetName] = useState(null);
+  const [analyzeSucceed, setAnalyzeSucceed] = useState(false);
+
   // 分析结束后返回数据集名称回显
+  const contentConfig = {
+    a: (<ImportFilePage />),
+    b: (<Preview datasetName={temporaryDatasetName} />),
+    c: (<Explore datasetNameFromParam={temporaryDatasetName} isTemporary={true} />)
+  }
 
   // 分析结束后返回数据集名称回显
   useEffect(() => {
-    if('succeed' === step3Status){
-      form.setFieldsValue({
-        btn: false,
-        datasetName: recommendDatasetName,
-      });
-    }
-  }, [form, datasetName, step3Status, recommendDatasetName]);
 
-  const isGrey = datasetName && datasetName.length > 0 ? false : true; // 创建按钮是否置灰
+    checkoutStepFromResponse(pollJobResponse, UploadStepType.analyze, (analyzeStep) => {
+      // analyzeStep.extension.recommend_dataset_name
+      if(analyzeStep.status === 'succeed'){
+        setTemporaryDatasetName(pollJobResponse.data.temporary_dataset_name)
+        setAnalyzeSucceed(true);
+      }
+    })
+  }, [pollJobResponse]);
+
+
   // Create Events
   const handleCreate = () => {
+    // todo check dataset name
+
     dispatch({
       type: 'dataset/createDataset',
       payload: {
-        dataset_name: form.getFieldValue()['datasetName'],
-        temporary_dataset_name: params.temporary_dataset_name,
+        dataset_name: userInputDatasetName,
+        temporary_dataset_name: temporaryDatasetName,
         callback: () => {
-          router.push(`/lab?datasetName=${form.getFieldValue()['datasetName']}`);
+          router.push(`/lab?datasetName=${userInputDatasetName}`);
         }
       }
     })
@@ -51,7 +62,7 @@ const ImportFile = ({ importFile: { showTitle, datasetName, step3Status, params,
     setDatasetNameVal(e.target.value);
   }
 
-  const datasetNameHtml = <CreateDatasetForm form={form} temporaryDatasetName={datasetName} dispatch={dispatch}/> ;
+  const datasetNameHtml = <CreateDatasetFormPage /> ;
 
   const handleTitleChange = (e) => {
     setRadioValue(e.target.value);
@@ -60,7 +71,7 @@ const ImportFile = ({ importFile: { showTitle, datasetName, step3Status, params,
     <Radio.Group onChange={handleTitleChange} defaultValue={defaultValue}>
       <Radio.Button value="a">{formatMessage({ id: 'import.import'})}</Radio.Button>
       {
-        showTitle && (
+        analyzeSucceed && (
           <>
             <Radio.Button value="b">{formatMessage({ id: 'extra.preview'})}</Radio.Button>
             <Radio.Button value="c">{formatMessage({ id: 'extra.dataExplore'})}</Radio.Button>

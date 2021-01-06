@@ -31,8 +31,8 @@ export function getTempDateRetrieve(params) {
 }
 
 // 检测文件路径
-export function testImportFile(params) {
-  return request.post('/api/dataset/test-import-file', params, null, false);
+export function testImportFile(path) {
+  return request.post('/api/dataset/test-import-file', { path }, null, false);
 }
 
 // 创建数据集
@@ -86,4 +86,9 @@ export function batchPredict(datasetName, modelName, reqParams) {
 // 模型中心 -- 轮询预测状态
 export function getPredictJob(datasetName, modelName, batch_predict_job_name) {
   return request.get(`api/dataset/${datasetName}/feature-series/default/model/${modelName}/batch-predict-job/${batch_predict_job_name}`);
+}
+
+
+export function checkDatasetName(datasetName) {
+  return request.post(`/api/dataset/${datasetName}/check-name`, {}, null, false);
 }
