@@ -221,12 +221,10 @@ def _divide(n1, n2):
     return r1, r2
 
 
-def datetime_diff_human_format_by_minute(end, start):
+def human_format_by_minute(seconds):
     unit_day = 3600 * 24
     unit_hour = 3600
     unit_minute = 60
-
-    seconds = round((end - start).total_seconds(), 2)  # in seconds
 
     if seconds >= unit_day:  # by hour
         n_days, remain_seconds = _divide(seconds, unit_day)
@@ -242,6 +240,11 @@ def datetime_diff_human_format_by_minute(end, start):
         return f"{n_minutes}m"
     else:
         return "<1m"
+
+
+def datetime_diff_human_format_by_minute(end, start):
+    seconds = round((end - start).total_seconds(), 2)  # in seconds
+    return human_format_by_minute(seconds)
 
 
 def time_diff(end, start):

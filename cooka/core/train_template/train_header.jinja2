@@ -75,12 +75,13 @@ class TrainTrailCallback(Callback):
     def get_space_params(self, space):
         params_dict = {}
         for hyper_param in space.get_all_params():
-            param_name = hyper_param.alias[len(list(hyper_param.references)[0].name) + 1:]
-            param_value = hyper_param.value
-            # only show number param
-            if isinstance(param_value, int) or isinstance(param_value, float):
-                if not isinstance(param_value, bool):
-                    params_dict[param_name] = param_value
+            references = list(hyper_param.references)
+            if len(references) > 0:
+                param_name = hyper_param.alias[len(list(hyper_param.references)[0].name) + 1:]
+                param_value = hyper_param.value
+                if isinstance(param_value, int) or isinstance(param_value, float):
+                    if not isinstance(param_value, bool):
+                        params_dict[param_name] = param_value
         return params_dict
 
     def ensure_number(self, value, var_name):
