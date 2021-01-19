@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from cooka.common import consts
 from cooka.common.serializer import Bean, ListBeanField, StringField, BeanField, IntegerField, FloatField, DictField, ListObjectField, ObjectField
 from cooka.common.serializer import BooleanField, DatetimeField
 from os import path as P

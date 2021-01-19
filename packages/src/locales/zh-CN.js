@@ -208,7 +208,7 @@ export default {
   'extra.train': '实验设计',
   'extra.center': '实验列表',
   // 'extra.doc': '操作文档',
-  'extra.doc': 'DataCanvas AutoML Toolkit',
+  'extra.doc': ' ', // DataCanvas AutoML Toolkit
   'extra.testAndTrain': '验证集-训练集-测试集',
   'extra.verifyUnion': '验证集',
   'extra.trainUnion': '训练集',

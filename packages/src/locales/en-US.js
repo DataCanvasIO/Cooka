@@ -214,7 +214,7 @@ export default {
   'extra.dataExplore': 'Insight',
   'extra.train': 'Design',
   'extra.center': 'Experiment',
-  'extra.doc': 'DataCanvas AutoML Toolkit',
+  'extra.doc': '', // DataCanvas AutoML Toolkit
   // 'extra.doc': 'Documentation',
   'extra.testAndTrain': 'Train-Validation-Holdout',
   'extra.verifyUnion': 'Validation',

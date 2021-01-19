@@ -1,14 +1,13 @@
 # DataFrames
 import os
 
-from cooka.common import util, consts
-from cooka.common.serializer import ListBeanField, Bean
 import pandas as pd
-from cooka.common.log import log_core as logger
-from cooka.common.model import Feature, FeatureTypeStats, DatasetStats, ContinuousFeatureBin, ContinuousFeatureExtension, FeatureValueCount, \
-    CategoricalFeatureExtension, DatetimeFeatureExtension, YearValueCount, FeatureType, FeatureMode, SampleConf,\
-    FeatureUnique, FeatureMissing, FeatureCorrelation
-from sklearn.compose import make_column_selector
+
+from cooka.common import consts
+from cooka.common.model import Feature, FeatureTypeStats, DatasetStats, ContinuousFeatureBin, \
+    ContinuousFeatureExtension, FeatureValueCount, \
+    CategoricalFeatureExtension, DatetimeFeatureExtension, YearValueCount, FeatureType, FeatureMode, SampleConf, \
+    FeatureUnique, FeatureMissing
 
 
 class Analyzer(object):
@@ -21,18 +20,17 @@ class PandasAnalyzer(Analyzer):
     def get_analyze_df(file_path, sample_chunksize, header):
         # infer
         if sample_chunksize > -1:
-            df_iterator = pd.read_csv(file_path, chunksize=sample_chunksize, header=header)
+            df_iterator = pd.read_csv(file_path, chunksize=sample_chunksize, header=header, infer_datetime_format=True)
             return df_iterator.get_chunk()  # use first chunk
         else:
             # use whole data
-            return pd.read_csv(file_path, header=header)
+            return pd.read_csv(file_path, header=header, infer_datetime_format=True)
 
     def __init__(self, file_path: str, label_col: str, sample_conf: SampleConf):
-
+        import time
         # 1. check params
         if not os.path.exists(file_path):
             raise FileExistsError("File not found: %s" % file_path)
-
         self.file_path = file_path
         self.sample_conf = sample_conf
         self.label_col = label_col
@@ -71,8 +69,19 @@ class PandasAnalyzer(Analyzer):
             self.n_rows_used = sample_chunksize
 
         # 3. to fix date types
-        categorical_cols = make_column_selector(dtype_include=['object'])(self.df)
-        self.df[categorical_cols] = self.df[categorical_cols].applymap(self.parse_date)
+        categorical_cols = self.get_categorical_cols(self.df)
+        for c in categorical_cols:
+            self.df[c] = self.parse_date(self.df[c])
+
+    @staticmethod
+    def get_categorical_cols(df: pd.DataFrame):
+        c_list = []
+        for k, v in df.dtypes.items():
+            if 'object' in v.name:
+                c_list.append(k)
+        return c_list
+
+
 
     @staticmethod
     def is_csv_file_has_header(path):
@@ -85,15 +94,24 @@ class PandasAnalyzer(Analyzer):
         return True
 
     @staticmethod
-    def parse_date(t):
-        format = "%Y-%m-%d %H:%M:%S"
-        try:
-            if isinstance(t, str):
-                return pd.datetime.strptime(t, format)
-            else:
-                return t
-        except Exception as e:
-            return t
+    def parse_date(series: pd.Series):
+        format = "%Y-%m-%d %H:%M:%S"  # Now only support one format
+        # 1. take top 100 non-empty values
+        INFER_TOP_N = 100
+        series_non_empty = series.dropna()[: INFER_TOP_N]
+
+        # 2. if these value all datetime value infer it as datetime nor object
+        for item in series_non_empty:
+            try:
+                if isinstance(item, str):
+                    pd.datetime.strptime(item, format)
+                else:
+                    return series
+            except Exception as e:
+                return series
+
+        # 3. infer as datetime
+        return pd.to_datetime(series, format=format)
 
     def _count_lines(self, path, is_has_header):
         count = 0

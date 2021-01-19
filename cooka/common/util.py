@@ -8,10 +8,6 @@ import math
 import re
 from cooka.common import consts
 from os import path as P
-import pandas as pd
-import pickle
-
-
 
 MAX_BUFFER_SIZE = 1024
 
@@ -467,6 +463,7 @@ def model_dir(dataset_name, model_name):
 
 
 def read_csv(csv_file, has_header, default_headers=None):
+    import pandas as pd  # took a lot of time(0.4s)
     if has_header:
         return pd.read_csv(csv_file)  # read it all
     else:
