@@ -4,7 +4,7 @@ from cooka.common import consts
 from cooka.common.exceptions import EntityNotExistsException
 from cooka.common.model import ExperimentConf, TrainJobConf, FrameworkType, JobStep, TrainStep, CrossValidation, \
     TrainValidationHoldout, Model, ModelStatusType, \
-    AnalyzeStep, FeatureType, FeatureValueCount, SampleConf, TrainValidationHoldoutDefault, TrailStatus
+    AnalyzeStep, FeatureType, FeatureValueCount, SampleConf, TrainValidationHoldoutDefault, TrialStatus
 from cooka.dao.dao import ExperimentDao, DatasetDao
 from cooka.dao.entity import ExperimentEntity, MessageEntity
 from cooka.dao import db
@@ -82,15 +82,15 @@ class ExperimentService(object):
         return None
 
     @staticmethod
-    def calc_avg_trail_elapsed(model_name, model_status, succeed_trails):
+    def calc_avg_trial_elapsed(model_name, model_status, succeed_trials):
         total_elapsed = 0
-        if succeed_trails is not None and len(succeed_trails) > 0:
-            for trail in succeed_trails:
-                total_elapsed = total_elapsed + trail.extension['elapsed']
-            return total_elapsed / len(succeed_trails)
+        if succeed_trials is not None and len(succeed_trials) > 0:
+            for trial in succeed_trials:
+                total_elapsed = total_elapsed + trial.extension['elapsed']
+            return total_elapsed / len(succeed_trials)
         else:
-            log.warning(f"Model = {model_name}, status={model_status} but has no trails, " +
-                        "may be train script execute failed, see trail log for more detail.")
+            log.warning(f"Model = {model_name}, status={model_status} but has no trials, " +
+                        "may be train script execute failed, see trial log for more detail.")
             return 0
 
     def find_running_model(self):
@@ -105,22 +105,22 @@ class ExperimentService(object):
             model_train_process = model.progress
             if model_train_process is None or model_train_process in [TrainStep.Types.Load]:
                 estimated_remaining_time = None
-            elif model_train_process in [TrainStep.Types.Optimize]:  # in this stage already has a trail finished, before this stage has no evaluate remaining time
+            elif model_train_process in [TrainStep.Types.Optimize]:  # in this stage already has a trial finished, before this stage has no evaluate remaining time
                 # 1. calc avg elapsed
-                avg_elapsed = ExperimentService.calc_avg_trail_elapsed(model.name, model_train_process, model.trails)
+                avg_elapsed = ExperimentService.calc_avg_trial_elapsed(model.name, model_train_process, model.trials)
 
                 # 2. calc estimated remaining time
                 model_extension = model.extension
                 train_mode = model_extension['experiment_conf']["train_mode"]  # extension must has experiment_conf and train_mode and not None
-                max_trails = consts.TRAIN_MODE_MAX_TRAILS_MAPPING[train_mode]  # must has {train_mode}
-                train_trail_no = model.train_trail_no
-                estimated_remaining_time = (max_trails - train_trail_no) * avg_elapsed
+                max_trials = consts.TRAIN_MODE_MAX_TRIALS_MAPPING[train_mode]  # must has {train_mode}
+                train_trial_no = model.train_trial_no
+                estimated_remaining_time = (max_trials - train_trial_no) * avg_elapsed
 
                 # 3. plus final train time and evaluate/persist time
                 estimated_remaining_time + avg_elapsed + 30
 
             elif model_train_process in [TrainStep.Types.Searched]:
-                avg_elapsed = ExperimentService.calc_avg_trail_elapsed(model.name, model_train_process, model.trails)
+                avg_elapsed = ExperimentService.calc_avg_trial_elapsed(model.name, model_train_process, model.trials)
                 # plus final train/evaluate/persist time
                 estimated_remaining_time = avg_elapsed + 30
 
@@ -147,7 +147,7 @@ class ExperimentService(object):
         def f(model: Model):
             model_extension = model.extension
             train_mode = model_extension['experiment_conf']["train_mode"]  # extension must has experiment_conf and train_mode and not None
-            max_trails = consts.TRAIN_MODE_MAX_TRAILS_MAPPING[train_mode]  # must has {train_mode}
+            max_trials = consts.TRAIN_MODE_MAX_TRIALS_MAPPING[train_mode]  # must has {train_mode}
             d = \
                 {
                     "name": model.name,
@@ -162,8 +162,8 @@ class ExperimentService(object):
                     "log_file_path": model.log_file_path(),
                     "train_source_code_path": model.train_source_code_path(),
                     "train_notebook_uri": model.train_notebook_uri(),
-                    "train_trail_no": 0 if model.train_trail_no is None else model.train_trail_no,
-                    "max_train_trail_no": max_trails,
+                    "train_trial_no": 0 if model.train_trial_no is None else model.train_trial_no,
+                    "max_train_trial_no": max_trials,
                     "estimated_remaining_time": ExperimentService.calc_remain_time(model),
                     "model_file_size": model.model_file_size
                 }
@@ -332,7 +332,7 @@ class ExperimentService(object):
             "reward_metric": reward_metric,
             "optimize_direction": self.get_direction_source_code(reward_metric),
             "framework": train_job_conf.framework,
-            "max_trails": train_job_conf.max_trails,
+            "max_trials": train_job_conf.max_trials,
             "dataset_has_header": experiment_conf.dataset_has_header,
             "dataset_default_headers": dataset_default_headers_code,
             "model_feature_list": util.dumps(model_input_features, indent=None)
@@ -439,7 +439,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                                       name=job_name,
                                       model_name=model_name,
                                       searcher=TrainJobConf.Searcher.MCTSSearcher,
-                                      max_trails=consts.TRAIN_MODE_MAX_TRAILS_MAPPING[conf.train_mode],
+                                      max_trials=consts.TRAIN_MODE_MAX_TRIALS_MAPPING[conf.train_mode],
                                       search_space=TrainJobConf.SearchSpace.Minimal)
         # 2. insert to db
         with db.open_session() as s:
@@ -745,50 +745,50 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         with db.open_session() as s:
             model = self.require_model(s, model_name)
 
-        # handle trails
-        if model.trails is not None and len(model.trails)>0:
-            failed_trails = {}
-            for t in model.trails:
-                if t.status == TrailStatus.Failed:
-                    failed_trails[t.trail_no] = t.extension['reason']
+        # handle trials
+        if model.trials is not None and len(model.trials)>0:
+            failed_trials = {}
+            for t in model.trials:
+                if t.status == TrialStatus.Failed:
+                    failed_trials[t.trial_no] = t.extension['reason']
 
-            # Filter that failed trails
-            succeed_trails = list(filter(lambda _: _.status == TrailStatus.Succeed, model.trails))
-            if len(succeed_trails) > 0:
-                param_names = [k for k in succeed_trails[0].extension['params']]
-                trail_data_dict_list = []
-                trail_params_values = []
-                trail_index = []
-                for t in succeed_trails:
+            # Filter that failed trials
+            succeed_trials = list(filter(lambda _: _.status == TrialStatus.Succeed, model.trials))
+            if len(succeed_trials) > 0:
+                param_names = [k for k in succeed_trials[0].extension['params']]
+                trial_data_dict_list = []
+                trial_params_values = []
+                trial_index = []
+                for t in succeed_trials:
                     param_values = [_replace_NaN(t.extension['params'].get(n)) for n in param_names]
-                    trail_params_values.append(param_values)
-                    trail_index.append(t.trail_no)
-                df_train_params = pd.DataFrame(data=trail_params_values, columns=param_names)
+                    trial_params_values.append(param_values)
+                    trial_index.append(t.trial_no)
+                df_train_params = pd.DataFrame(data=trial_params_values, columns=param_names)
 
                 # remove if all is None
                 df_train_params.dropna(axis=1, how='all', inplace=True)
-                for i, t in enumerate(succeed_trails):
-                    trail_extension = t.extension
-                    trail_data_dict = {"reward": trail_extension['reward'], "params": [_replace_NaN(_) for _ in df_train_params.iloc[i].tolist()], "elapsed": trail_extension['elapsed']}
-                    trail_data_dict_list.append(trail_data_dict)
+                for i, t in enumerate(succeed_trials):
+                    trial_extension = t.extension
+                    trial_data_dict = {"reward": trial_extension['reward'], "params": [_replace_NaN(_) for _ in df_train_params.iloc[i].tolist()], "elapsed": trial_extension['elapsed']}
+                    trial_data_dict_list.append(trial_data_dict)
 
                 if len(df_train_params.columns.values) > 0:  # ensure not all params is None
-                    trails_dict = {
+                    trials_dict = {
                         "param_names": df_train_params.columns.tolist(),
-                        "data": trail_data_dict_list
+                        "data": trial_data_dict_list
                     }
                 else:
-                    trails_dict = {}
+                    trials_dict = {}
             else:
-                trails_dict = {}
+                trials_dict = {}
         else:
-            trails_dict = {}
-            failed_trails = {}
+            trials_dict = {}
+            failed_trials = {}
 
         model_dict = model.to_dict()
-        # update trails
-        model_dict['trails'] = trails_dict
-        model_dict['failed_trails'] = failed_trails
+        # update trials
+        model_dict['trials'] = trials_dict
+        model_dict['failed_trials'] = failed_trials
         model_dict['model_path'] = util.relative_path(model_dict['model_path'])
         model_dict['escaped'] = model.escaped_time_by_seconds()
         model_dict['log_file_path'] = model.log_file_path()
@@ -857,21 +857,21 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
             elif step_type == TrainStep.Types.Optimize:
                 # Note: this step is always succeed
-                train_trail_no = step_extension.get('trail_no')
-                # load current trail and append new
-                trails = model.trails
-                if model.trails is None:
-                    trails = []
-                trails.append(step_extension)
-                trail_status = step_extension['status']
-                trail_extension = step_extension['extension']
-                if trail_status == TrailStatus.Succeed:
-                    self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "score": trail_extension.get('reward'), "trails": trails})
-                elif trail_status in [TrailStatus.Failed, TrailStatus.Skip]:
+                train_trial_no = step_extension.get('trial_no')
+                # load current trial and append new
+                trials = model.trials
+                if model.trials is None:
+                    trials = []
+                trials.append(step_extension)
+                trial_status = step_extension['status']
+                trial_extension = step_extension['extension']
+                if trial_status == TrialStatus.Succeed:
+                    self._update_model(s, model_name, step_type, {"train_trial_no": train_trial_no, "score": trial_extension.get('reward'), "trials": trials})
+                elif trial_status in [TrialStatus.Failed, TrialStatus.Skip]:
                     # does not update score
-                    self._update_model(s, model_name, step_type, {"train_trail_no": train_trail_no, "trails": trails})
+                    self._update_model(s, model_name, step_type, {"train_trial_no": train_trial_no, "trials": trials})
                 else:
-                    raise ValueError(f"Unseen trail status {trail_status} .")
+                    raise ValueError(f"Unseen trial status {trial_status} .")
 
             elif step_type == TrainStep.Types.Searched:
                 if step_status == JobStep.Status.Succeed:

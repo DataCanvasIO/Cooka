@@ -16,9 +16,9 @@ const Params = ({ modelName, location: { query: { datasetName } } }) => {
     };
     getModelDetail(params).then((originRes) => {
       const res = originRes.data;
-      if (res.trails) {
+      if (res.trials) {
         setLoading(false);
-        setData(res.trails);
+        setData(res.trials);
       }
     })
   }, [datasetName, modelName])

@@ -1,6 +1,6 @@
 {
   "singleQuote": true,
-  "trailingComma": "all",
+  "trialingComma": "all",
   "printWidth": 100,
   "overrides": [
     {

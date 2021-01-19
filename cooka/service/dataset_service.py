@@ -448,6 +448,7 @@ class DatasetService:
 
             # 5.2. replace NaN to null
             page_df.replace(np.NaN, 'NULL', inplace=True)
+            # fixme orgin data can not has column named index nor cause a error "ValueError: name already used as a name or title"
             values = page_df.to_records(index=True).tolist()
 
             return RespPreviewDataset(headers=dataset_headers, rows=values, count=dataset_stats.n_rows, file_path=relative_file_path)

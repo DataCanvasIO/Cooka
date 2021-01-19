@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, DateTime, Float, Text, Boolean, JSON
 
-from cooka.common.model import Model, Performance, TrainTrail, DatasetStats, Feature
+from cooka.common.model import Model, Performance, TrainTrial, DatasetStats, Feature
 from cooka.dao.db import Base
 from cooka.common.model import ModelFeature
 from deeptables.models.deepmodel import IgnoreCaseDict
@@ -85,8 +85,8 @@ class ExperimentEntity(Base):
     score = Column(Float(), nullable=True)
     progress = Column(String(128))
     train_job_name = Column(String(128))
-    train_trail_no = Column(Integer(), nullable=True)
-    trails = Column(JSON(), nullable=True)
+    train_trial_no = Column(Integer(), nullable=True)
+    trials = Column(JSON(), nullable=True)
     extension = Column(JSON(), nullable=True)  # update
     create_datetime = Column(DateTime())
     finish_datetime = Column(DateTime(), nullable=True)
@@ -106,7 +106,7 @@ class ExperimentEntity(Base):
                   task_type=self.task_type, performance=performance,
                   model_path=self.model_path, score=self.score, status=self.status, pid=self.pid,
                   progress=self.progress, train_job_name=self.train_job_name,
-                  train_trail_no=self.train_trail_no, trails=TrainTrail.load_dict_list(self.trails), extension=self.extension,
+                  train_trial_no=self.train_trial_no, trials=TrainTrial.load_dict_list(self.trials), extension=self.extension,
                   create_datetime=self.create_datetime, finish_datetime=self.finish_datetime, last_update_datetime=self.last_update_datetime)
         return m
 

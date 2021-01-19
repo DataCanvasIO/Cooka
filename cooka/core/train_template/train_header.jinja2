@@ -55,22 +55,22 @@ def train_callback(portal, train_job_name, dataset_name, type, status, took, ext
     return response_dict['data']
 
 
-class TrainTrailCallback(Callback):
+class TrainTrialCallback(Callback):
     def __init__(self, server_portal, train_job_name, dataset_name):
-        super(TrainTrailCallback, self).__init__()
+        super(TrainTrialCallback, self).__init__()
         self.server_portal = server_portal
         self.train_job_name = train_job_name
         self.dataset_name = dataset_name
 
-    def on_build_estimator(self, hyper_model, space, estimator, trail_no):
+    def on_build_estimator(self, hyper_model, space, estimator, trial_no):
         pass
 
-    def on_trail_begin(self, hyper_model, space, trail_no):
+    def on_trial_begin(self, hyper_model, space, trial_no):
         pass
-        #trail_extension = {
-        #    "trail_no": trail_no
+        #trial_extension = {
+        #    "trial_no": trial_no
         #}
-        #train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize_start', 'succeed', 0, trail_extension)
+        #train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize_start', 'succeed', 0, trial_extension)
 
     def get_space_params(self, space):
         params_dict = {}
@@ -92,13 +92,13 @@ class TrainTrailCallback(Callback):
                 raise ValueError(f"Var {var_name} = {value} not a number.")
 
 
-    def on_trail_end(self, hyper_model, space, trail_no, reward, improved, elapsed):
+    def on_trial_end(self, hyper_model, space, trial_no, reward, improved, elapsed):
         self.ensure_number(reward, 'reward')
-        self.ensure_number(trail_no, 'trail_no')
+        self.ensure_number(trial_no, 'trial_no')
         self.ensure_number(elapsed, 'elapsed')
 
-        trail_extension = {
-            "trail_no": trail_no,
+        trial_extension = {
+            "trial_no": trial_no,
             "status": 'succeed',
             "extension": {
                 "reward": reward,
@@ -106,16 +106,16 @@ class TrainTrailCallback(Callback):
                 "params": self.get_space_params(space)
             }
         }
-        train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trail_extension)
+        train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trial_extension)
 
-    def on_skip_trail(self, hyper_model, space, trail_no, reason, reward, improved, elapsed):
-        trail_extension = {
-            "trail_no": trail_no,
+    def on_skip_trial(self, hyper_model, space, trial_no, reason, reward, improved, elapsed):
+        trial_extension = {
+            "trial_no": trial_no,
             "status": 'skip',
             "extension": {
                 "reason": str(reason)
             }
         }
-        train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trail_extension)
+        train_callback(self.server_portal, self.train_job_name, self.dataset_name, 'optimize', Status_Succeed, elapsed, trial_extension)
 
 {% endif %}

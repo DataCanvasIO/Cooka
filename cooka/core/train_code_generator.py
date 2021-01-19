@@ -42,7 +42,7 @@ params_dict = {
     "datetime_series_col": experiment_conf.datetime_series_col,
 
     "framework": train_job_conf.framework,
-    "max_trails": train_job_conf.max_trails,
+    "max_trials": train_job_conf.max_trials,
 }
 
 if experiment_conf.partition_strategy == ExperimentConf.PartitionStrategy.TrainValidationHoldout:

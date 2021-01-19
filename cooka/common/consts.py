@@ -41,7 +41,7 @@ class CookaApp(Application):
         }
     ).tag(config=True)
 
-    max_trails = Dict(
+    max_trials = Dict(
         per_key_traits={
             "performance": Integer(50),
             "quick": Integer(10),
@@ -66,7 +66,7 @@ TASK_TYPE_OPTIMIZE_METRIC_MAPPING = {
     "binary_classification": "auc",
     "regression": "rmse"
 }
-TRAIN_MODE_MAX_TRAILS_MAPPING = {
+TRAIN_MODE_MAX_TRIALS_MAPPING = {
     "performance": 50,
     "quick": 10,
     "minimal": 1

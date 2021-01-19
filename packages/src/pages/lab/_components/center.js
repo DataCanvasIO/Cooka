@@ -188,12 +188,12 @@ class Center extends React.Component {
     },
     {
       title: makeTableHeader('center.process', 'center.hintProgress'),
-      dataIndex: 'max_train_trail_no',
-      key: 'max_train_trail_no',
+      dataIndex: 'max_train_trial_no',
+      key: 'max_train_trial_no',
       render: (text, record, index) => {
-        const displayContent = `${record.train_trail_no}/${record.max_train_trail_no}`
+        const displayContent = `${record.train_trial_no}/${record.max_train_trial_no}`
         if(record.status === 'succeed'){
-          if (record.train_trail_no !== record.max_train_trail_no){
+          if (record.train_trial_no !== record.max_train_trial_no){
             return makeToolTip(<span style={ {color: 'orange'} }>{displayContent}</span>, formatMessage({id: 'center.hintEarlyStopping'}))
           }else {
             return <span>{displayContent}</span>

@@ -19,8 +19,8 @@
 #     "regression": "rmse"
 # }
 
-# Default trail nums
-# c.CookaApp.max_trails = {
+# Default trial nums
+# c.CookaApp.max_trials = {
 #     "performance": 50,
 #     "quick": 10,
 #     "minimal": 1

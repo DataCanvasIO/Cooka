@@ -86,11 +86,11 @@
 {{ MRO.insert_tab()}}rs = MCTSSearcher(search_space, max_node_space=10, optimize_direction=optimize_direction)
 {{ MRO.insert_tab()}}
 {{ MRO.insert_tab()}}hk = HyperDT(rs,
-{{ MRO.insert_tab()}}             callbacks=[{% if target_source_type == 'raw_python' %}TrainTrailCallback(server_portal, train_job_name, dataset_name), {% endif %}SummaryCallback(), FileLoggingCallback(rs), EarlyStoppingCallback(max_no_improvement_trails=5, mode=optimize_direction.value)],
+{{ MRO.insert_tab()}}             callbacks=[{% if target_source_type == 'raw_python' %}TrainTrialCallback(server_portal, train_job_name, dataset_name), {% endif %}SummaryCallback(), FileLoggingCallback(rs), EarlyStoppingCallback(max_no_improvement_trials=5, mode=optimize_direction.value)],
 {{ MRO.insert_tab()}}             reward_metric=reward_metric,
 {{ MRO.insert_tab()}}             dnn_params={
 {{ MRO.insert_tab()}}                 'dnn_units': ((256, 0, False), (256, 0, False)),
 {{ MRO.insert_tab()}}                 'dnn_activation': 'relu'})
-{{ MRO.insert_tab()}}hk.search(X_train, y_train, X_test, y_test, max_trails=max_trails)
-{{ MRO.insert_tab()}}best_trial = hk.get_best_trail()
+{{ MRO.insert_tab()}}hk.search(X_train, y_train, X_test, y_test, max_trials=max_trials)
+{{ MRO.insert_tab()}}best_trial = hk.get_best_trial()
 {{ MRO.insert_tab()}}estimator = hk.final_train(best_trial.space_sample, X_train, y_train)

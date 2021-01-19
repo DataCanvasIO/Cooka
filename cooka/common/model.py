@@ -147,7 +147,7 @@ class TrainJobConf(Bean):
     name = StringField()
     model_name = StringField()
     searcher = StringField()
-    max_trails = IntegerField()
+    max_trials = IntegerField()
     search_space = StringField()
 
     class SearchSpace:
@@ -230,8 +230,8 @@ class ModelFeature(Bean):
     data_type = StringField()
 
 
-class TrainTrail(Bean):
-    trail_no = IntegerField()
+class TrainTrial(Bean):
+    trial_no = IntegerField()
     status = StringField()
     extension = DictField()
 
@@ -259,8 +259,8 @@ class Model(Bean):
     score = FloatField()
     progress = StringField()
     train_job_name = StringField()
-    train_trail_no = IntegerField()
-    trails = ListBeanField(TrainTrail)
+    train_trial_no = IntegerField()
+    trials = ListBeanField(TrainTrial)
     extension = DictField()
     create_datetime = DatetimeField()
     finish_datetime = DatetimeField()
@@ -313,7 +313,7 @@ class ModelStatusType(Bean):
     Running = "running"
 
 
-class TrailStatus:
+class TrialStatus:
     Succeed = STATUS_SUCCEED
     Failed = STATUS_FAILED
     Skip = 'skip'

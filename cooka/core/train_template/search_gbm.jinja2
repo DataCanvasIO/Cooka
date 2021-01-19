@@ -53,6 +53,6 @@
 {% endif %}
 {{ MRO.insert_tab()}}rs = MCTSSearcher(search_space, max_node_space=10, optimize_direction=optimize_direction)
 {{ MRO.insert_tab()}}hk = HyperGBM(rs, task="{{ gbm_task_type }}", reward_metric=reward_metric,
-{{ MRO.insert_tab()}}              callbacks=[{% if target_source_type == 'raw_python' %}TrainTrailCallback(server_portal, train_job_name, dataset_name), {% endif %}SummaryCallback(), FileLoggingCallback(rs), EarlyStoppingCallback(max_no_improvement_trails=5, mode=optimize_direction.value)])
+{{ MRO.insert_tab()}}              callbacks=[{% if target_source_type == 'raw_python' %}TrainTrialCallback(server_portal, train_job_name, dataset_name), {% endif %}SummaryCallback(), FileLoggingCallback(rs), EarlyStoppingCallback(max_no_improvement_trials=5, mode=optimize_direction.value)])
 {{ MRO.insert_tab()}}experiment = GeneralExperiment(hk, X_train, y_train, X_eval=X_test, y_eval=y_test)
-{{ MRO.insert_tab()}}estimator = experiment.run(use_cache=True, max_trails=max_trails)
+{{ MRO.insert_tab()}}estimator = experiment.run(use_cache=True, max_trials=max_trials)

@@ -187,9 +187,9 @@ export default {
   'center.big': 'File to big',
   'center.failUpload': 'File uploaded failed',
   'center.hintConfusionMatrix': 'The confusion matrix is a table where each row is a predicted class and each column is the observed class. The cells of the matrix indicate how often each classification prediction coincides with each observed label. This matrix is useful for determining which misclassifications occur most often, i.e. which classes often get "confused" with each other',
-  'center.hintOptimizeMetric': 'The model score of last trail',
+  'center.hintOptimizeMetric': 'The model score of last trial',
   'center.hintProgress': 'Parameter search progress, searched times / expected times. By default, the early stopping method is used. When the prediction ability of the model cannot be improved, the training will be stopped in advance',
-  'center.hintRemainingTime': 'Estimated remaining time , calculate by the time consumed by the completed trails, The remaining time can only be evaluated by at least one successful trail',
+  'center.hintRemainingTime': 'Estimated remaining time , calculate by the time consumed by the completed trials, The remaining time can only be evaluated by at least one successful trial',
   'center.hintElapsed': 'time consumed',
 
   'center.hintModelSize': 'The total size of the model file is displayed after the model training is successful',
