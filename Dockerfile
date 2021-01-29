@@ -1,32 +1,50 @@
-FROM  ubuntu:18.04
+FROM centos:7
 
 USER root
-
 ENV LANG C.UTF-8
+ENV NotebookToken ''
 
-RUN sed -i "s/archive.ubuntu.com/mirrors.aliyun.com/g" /etc/apt/sources.list\
-     && sed -i "s/security.ubuntu.com/mirrors.aliyun.com/g" /etc/apt/sources.list
+# llvm9 in epel, need by compile shap;
+# gcc9 in centos-release-scl; gcc9 is need by compile xgboost
+# `scl enable devtoolset-9 bash` to enable gcc9
+# `echo "source /opt/rh/devtoolset-9/enable" >> /etc/profile` is equals to `scl enable devtoolset-9 bash`
+# xgboost need cmake3
 
-RUN mkdir -p /root/.pip \
-    && echo "[global]\n\
-index-url = https://mirrors.aliyun.com/pypi/simple" > /root/.pip/pip.conf
-
-# for install shap
-RUN echo "[easy_install]\n\
-index_url = https://mirrors.aliyun.com/pypi/simple" > /root/.pydistutils.cfg
-
-RUN apt-get update \
-     && apt-get install -y language-pack-zh-hans  python3 python3-pip\
-     && apt-get clean \
+RUN  yum install epel-release  centos-release-scl -y \
+     && yum clean all \
+     && yum makecache \
+     && yum install -y llvm9.0 llvm9.0-devel python36-devel devtoolset-9-gcc devtoolset-9-gcc-c++ make cmake3 \
+	 && ln -s /opt/rh/devtoolset-9/root/usr/bin/gcc /usr/local/bin \
+	 && ln -s /opt/rh/devtoolset-9/root/usr/bin/g++ /usr/local/bin \
+	 && ln -s /usr/bin/cmake3 /usr/bin/cmake \
+     && yum install -y graphviz \
+     && yum install -y git \
      && pip3 install --upgrade pip setuptools
 
-# only need if install notebook
-RUN apt-get install -y gcc g++ make clang-10 python3-clang-10
+ENV LLVM_CONFIG /usr/bin/llvm-config-9.0-64
 
-RUN pip3 install -i http://172.20.10.193:8081/repository/zetyun-pypi-group/simple --trusted-host 172.20.10.193 cooka[notebook]
+RUN mkdir -p /root/.pip \
+    && echo -e "[global]\n\
+index-url = https://mirrors.aliyun.com/pypi/simple" > /root/.pip/pip.conf
 
-COPY entrypoint.sh /
+# For install shap
+RUN echo -e "[easy_install]\n\
+index_url = https://mirrors.aliyun.com/pypi/simple" > /root/.pydistutils.cfg
 
-RUN chmod +x /entrypoint.sh
+RUN pip3 -v install jupyterlab supervisor # Docker Image deps
 
-ENTRYPOINT /entrypoint.sh
+RUN pip3 -v install numpy==1.19.1 scikit-learn==0.23.1  # Prepare for shap
+RUN pip3 -v install shap==0.28.5 matplotlib  # Prepare for hypergbm
+
+# todo change to pypi
+RUN pip3 install -v -i http://172.20.51.202:28081/repository/pypi-group/simple --trusted-host 172.20.51.202 cooka[notebook]  # install cooka
+
+RUN mkdir -p /root/.config/cooka /root/cooka /etc/supervisor/ /var/log
+
+COPY supervisord.conf /etc/supervisor/
+
+EXPOSE 8888 8000 9000
+
+CMD ["bash", "-c", "/usr/local/bin/supervisord -c /etc/supervisor/supervisord.conf"]
+
+# docker run --rm  -p 8888:8888 -e NotebookToken=your-token datacanvas/hypergbm

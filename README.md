@@ -112,8 +112,8 @@ docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip
 Open `http://<external_ip:8000>` with your browser to use cooka.
 
 See more documents：
-1. [Install from source code](docs/pages/install_from_source.md)
-2. [Integrate with Notebook](docs/pages/install_with_jupyter.md)
+1. [Install from source code](docs/en_US/source/install_from_source.md)
+2. [Integrate with Notebook](docs/en_US/source/configuration/intergrate_with_jupyter.md)
 
 ## DataCanvas
 

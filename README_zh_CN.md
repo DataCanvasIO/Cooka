@@ -108,8 +108,8 @@ docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip
 
 
 更多文档：
-1. [使用源码安装](docs/pages/install_from_source.md)
-2. [整合Jupyter Notebook](docs/pages/install_with_jupyter.md)
+1. [使用源码安装](docs/en_US/source/install_from_source.md)
+2. [整合Jupyter Notebook](docs/en_US/source/configuration/intergrate_with_jupyter.md)
 
 ## DataCanvas
 
