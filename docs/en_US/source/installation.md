@@ -11,13 +11,13 @@ pip install --upgrade pip setuptools # (optional)
 pip install cooka
 ```
 
-and then start cooka web server:
+then start cooka web server:
 
 ```shell script
 cooka server
 ```
 
-Open browser visit site `http://<your-ip>:8000` to use cooka. If you want to integrate with jupyter notebook please refer to this [guide](configuration/intergrate_with_jupyter.md). 
+Open browser visit site `http://<your-ip>:8000` to use cooka. If you want to integrate with jupyter notebook please refer to this [guide](configuration/integrate_with_jupyter.md). 
 
 
 ### Using Docker
@@ -30,7 +30,7 @@ docker run -ti -e NOTEBOOK_TOKEN="your-token" -e COOKA_NOTEBOOK_PORTAL=http://<y
 Open browser visit site `http://<your-ip>:8000`，the notebook token is what you have set "you-token"，it can also be empty if do not specified.
 
 
-## Using source code
+### Using source code
 
 Frontend developed by [reactjs](https://reactjs.org), therefore, we need to install [node>=8.0.0](https://nodejs.org/en/) get it at [https://nodejs.org](https://nodejs.org) and install [yarn](https://yarnpkg.com):
 

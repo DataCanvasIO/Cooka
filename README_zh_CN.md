@@ -109,10 +109,10 @@ docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip
 
 更多文档：
 1. [使用源码安装](docs/en_US/source/install_from_source.md)
-2. [整合Jupyter Notebook](docs/en_US/source/configuration/intergrate_with_jupyter.md)
+2. [整合Jupyter Notebook](docs/en_US/source/configuration/integrate_with_jupyter.md)
 
 ## DataCanvas
 
-![](docs/img/dc_logo_1.png)
+![](docs/static/dc_logo_1.png)
 
 Cooka is an open source project created by [DataCanvas](https://www.datacanvas.com/). 

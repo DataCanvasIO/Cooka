@@ -1,65 +1,59 @@
 Release Note
 =====================
 
-Version 0.2.0
+Version 0.1.0
 -------------
-本次发布新增以下特性：
 
-特征工程
-  - 特征衍生
-  - 特征降维
+This release add following new features:
 
-数据清洗
-  - 特殊空值字符处理
-  - 列类型校正
-  - 常量列清理
-  - 重复列清理
-  - 删除标签列为空的样本
-  - 非法值替换
-  - id列清理
-  - 共线性特征清理
+数据集管理
+- 搜索
+- 删除
+- 上传，导入csv
+    * 分析抽样支持按行数、按比例、和使用全量数据
+    * 自动推断有无列头
+    * 自动推断特征类型（连续、离散、日期）
 
-数据集拆分
-  - 对抗验证
+数据集预览
+- 原始数据集查看
+- 数据滚动加载
 
-建模算法
-  - XGBoost
-  - Catboost
-  - LightGBM
-  - HistGridientBoosting
+数据集探查
+- 特征类型分布
+- 特征的数据类型、特征类型、缺失值、不同值、线性相关分析
+- Id列、常量列、过多缺失值列识别
+- 特征检索
+- 日期类型特征支持
+    - 按年、月、日、时、星期分布
+- 类别特征
+    - 值分布
+    - 众数
+- 连续特征
+    - 区间分布
+    - 值分布
+    - 最大值，最小值，中位数，均值，标准差
 
-模型训练
-  - 自动任务类型推断
-  - 命令行工具
+实验设计
+- 自动推荐建模选项
+- HyperGBM、HyperDT实验引擎
+- 快速、性能训练模式
+- Train-Validation-Holdout数据拆分模式
+- 按日期顺序拆分数据
+- 支持任务类型
+    - 二分类
+    - 多分类
+    - 回归
 
-评估方法
-  - 交叉验证(Cross-Validation)
-  - Train-Validation-Holdout验证
+实验列表
+- 训练进度、剩余时间评估
+- 混淆矩阵、ROC曲线(二分类)
+- 评估指标
+    - 二分类： Accuracy, F1, Fbeta, Precision, Recall, AUC, Log Loss
+    - 多分类： Accuracy, F1, Fbeta, Precision, Recall, Log Loss
+    - 回归： EVS, MAE, MSE, RMSE, MSLE, R2, MedianAE
 
-搜索算法
-  - 蒙特卡洛树算法
-  - 进化算法
-  - 随机搜索算法
+- 查看训练日志、训练源码
+- 导出成Notebook文件
+- 优化参数
+- 使用批量预测
 
-不平衡数据处理
-  - 类平衡（Class Weight）
-  - 降采样(Under -Samping)支持
-    - Near miss
-    - Tomeks links
-    - Random
-  - 过采样(Over-Samping)支持
-    - SMOTE
-    - ADASYN
-    - Random
-
-提前停止策略
-  - n次搜索都不再提升，提前停止
-  - 最大用时提前停止
-  - 到达预期指标提前停止
-
-高级特性
-  - 二阶段搜索
-    * 伪标签
-    * 特征选择
-  - 概念漂移处理
-  - 模型融合

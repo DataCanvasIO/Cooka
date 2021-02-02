@@ -93,7 +93,7 @@ Start the web server：
 cooka server
 ```
 
-Then open `http://<server:8140>` with your browser to use cooka.
+Then open `http://<server:8000>` with your browser to use cooka.
 
 By default, the cooka configuration file is at `~/.config/cooka/cooka.py`,  to generate a template:
 ```shell script
@@ -113,11 +113,11 @@ Open `http://<external_ip:8000>` with your browser to use cooka.
 
 See more documents：
 1. [Install from source code](docs/en_US/source/install_from_source.md)
-2. [Integrate with Notebook](docs/en_US/source/configuration/intergrate_with_jupyter.md)
+2. [Integrate with Notebook](docs/en_US/source/configuration/integrate_with_jupyter.md)
 
 ## DataCanvas
 
-![](docs/img/dc_logo_1.png)
+![](docs/static/dc_logo_1.png)
 
 Cooka is an open source project created by [DataCanvas](https://www.datacanvas.com/). 
 

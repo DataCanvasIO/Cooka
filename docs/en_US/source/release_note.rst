@@ -1,66 +1,60 @@
 Release Note
 =====================
 
-Version 0.2.0
+Version 0.1.0
 -------------
+
 This release add following new features:
 
+Dataset manage
 
-Feature engineering	
-  - Feature generation
-  - Feature selection
+- Search
+- Delete
+- Upload or import CSV
+    * Sampling analysis
+    * Support no column headers
+    * Inferring feature types
 
-Data clean
-  - Special empty value handing 
-  - Correct data type
-  - Id-ness features cleanup
-  - Duplicate features cleanup
-  - Empty label rows cleanup
-  - Illegal values replacement
-  - Constant features cleanup
-  - Collinearity features cleanup
+Dataset preview
 
-Data set split
-  - Adversarial validation
+- Cat origin file on line
+- Scrolling
 
-Modeling algorithms
-  - XGBoost
-  - Catboost
-  - LightGBM
-  - HistGridientBoosting
+Dataset insight
 
-Training 
-  - Task inference
-  - Command-line tools
+- Distribution of feature type
+- Data type, feature type, missing percentage,  uniques, linear correlation
+- Recognize Id-ness, constant, missing percentage too high features
+- Feature search
+- Datetime features
+    - Display by year, month, day, hour, week
+- Categorical features
+    - Distribution of values
+    - Mode
+- Continuous features
+    - Distribution of interval
+    - Distribution of values
+    - max, min, median, mean, stand deviation
 
-Evaluation strategies:
-  - Cross-validation
-  - Train-Validation-Holdout
+Experiment design
 
-Search strategies
-  - Monte Carlo Tree Search
-  - Evolution
-  - Random search
+- Recommend experiment options
+- HyperGBM,HyperDT as experiment engine
+- Quick, performance training mode
+- Train-Validation-Holdout data partition
+- Split data in datetime order
+- Support binary classification, multi-classification, regression
 
-Imbalance data 
-  - Class Weight
-  - Under-Samping 
-    - Near miss
-    - Tomeks links 
-    - Random
-  - Over-Samping
-    - SMOTE
-    - ADASYN
-    - Random
+Experiment list
 
-Early stopping strategies
-  - max_no_improvement_trials
-  - time_limit
-  - expected_reward
-
-Advance features:
-  - Two stage search
-    - Pseudo label
-    - Feature selection
-  - Concept drift handling
-  - Ensemble
+- Training process,
+- Remaining time estimation
+- Confusion matrix and ROC curve for binary-classification
+- Evaluation metrics
+    - Binary classification： Accuracy, F1, Fbeta, Precision, Recall, AUC, Log Loss
+    - Multi-classification： Accuracy, F1, Fbeta, Precision, Recall, Log Loss
+    - Regression： EVS, MAE, MSE, RMSE, MSLE, R2, MedianAE
+- View train log and source code
+- Export to notebook
+- Hyper-params
+- Batch predict

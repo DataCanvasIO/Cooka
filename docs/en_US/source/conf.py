@@ -20,7 +20,7 @@
 import os, sys
 sys.path.insert(0, os.path.abspath('../..'))
 
-project = 'HyperGBM'
+project = 'Cooka'
 copyright = '2020, Zetyun.com'
 author = 'Zetyun.com'
 
@@ -48,7 +48,7 @@ html_static_path = ['_static']
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'hypergbm', 'HypergGBM Documentation',
+    (master_doc, 'Cooka', 'Cooka Documentation',
      [author], 1)
 ]
 
