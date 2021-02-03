@@ -1,30 +1,32 @@
-## 用户操作手册
+## 操作手册
 
+这个文档的目录是帮助您通过浏览器使用Cooka来完成：
 
+- 管理数据集
+- 预览数据集 
+- 探查数据集 
+- 设计运行实验
+- 使用实验成果
 
-Cooka客户端需要Chrome浏览器v59以上版本。
-
-
+我们推荐使用Chrome浏览器v59以上版本访问Cooka。
 
 ### 数据集管理
 
 Cooka允许用户上传或者导入服务器上的数据来进行建模训练，支持使用无列头的数据，在数据集列表页可以新增数据集：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_home.png) 
-
- 
+![img](static/cooka_dataset_home.png) 
 
 #### 导入
 
 用户可以填写服务器上的数据文件地址，当系统确认文件正常符合建模要求后，单击分析，可以对数据集进行进一步的分析，在右侧信息栏可以显示分析的进度，以及简要信息，确认无误后点击创建。这种方式适用于文件比较大的情况，避免通过浏览器上传由于网络原因导致网络中断。
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_import.png) 
+![img](static/cooka_dataset_import.png) 
 
-### 上传
+#### 上传
 
 用户可以通过浏览器将本地的文件上传到系统创建数据集：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_upload.png) 
+![img](static/cooka_dataset_upload.png) 
 
 对数据分析时候还可以选择抽样策略，Cooka可以按比例、或者行数抽样来加快分析进度。
 
@@ -34,7 +36,7 @@ Cooka允许用户上传或者导入服务器上的数据来进行建模训练，
 
 通过数据预览可以直观地看到数据内容，当系统解析的文件格式与预期的文件格式不相符时候，还可以查看原始数据集。
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_preview.png) 
+![img](static/cooka_dataset_preview.png) 
 
  
 
@@ -42,45 +44,36 @@ Cooka允许用户上传或者导入服务器上的数据来进行建模训练，
 
 创建数据集的过程中Cooka会自动分析特征的信息，包括不同类型特征的分布、每个特征的数据、数值分布、缺失值率等信息：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_insight.png) 
+![img](static/cooka_dataset_insight.png) 
 
 当模型训练后Cooka还可以自动分析出特征列与目标列的线性相关性，来分析哪些特征更有用。对于类别型特征Cooka可以分析出众数和数值分布：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_categorical.png) 
+![img](static/cooka_dataset_categorical.png) 
 
 对于连续型特征可以分析其分布、极值等信息：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_continuous.png) 
+![img](static/cooka_dataset_continuous.png) 
 
 还有其离散性的分析：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_continuous_2.png) 
-
- 
+![img](static/cooka_dataset_continuous_2.png) 
 
 对于日期类型数据，还可以分析出其在不同年、月、日、时的分布：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_datetime.png) 
-
+![img](static/cooka_dataset_datetime.png) 
   
 
-  Cooka还会对质量较差以及原因进行标注：
+Cooka还会对质量较差以及原因进行标注：
 
-![img](/Users/wuhf/PycharmProjects/cooka/docs/static/cooka_dataset_missing.png) 
+![img](static/cooka_dataset_missing.png) 
 
 可能被标注的情况：
 
-1. 相关性太低
+1. 相关性过低
+2. 缺失值过多
+3. 常量列
+4. Id列(每一行的值都不同)
 
-2. 缺失值太多
-
-3. 重复值太多
-
-4. 每一行的值都不同
-
-
-
- 
 
 ### 实验设计
 
@@ -137,7 +130,6 @@ Cooka支持提前停止算法，当模型的性能无法提升会提前终止训
 ![img](static/cooka_experiment_predict.png) 
 
 结果可以在预测结束后下载到本地。
-
 
 
 ### 导出Notebook

@@ -4,9 +4,8 @@ Release Note
 Version 0.1.0
 -------------
 
-This release add following new features:
 
-Dataset manage
+**Dataset manage**
 
 - Search
 - Delete
@@ -15,12 +14,12 @@ Dataset manage
     * Support no column headers
     * Inferring feature types
 
-Dataset preview
+**Dataset preview**
 
 - Cat origin file on line
 - Scrolling
 
-Dataset insight
+**Dataset insight**
 
 - Distribution of feature type
 - Data type, feature type, missing percentage,  uniques, linear correlation
@@ -36,7 +35,7 @@ Dataset insight
     - Distribution of values
     - max, min, median, mean, stand deviation
 
-Experiment design
+**Experiment design**
 
 - Recommend experiment options
 - HyperGBM,HyperDT as experiment engine
@@ -45,7 +44,7 @@ Experiment design
 - Split data in datetime order
 - Support binary classification, multi-classification, regression
 
-Experiment list
+**Experiment list**
 
 - Training process,
 - Remaining time estimation

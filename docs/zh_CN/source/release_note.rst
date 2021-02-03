@@ -4,21 +4,24 @@ Release Note
 Version 0.1.0
 -------------
 
-This release add following new features:
+这个版本包含以下新特性:
 
-数据集管理
+**数据集管理**
+
 - 搜索
 - 删除
-- 上传，导入csv
+- 上传、导入csv
     * 分析抽样支持按行数、按比例、和使用全量数据
-    * 自动推断有无列头
+    * 支持无列头数据集文件
     * 自动推断特征类型（连续、离散、日期）
 
-数据集预览
-- 原始数据集查看
-- 数据滚动加载
+**数据集预览**
 
-数据集探查
+- 查看原始数据集
+- 数据表格滚动加载
+
+**数据集探查**
+
 - 特征类型分布
 - 特征的数据类型、特征类型、缺失值、不同值、线性相关分析
 - Id列、常量列、过多缺失值列识别
@@ -33,7 +36,8 @@ This release add following new features:
     - 值分布
     - 最大值，最小值，中位数，均值，标准差
 
-实验设计
+**实验设计**
+
 - 自动推荐建模选项
 - HyperGBM、HyperDT实验引擎
 - 快速、性能训练模式
@@ -44,16 +48,16 @@ This release add following new features:
     - 多分类
     - 回归
 
-实验列表
+**实验列表**
+
 - 训练进度、剩余时间评估
 - 混淆矩阵、ROC曲线(二分类)
 - 评估指标
     - 二分类： Accuracy, F1, Fbeta, Precision, Recall, AUC, Log Loss
     - 多分类： Accuracy, F1, Fbeta, Precision, Recall, Log Loss
     - 回归： EVS, MAE, MSE, RMSE, MSLE, R2, MedianAE
-
 - 查看训练日志、训练源码
 - 导出成Notebook文件
-- 优化参数
-- 使用批量预测
+- 优化参数可视化
+- 批量预测
 

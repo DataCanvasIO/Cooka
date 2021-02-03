@@ -1,30 +1,30 @@
 ## Installation
 
-You can use not only docker or pip to install Cooka but also build from source code.
+You can use docker,pip and source code to install Cooka.
 
 ### Using pip
 
-It requires `Python3.6` or above, and uses pip to install Cooka:
+It requires `Python3.6` or above, uses pip to install Cooka:
 
-```shell script
+```shell
 pip install --upgrade pip setuptools # (optional)
 pip install cooka
 ```
 
 then start cooka web server:
 
-```shell script
+```shell
 cooka server
 ```
 
-Open browser visit site `http://<your-ip>:8000` to use cooka. If you want to integrate with jupyter notebook please refer to this [guide](configuration/integrate_with_jupyter.md). 
+Open browser visit site `http://<your-ip>:8000` to use Cooka. If you want to integrate with jupyter notebook please refer to this [guide](configuration/integrate_with_jupyter.md). 
 
 
 ### Using Docker
 
 You can also use Cooka through docker image with command:
-```shell script
-docker run -ti -e NOTEBOOK_TOKEN="your-token" -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 -p 8888:8888 -p 8000:8000 datacanvas/hypergbm:0.1.0
+```shell
+docker run -ti -e NOTEBOOK_TOKEN="your-token" -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 -p 8888:8888 -p 8000:8000 datacanvas/cooka:0.1.0
 ```
 
 Open browser visit site `http://<your-ip>:8000`，the notebook token is what you have set "you-token"，it can also be empty if do not specified.
@@ -34,12 +34,12 @@ Open browser visit site `http://<your-ip>:8000`，the notebook token is what you
 
 Frontend developed by [reactjs](https://reactjs.org), therefore, we need to install [node>=8.0.0](https://nodejs.org/en/) get it at [https://nodejs.org](https://nodejs.org) and install [yarn](https://yarnpkg.com):
 
-```shell script
+```shell
 npm install yarn -g
 ```
 
 Finally build frontend and install them all：
-```shell script
+```shell
 pip install --upgrade pip setuptools
 git clone git@github.com:DataCanvasIO/Cooka.git
 

@@ -6,40 +6,40 @@
 
 Cooka需要 `Python3.6` 或者以上版本, 用pip安装命令 :
 
-```shell script
+```shell
 pip install --upgrade pip setuptools # (optional)
 pip install cooka
 ```
 
 启动Cooka的Web服务:
 
-```shell script
+```shell
 cooka server
 ```
 
-打开浏览器访问 `http://<your-ip>:8000` 来使用Cooka. 整合jupyter notebook参考[教程](configuration/intergrate_with_jupyter.md). 
+打开浏览器访问 `http://<your-ip>:8000` 来使用Cooka. 整合jupyter notebook参考[教程](configuration/integrate_with_jupyter.md). 
 
 
 ### 使用 Docker
 
 使用Docker拉起一个Cooka 服务：
-```shell script
-docker run -ti -e NOTEBOOK_TOKEN="your-token" -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 -p 8888:8888 -p 8000:8000 datacanvas/hypergbm:0.1.0
+```shell
+docker run -ti -e NOTEBOOK_TOKEN="your-token" -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 -p 8888:8888 -p 8000:8000 datacanvas/cooka:0.1.0
 ```
 
 打开浏览器访问 `http://<your-ip>:8000` 来使用Cooka
 Open browser visit site `http://<your-ip>:8000`，notebook的token您设置的"you-token"，如果不指定则为空。
 
-## 从源码安装
+### 从源码安装
 
-Cooka的Web页面使用[reactjs](https://reactjs.org)开发，因此需要先安装[node>=8.0.0](https://nodejs.org/en/) get it at [https://nodejs.org](https://nodejs.org)再安装[yarn](https://yarnpkg.com)来构建Cooka:
+Cooka的Web页面使用[reactjs](https://reactjs.org)开发，因此需要先安装[node>=8.0.0](https://nodejs.org/en/) 再安装[yarn](https://yarnpkg.com)来构建Cooka:
 
-```shell script
+```shell
 npm install yarn -g
 ```
 
 安装构建环境完成后来构建Cooka并安装：：
-```shell script
+```shell
 pip install --upgrade pip setuptools
 git clone git@github.com:DataCanvasIO/Cooka.git
 

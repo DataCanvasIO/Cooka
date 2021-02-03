@@ -18,7 +18,7 @@ You can upload or import data from the server for training and the data file sho
 2. In CSV format
 3. With headers or not
 
-You can also choose the sampling strategy to  analyzing the data, supported sampling strategies:
+You can also choose the sampling strategy to analyze the dataset, supported sampling strategies:
 
 - by rows
 - by percentage
