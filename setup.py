@@ -24,6 +24,9 @@ version = version_ns['__version__']
 
 print("__version__=" + version)
 
+with open(P.join(HERE, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 
 class BuildJSCommand(distutils.cmd.Command):
 
@@ -63,10 +66,13 @@ if __name__ == '__main__':
         name="cooka",
         version=version,
         description="A lightweight AutoML system.",
+        long_description=long_description,
+        long_description_content_type="text/markdown",
         packages=find_packages(exclude=["test.*", "test"]),
-        author="DataCanvas",
+        author="DataCanvas Community",
         author_email="yangjian@zetyun.com",
         cmdclass={'buildjs': BuildJSCommand},
+        python_requires='>=3.6.*',
         license='Apache License 2.0',
         install_requires=[
             'numpy',
@@ -90,14 +96,18 @@ if __name__ == '__main__':
         zip_safe=False,
         platforms="Linux, Mac OS X",
         classifiers=[
-            'Development Status :: 4 - Beta',
-            'Environment :: Other Environment',
-            'Intended Audience :: Developers',
-            'Intended Audience :: Science/Research',
             'Operating System :: OS Independent',
+            'Intended Audience :: Developers',
+            'Intended Audience :: Education',
+            'Intended Audience :: Science/Research',
             'Programming Language :: Python',
             'Programming Language :: Python :: 3.6',
-            'Topic :: Utilities',
+            'Programming Language :: Python :: 3.7',
+            'Topic :: Scientific/Engineering',
+            'Topic :: Scientific/Engineering :: Artificial Intelligence',
+            'Topic :: Software Development',
+            'Topic :: Software Development :: Libraries',
+            'Topic :: Software Development :: Libraries :: Python Modules',
             'License :: OSI Approved :: Apache Software License',
         ],
         entry_points={

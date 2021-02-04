@@ -1,7 +1,7 @@
 # Cooka
-[![Python Versions](https://img.shields.io/pypi/pyversions/hypergbm.svg)](https://pypi.org/project/hypergbm)
-[![Downloads](https://pepy.tech/badge/hypergbm)](https://pepy.tech/project/hypergbm)
-[![PyPI Version](https://img.shields.io/pypi/v/hypergbm.svg)](https://pypi.org/project/hypergbm)
+[![Python Versions](https://img.shields.io/pypi/pyversions/cooka.svg)](https://pypi.org/project/hypergbm)
+[![Downloads](https://pepy.tech/badge/cooka)](https://pepy.tech/project/hypergbm)
+[![PyPI Version](https://img.shields.io/pypi/v/cooka.svg)](https://pypi.org/project/hypergbm)
 
 [简体中文](README_zh_CN.md)
 

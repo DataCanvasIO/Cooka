@@ -1,7 +1,8 @@
 # Cooka
-[![Python Versions](https://img.shields.io/pypi/pyversions/hypergbm.svg)](https://pypi.org/project/hypergbm)
-[![Downloads](https://pepy.tech/badge/hypergbm)](https://pepy.tech/project/hypergbm)
-[![PyPI Version](https://img.shields.io/pypi/v/hypergbm.svg)](https://pypi.org/project/hypergbm)
+[![Python Versions](https://img.shields.io/pypi/pyversions/cooka.svg)](https://pypi.org/project/hypergbm)
+[![Downloads](https://pepy.tech/badge/cooka)](https://pepy.tech/project/hypergbm)
+[![PyPI Version](https://img.shields.io/pypi/v/cooka.svg)](https://pypi.org/project/hypergbm)
+
 [中文](README_zh_CN.md)
 
 Cooka是一个轻量级、可视化的自动机器学习工具，可以通过Web UI管理数据集和设计建模实验，
