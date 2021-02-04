@@ -31,7 +31,7 @@ ENV LLVM_CONFIG /usr/bin/llvm-config-9.0-64
 #RUN echo -e "[easy_install]\n\
 #index_url = https://mirrors.aliyun.com/pypi/simple" > /root/.pydistutils.cfg
 
-RUN pip3 -v install jupyterlab supervisor pyarrow==2.0.0 # Docker Image deps
+RUN pip3 -v install jupyterlab==2.0.0 supervisor pyarrow==2.0.0 # Docker Image deps
 
 RUN pip3 -v install numpy==1.19.1 scikit-learn==0.23.1  # Prepare for shap
 RUN pip3 -v install shap==0.28.5 matplotlib  # Prepare for hypergbm
