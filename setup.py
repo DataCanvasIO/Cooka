@@ -8,7 +8,21 @@ import distutils.log
 import subprocess
 from os import path as P
 
+
+try:
+    execfile
+except NameError:
+    def execfile(fname, globs, locs=None):
+        locs = locs or globs
+        exec(compile(open(fname).read(), fname, "exec"), globs, locs)
+
 HERE = P.dirname((P.abspath(__file__)))
+
+version_ns = {}
+execfile(P.join(HERE, 'cooka', '_version.py'), version_ns)
+version = version_ns['__version__']
+
+print("__version__=" + version)
 
 
 class BuildJSCommand(distutils.cmd.Command):
@@ -47,11 +61,11 @@ if __name__ == '__main__':
 
     setup(
         name="cooka",
-        version="0.1.0",
+        version=version,
         description="A lightweight AutoML system.",
         packages=find_packages(exclude=["test.*", "test"]),
         author="DataCanvas",
-        author_email="yangjian@zetyun.com,wuhf@zetyun.com",
+        author_email="yangjian@zetyun.com",
         cmdclass={'buildjs': BuildJSCommand},
         license='Apache License 2.0',
         install_requires=[
@@ -62,18 +76,17 @@ if __name__ == '__main__':
             'SQLAlchemy>=1.3.18',
             'tornado==6.0.4',
             'jinja2',
-            'deeptables',
-            'hypergbm',
+            'deeptables==0.1.13',
+            'hypergbm==0.2.1',
             'traitlets',
-            'tabular-toolbox',  # todo remove if hypergbm installed
         ],
-        extras_require={
-            'notebook': [
-                'shap',  # todo remove shap if deeptable add
-                'jupyterlab',
-                'matplotlib'
-            ]
-        },
+        # extras_require={
+        #     'notebook': [
+        #         'shap',
+        #         'jupyterlab',
+        #         'matplotlib'
+        #     ]
+        # },
         zip_safe=False,
         platforms="Linux, Mac OS X",
         classifiers=[
@@ -94,6 +107,6 @@ if __name__ == '__main__':
         },
         include_package_data=True,
         package_data={
-            'cooka': ['core/train_template/*.jinja2', '*.template', 'assets/*', 'assets/static/*'],   # can not inlcude a directory recursion
+            'cooka': ['core/train_template/*.jinja2', '*.template', 'assets/*', 'assets/static/*'],  # can not inlcude a directory recursion
         }
     )

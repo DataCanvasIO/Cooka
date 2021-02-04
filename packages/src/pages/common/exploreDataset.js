@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Table, Tooltip, Radio, Popover, Spin } from 'antd';
+import { Input, Table, Tooltip, Radio, Popover, Spin, Button } from 'antd';
 import {
   CheckOutlined,
   CloseOutlined,
@@ -31,68 +31,6 @@ const displayFeatureType = {
   text: formatMessage({id:  'explore.text'}),
 }
 
-class FeatureNamePopover extends React.Component{
-  /**
-   *
-   * @param props.dispatch: 请求model用
-   * @param props.content: 提示按钮的内容
-   * @param props.targetCol: 标签列名称，如果是标签列需要标注出，在数据集未训练过时候为空
-   */
-  constructor(props){
-    super(props);
-    this.state = {
-      showTrainBtn: 'hidden'
-    }
-    this.content = props.content;
-    this.targetCol = props.targetCol;
-  }
-
-  onMouseOverHandler(){
-    this.setState({
-      showTrainBtn: 'visible'
-    })
-  }
-
-  onMouseLeaveHandler(){
-    this.setState({
-      showTrainBtn: 'hidden'
-    })
-  }
-
-  gotoTrain(){
-    this.props.dispatch({
-      type: 'train/save',
-      payload: {
-        defaultTab: 'c',
-        labelName: this.props.content
-      }
-    })
-  }
-
-  render(){
-    const trainButtonStyle = {
-      visibility: this.state.showTrainBtn,
-      marginLeft: 10,
-      padding: 4,
-      border: '0px solid #1890ff',
-      cursor: 'pointer',
-      color: '#1890ff',
-      borderRadius: 4
-    };
-    return (
-        <div onMouseOver={this.onMouseOverHandler.bind(this)} onMouseOut={this.onMouseLeaveHandler.bind(this)} >
-          {this.content}
-          {
-            this.content === this.targetCol ? (
-              <span style={{width: 65, height: 20, backgroundColor: '#cecece', borderRadius: '5px 5px 5px 5px', textAlign: 'center', marginLeft: 2}}>
-                      <span style={{color: 'black'}}>{`${formatMessage({id: 'explore.labelCol'})}`}</span>
-                  </span>): null
-          }
-          <span style={trainButtonStyle}  onClick={this.gotoTrain.bind(this)}>{formatMessage({id: 'explore.goTrain'})}</span>
-        </div>
-      )
-  }
-}
 
 
 function getColorStyle(needColor, color){
@@ -112,6 +50,8 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
   if (datasetName == null){
     datasetName = datasetNameFromParam
   }
+
+
 
   const [defaultValue, setDefaultValue] = useState('year');
   const [featuresData, setFeaturesData] = useState([]);
@@ -210,6 +150,42 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
     })
   }, [datasetName])
 
+  const onMouseOverHandler = (e) => {
+    // console.info(e.target.lastElementChild.style.visibility)
+    const lastElement = e.target.lastElementChild
+    console.info(lastElement.className);
+    if(lastElement.className === 'go2train'){
+      const current = e.target.lastElementChild.style.visibility
+      if(current !== 'visible'){
+        // visible none inline hidden
+        e.target.lastElementChild.style.visibility = 'visible'
+      }
+    }
+  }
+
+  const onMouseLeaveHandler = (e) => {
+    console.info(e.target.lastElementChild)
+    console.info(e.target.children)
+    // const current = e.target.lastElementChild.style.visibility
+    //
+    // if(current !== 'hidden'){
+    //   // visible none inline hidden
+    //   e.target.lastElementChild.style.visibility = 'hidden'
+    // }
+
+  }
+
+  const gotoTrain = (userTarget) => {
+
+    dispatch({
+      type: 'train/save',
+      payload: {
+        defaultTab: 'c',
+        labelName: userTarget
+      }
+    })
+  }
+
   // 过滤
   const handleSearch = (e) => {
     const val = e.target.value;
@@ -226,8 +202,6 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
     setDefaultValue(e.target.value);
   }
 
-
-
   const handleChange = (e) => {
     setDefaultTab(e.target.value);
   }
@@ -237,7 +211,24 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
       title: formatMessage({id: 'explore.name'}),
       dataIndex: 'name',
       render: (_, record) => {
-        return isTemporary ? <span> {record.name}</span> : <FeatureNamePopover content={record.name} targetCol={labelCol} dispatch={dispatch}/>
+        const datasetName = record.name;
+        return isTemporary ? <span> {record.name}</span> :
+          <div >
+            <Tooltip placement="right"
+                     arrowPointAtCenter={true}
+                     title={<a onClick={v => {gotoTrain(datasetName) } }>{formatMessage({id: 'explore.goTrain'})} </a> } color={'white'}>
+              <span>
+                {datasetName}
+              </span>
+            </Tooltip>
+            {
+              datasetName === labelCol ? (
+                <span style={{width: 65, height: 20, backgroundColor: '#cecece', borderRadius: '5px 5px 5px 5px', textAlign: 'center', marginLeft: 2}}>
+                      <span style={{color: 'black'}}>{`${formatMessage({id: 'explore.labelCol'})}`}</span>
+                  </span>): null
+            }
+          </div>
+        // return <span> {record.name}</span>
       }
     },
     {
@@ -402,7 +393,7 @@ const Explore = ({ dispatch, datasetNameFromParam, isTemporary ,location: { quer
       <Search
         placeholder={formatMessage({id: 'explore.placeholder'})}
         style={{ width: 300, marginTop: 20, marginBottom: 20}}
-        onChange={(e) => handleSearch(e)}
+        onChange={ handleSearch }
       />
       <Table
         columns={columns}

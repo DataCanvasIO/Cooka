@@ -133,7 +133,7 @@ export default {
   'train.taskMultiClassification': 'Multi Classification',
   'train.taskRegression': 'Regression',
   'train.hintInferTaskType': 'A {taskType} task will be created',
-  'train.hintTaskType': 'Only two different values in target column can be inferred as Binary Classification, target data type is float can be inferred as Regression and other types are inferred as Multi Classification, more than 1000 categories not supported ',
+  'train.hintTaskType': 'Only two different values in target should be inferred as Binary Classification, target data type is float can be inferred as Regression and other types are inferred as Multi Classification, more than 1000 categories not supported ',
   'train.hintTrainMode': 'Performance mode will use larger parameter space and more iterations than fast mode, in general, the model should also work better, but it will take more time',
   'train.hintDatetimeSeriesFeature': 'Used to split the data in chronological order. If your data is in chronological order and the model is to predict future values, this option can help improve the prediction ability of the model',
   'train.hintTarget': 'Select target column to train',
@@ -214,7 +214,7 @@ export default {
   'extra.dataExplore': 'Insight',
   'extra.train': 'Design',
   'extra.center': 'Experiment',
-  'extra.doc': '', // DataCanvas AutoML Toolkit
+  'extra.doc': ' ', // DataCanvas AutoML Toolkit
   // 'extra.doc': 'Documentation',
   'extra.testAndTrain': 'Train-Validation-Holdout',
   'extra.verifyUnion': 'Validation',

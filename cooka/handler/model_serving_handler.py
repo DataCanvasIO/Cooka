@@ -26,11 +26,9 @@ class BatchPredictJobItemHandler(BaseHandler):
         # 2. response
         response = \
             {
-                "data": {
-                    "batch_predict_job_name": batch_predict_job_name,
-                    "dataset_name": dataset_name,
-                    "steps": messages_dict_list
-                }
+                "batch_predict_job_name": batch_predict_job_name,
+                "dataset_name": dataset_name,
+                "steps": messages_dict_list
             }
         self.response_json(response)
 

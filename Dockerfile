@@ -23,21 +23,20 @@ RUN  yum install epel-release  centos-release-scl -y \
 
 ENV LLVM_CONFIG /usr/bin/llvm-config-9.0-64
 
-RUN mkdir -p /root/.pip \
-    && echo -e "[global]\n\
-index-url = https://mirrors.aliyun.com/pypi/simple" > /root/.pip/pip.conf
+#RUN mkdir -p /root/.pip \
+#    && echo -e "[global]\n\
+#index-url = https://mirrors.aliyun.com/pypi/simple" > /root/.pip/pip.conf
+#
+## For install shap
+#RUN echo -e "[easy_install]\n\
+#index_url = https://mirrors.aliyun.com/pypi/simple" > /root/.pydistutils.cfg
 
-# For install shap
-RUN echo -e "[easy_install]\n\
-index_url = https://mirrors.aliyun.com/pypi/simple" > /root/.pydistutils.cfg
-
-RUN pip3 -v install jupyterlab supervisor # Docker Image deps
+RUN pip3 -v install jupyterlab supervisor pyarrow==2.0.0 # Docker Image deps
 
 RUN pip3 -v install numpy==1.19.1 scikit-learn==0.23.1  # Prepare for shap
 RUN pip3 -v install shap==0.28.5 matplotlib  # Prepare for hypergbm
 
-# todo change to pypi
-RUN pip3 install -v -i http://172.20.51.202:28081/repository/pypi-group/simple --trusted-host 172.20.51.202 cooka[notebook]  # install cooka
+RUN pip3 install -v cooka  # install cooka
 
 RUN mkdir -p /root/.config/cooka /root/cooka /etc/supervisor/ /var/log
 

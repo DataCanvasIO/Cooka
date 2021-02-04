@@ -91,7 +91,7 @@ pip install cooka
 ```shell script
 cooka server
 ```
-然后使用浏览器访问`http://<server_ip:8000>`来使用Cooka。
+然后使用浏览器访问`http://<your_ip:8000>`来使用Cooka。
 
 Cooka配置文件默认在`~/.config/cooka/cooka.py`，生成配置文件模板：
 
@@ -102,14 +102,10 @@ cooka generate-config > ~/.config/cooka/cooka.py
 
 ### 使用Docker部署Cooka
 ```shell script
-docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip>:8888"  datacanvas/cooka
+docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<your_ip>:8888"  datacanvas/cooka
 ```
-然后使用浏览器访问`http://<external_ip:8000>`来使用Cooka。
+然后使用浏览器访问`http://<your_ip:8000>`来使用Cooka。
 
-
-更多文档：
-1. [使用源码安装](docs/en_US/source/install_from_source.md)
-2. [整合Jupyter Notebook](docs/en_US/source/configuration/integrate_with_jupyter.md)
 
 ## DataCanvas
 

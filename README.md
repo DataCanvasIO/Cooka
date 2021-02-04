@@ -79,7 +79,7 @@ It can also extend the search space to support more feature engineering methods 
 
 ## Installation 
 
-### Use pip
+### Using pip
 
 The python version should be >= 3.6, for CentOS , install the system package:
 
@@ -93,7 +93,7 @@ Start the web server：
 cooka server
 ```
 
-Then open `http://<server:8000>` with your browser to use cooka.
+Then open `http://<your_ip:8000>` with your browser to use cooka.
 
 By default, the cooka configuration file is at `~/.config/cooka/cooka.py`,  to generate a template:
 ```shell script
@@ -101,19 +101,15 @@ mkdir -p ~/.config/cooka/
 cooka generate-config > ~/.config/cooka/cooka.py
 ```
 
-### Use Docker
+### Using Docker
 
 Launch a Cooka docker container:
 
 ```shell script
-docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<external_ip>:8888"  datacanvas/cooka
+docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<your_ip>:8888"  datacanvas/cooka
 ```
 
-Open `http://<external_ip:8000>` with your browser to use cooka.
-
-See more documents：
-1. [Install from source code](docs/en_US/source/install_from_source.md)
-2. [Integrate with Notebook](docs/en_US/source/configuration/integrate_with_jupyter.md)
+Open `http://<your_ip:8000>` with your browser to visit cooka.
 
 ## DataCanvas
 

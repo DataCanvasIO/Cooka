@@ -1,5 +1,6 @@
 from os import path as P
 import psutil
+import os
 
 from traitlets.config import Application
 from traitlets.traitlets import (
@@ -19,11 +20,17 @@ def _get_ip_addr():
 
 
 def _get_default_notebook_portal():
-    ip_addr = _get_ip_addr()
-    if ip_addr is None:
-        return "http://localhost:8888"
+    # 1. read from env as default value
+    portal = os.environ.get('COOKA_NOTEBOOK_PORTAL')
+    if portal is not None and len(portal) > 0:
+        return portal
     else:
-        return f"http://{ip_addr}:8888"
+        # 2. if not set in env using the interface
+        ip_addr = _get_ip_addr()
+        if ip_addr is None:
+            return "http://localhost:8888"
+        else:
+            return f"http://{ip_addr}:8888"
 
 
 # -- Load config

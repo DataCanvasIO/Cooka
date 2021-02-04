@@ -57,8 +57,8 @@ try:
     df_origin = df.copy()
 
     load_extension = {
-        "n_cols": df.shape[0],
-        "n_rows": df.shape[1]
+        "n_rows": df.shape[0],
+        "n_cols": df.shape[1]
     }
 
 except Exception as e:

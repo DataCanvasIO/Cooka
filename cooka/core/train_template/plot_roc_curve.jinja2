@@ -1,5 +1,5 @@
 {% import 'macro.jinja2' as MRO with context %}
-fpr, tpr, threshold = metrics.roc_curve(y_test, y_score, pos_label=pos_label)
+fpr, tpr, threshold = metrics.roc_curve(y_test, y_pos_score, pos_label=pos_label)
 roc_auc = metrics.auc(fpr,tpr)
 plt.figure(figsize=(6,6), facecolor=(1, 1, 1))
 lw = 2
