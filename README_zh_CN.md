@@ -103,7 +103,7 @@ cooka generate-config > ~/.config/cooka/cooka.py
 
 ### 使用Docker部署Cooka
 ```shell script
-docker run -ti -p 888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
+docker run -ti -p 8888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
 ```
 然后使用浏览器访问`http://<your_ip:8000>`来使用Cooka。
 

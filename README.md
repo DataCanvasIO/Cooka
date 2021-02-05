@@ -106,7 +106,7 @@ cooka generate-config > ~/.config/cooka/cooka.py
 Launch a Cooka docker container:
 
 ```shell script
-docker run -ti -p 888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
+docker run -ti -p 8888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
 ```
 
 Open `http://<your_ip:8000>` with your browser to visit cooka.
