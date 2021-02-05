@@ -24,7 +24,7 @@ cooka server
 
 使用Docker拉起一个Cooka 服务：
 ```shell
-docker run -ti -e NOTEBOOK_TOKEN="your-token" -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 -p 8888:8888 -p 8000:8000 datacanvas/cooka:0.1.0
+docker run -ti -p 888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
 ```
 
 打开浏览器访问 `http://<your-ip>:8000` 来使用Cooka

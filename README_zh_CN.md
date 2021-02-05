@@ -3,7 +3,7 @@
 [![Downloads](https://pepy.tech/badge/cooka)](https://pepy.tech/project/hypergbm)
 [![PyPI Version](https://img.shields.io/pypi/v/cooka.svg)](https://pypi.org/project/hypergbm)
 
-[中文](README_zh_CN.md)
+[文档](https://cooka.readthedocs.io/zh_CN/latest) | [English](README.md)
 
 Cooka是一个轻量级、可视化的自动机器学习工具，可以通过Web UI管理数据集和设计建模实验，
 并使用[DeepTables](https://github.com/DataCanvasIO/DeepTables) 和[HyperGBM](https://github.com/DataCanvasIO/HyperGBM)
@@ -103,7 +103,7 @@ cooka generate-config > ~/.config/cooka/cooka.py
 
 ### 使用Docker部署Cooka
 ```shell script
-docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<your_ip>:8888"  datacanvas/cooka
+docker run -ti -p 888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
 ```
 然后使用浏览器访问`http://<your_ip:8000>`来使用Cooka。
 

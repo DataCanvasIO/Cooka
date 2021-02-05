@@ -3,7 +3,7 @@
 [![Downloads](https://pepy.tech/badge/cooka)](https://pepy.tech/project/hypergbm)
 [![PyPI Version](https://img.shields.io/pypi/v/cooka.svg)](https://pypi.org/project/hypergbm)
 
-[简体中文](README_zh_CN.md)
+[Doc](https://cooka.readthedocs.io) | [简体中文](README_zh_CN.md)
 
 Cooka is a lightweight and visualization toolkit to manage datasets and design model learning experiments through web UI.
 It using [DeepTables](https://github.com/DataCanvasIO/DeepTables) and [HyperGBM](https://github.com/DataCanvasIO/HyperGBM) as experiment engine to complete feature engineering, neural architecture search and hyperparameter tuning automatically.
@@ -106,7 +106,7 @@ cooka generate-config > ~/.config/cooka/cooka.py
 Launch a Cooka docker container:
 
 ```shell script
-docker run -it -p 8000:8000 -p 8888:8888 -e NOTEBOOK_PORTAL="http://<your_ip>:8888"  datacanvas/cooka
+docker run -ti -p 888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
 ```
 
 Open `http://<your_ip:8000>` with your browser to visit cooka.
