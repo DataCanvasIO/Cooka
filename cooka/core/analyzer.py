@@ -2,7 +2,7 @@
 import os
 
 import pandas as pd
-
+import numpy as np
 from cooka.common import consts
 from cooka.common.model import Feature, FeatureTypeStats, DatasetStats, ContinuousFeatureBin, \
     ContinuousFeatureExtension, FeatureValueCount, \
@@ -126,93 +126,147 @@ class PandasAnalyzer(Analyzer):
         else:
             return 0
 
-    def analyze_col(self, col_name, missing):
+    @staticmethod
+    def analyze_continuous(series, missing):
+
+        n_rows = series.shape[0]
+        # 1. all data is missing
+        if n_rows == missing:
+            return \
+                ContinuousFeatureExtension(bins=[ContinuousFeatureBin(begin=0, end=0, value=10)],
+                                           min=None,
+                                           max=None,
+                                           mean=None,
+                                           stddev=None,
+                                           median=None,
+                                           value_count=[FeatureValueCount(type='NaN', value=n_rows)])
+
+        # 2. split to 10 bins
+        # duplicates='drop': may not up to 10 bins
+        bins = [ContinuousFeatureBin(begin=k.left, end=k.right, value=v) for k, v in
+                pd.value_counts(pd.cut(series, 10, duplicates='drop')).items()]
+
+        # 3. describe
+        series_d = series.describe()
+        feature_value_count = pd.value_counts(series)
+
+        # feature_value_count, 按个数进行统计
+        feature_value_count_sorted = feature_value_count.sort_values(ascending=False)
+
+        if feature_value_count_sorted.shape[0] > consts.MAX_DISTINCT_VALUES:
+            feature_value_count_limited = feature_value_count_sorted.iloc[:consts.MAX_DISTINCT_VALUES]
+            others_feature_values_sum = feature_value_count_sorted.iloc[consts.MAX_DISTINCT_VALUES:].sum()
+            value_count = [FeatureValueCount(type=k, value=int(v)) for k, v in
+                           feature_value_count_limited.items()]
+
+            remained_feature_count = FeatureValueCount(type=consts.KEY_REMAINED_FEATURE_VALUES_SUM,
+                                                       value=int(others_feature_values_sum))
+            value_count.append(remained_feature_count)
+        else:
+            value_count = [FeatureValueCount(type=k, value=int(v)) for k, v in feature_value_count_sorted.items()]
+
+        extension = \
+            ContinuousFeatureExtension(bins=bins,
+                                       min=series_d['min'],
+                                       max=series_d['max'],
+                                       mean=series_d['mean'],
+                                       stddev=series_d['std'],
+                                       median=series_d['50%'],
+                                       value_count=value_count)
+
+        return extension
+
+    @staticmethod
+    def analyze_categorical(series, missing):
+
+        n_rows = series.shape[0]
+        # 1. all data is missing
+        if n_rows == missing:
+            return CategoricalFeatureExtension(value_count=[FeatureValueCount(type='NaN', value=n_rows)],
+                                               mode=FeatureMode(value='NaN', count=n_rows, percentage=100))
+
+        # 2. describe
+        series_d = series.describe()
+
+        feature_value_count = pd.value_counts(series)
+        mode_value = series_d['top']
+        mode_count = int(feature_value_count[mode_value])
+        mode = FeatureMode(value=str(mode_value), count=mode_count,
+                           percentage=round(mode_count / n_rows * 100, 2))  # todo add unit test
+
+        # limit value count
+        feature_value_count_limited = feature_value_count.sort_values(ascending=False).iloc[:consts.MAX_DISTINCT_VALUES]
+
+        value_count = [FeatureValueCount(type=str(k), value=int(v)) for k, v in feature_value_count_limited.items()]
+        extension = \
+            CategoricalFeatureExtension(value_count=value_count, mode=mode)
+        return extension
+
+    @staticmethod
+    def analyze_datetime(series, missing):
+        n_rows = series.shape[0]
+        if n_rows == missing:
+            return DatetimeFeatureExtension(by_year=list(range(12)),
+                                            by_month=list(range(12)),
+                                            by_day=list(range(31)),
+                                            by_week=list(range(7)),
+                                            by_hour=list(range(24)))
+        def to_int(v):
+            try:
+                return int(v)
+            except Exception:
+                return v
+
+        by_year_dict = series.map(lambda _: to_int(_.year)).value_counts()
+        by_month_dict = series.map(lambda _: to_int(_.month)).value_counts()
+        by_day_dict = series.map(lambda _: to_int(_.day)).value_counts()
+        by_week_dict = series.map(lambda _: to_int(_.dayofweek)).value_counts()  # +1
+        by_hour_dict = series.map(lambda _: to_int(_.hour)).value_counts()
+
+        by_year = [YearValueCount(year=int(year), value=count) for year, count in by_year_dict.items()]
+        by_month = [int(by_month_dict.get(float(i), 0)) for i in range(12)]
+        by_day = [int(by_day_dict.get(float(i), 0)) for i in range(31)]
+        by_week = [int(by_week_dict.get(float(i), 0)) for i in range(7)]
+        by_hour = [int(by_hour_dict.get(float(i), 0)) for i in range(24)]
+
+        extension = \
+            DatetimeFeatureExtension(by_year=by_year, by_month=by_month,
+                                     by_day=by_day, by_week=by_week, by_hour=by_hour)
+        return extension
+
+    def analyze_col(self, col_name, missing_count):
+        """
+        Supported case:
+            1. categorical/continuous all value is missing
+            2. categorical not reach to 10
+        """
         series = self.df[col_name]
 
         unique_value = int(self.df[col_name].value_counts().count())
         type_name = self.df.dtypes[col_name].name
 
-        # del missing label
-        # label encoder label
-        # calc relevance
-        # not for text
-
         feature_type = self.infer_feature_type(type_name)
         extension = None
         if feature_type == FeatureType.Continuous:
-            # 1. defaule set to 10 bins
-            bins = [ContinuousFeatureBin(begin=k.left, end=k.right, value=v) for k, v in pd.value_counts(pd.cut(series, 10)).items()]
-
-            # 2. describe
-            series_d = series.describe()
-            feature_value_count = pd.value_counts(series)
-
-            # feature_value_count, 按个数进行统计
-            feature_value_count_sorted = feature_value_count.sort_values(ascending=False)
-
-            if feature_value_count_sorted.shape[0] > consts.MAX_DISTINCT_VALUES:
-                feature_value_count_limited = feature_value_count_sorted.iloc[:consts.MAX_DISTINCT_VALUES]
-                others_feature_values_sum = feature_value_count_sorted.iloc[consts.MAX_DISTINCT_VALUES:].sum()
-                value_count = [FeatureValueCount(type=k, value=int(v)) for k, v in
-                               feature_value_count_limited.items()]
-
-                remained_feature_count = FeatureValueCount(type=consts.KEY_REMAINED_FEATURE_VALUES_SUM, value=int(others_feature_values_sum))
-                value_count.append(remained_feature_count)
-            else:
-                value_count = [FeatureValueCount(type=k, value=int(v)) for k, v in feature_value_count_sorted.items()]
-
-            extension = \
-                ContinuousFeatureExtension(bins=bins,
-                                           min=series_d['min'],
-                                           max=series_d['max'],
-                                           mean=series_d['mean'],
-                                           stddev=series_d['std'],
-                                           median=series_d['50%'],
-                                           value_count=value_count)
+            extension = self.analyze_continuous(series, missing_count)
         elif feature_type == FeatureType.Categorical:
-            series_d = series.describe()
-
-            feature_value_count = pd.value_counts(series)
-            mode_value = series_d['top']
-            mode_count = int(feature_value_count[mode_value])
-            mode = FeatureMode(value=str(mode_value), count=mode_count, percentage=round(mode_count/self.df.shape[0] * 100, 2))  # todo add unit test
-
-            # limit value count
-            feature_value_count_limited = feature_value_count.sort_values(ascending=False).iloc[:consts.MAX_DISTINCT_VALUES]
-
-            value_count = [FeatureValueCount(type=str(k), value=int(v)) for k, v in feature_value_count_limited.items()]
-            extension = \
-                CategoricalFeatureExtension(value_count=value_count, mode=mode)
-
+            extension = self.analyze_categorical(series, missing_count)
         elif feature_type == FeatureType.Datetime:
-            def to_int(v):
-                try:
-                    return int(v)
-                except Exception:
-                    return v
-
-            by_year_dict = series.map(lambda _: to_int(_.year)).value_counts()
-            by_month_dict = series.map(lambda _: to_int(_.month)).value_counts()
-            by_week_dict = series.map(lambda _: to_int(_.dayofweek)).value_counts()  # +1
-            by_hour_dict = series.map(lambda _: to_int(_.hour)).value_counts()
-
-            by_month = [int(by_month_dict.get(float(i), 0)) for i in range(12)]
-            by_hour = [int(by_hour_dict.get(float(i), 0)) for i in range(24)]
-            by_week = [int(by_week_dict.get(float(i), 0)) for i in range(7)]
-            by_year = [YearValueCount(year=int(year), value=count) for year, count in by_year_dict.items()]
-
-            extension = \
-                DatetimeFeatureExtension(by_year=by_year, by_month=by_month, by_week=by_week,by_hour=by_hour)
+            extension = self.analyze_datetime(series, missing_count)
+        else:
+            extension = None
 
         if extension is not None:
             extension = extension.to_dict()
         n_rows = series.shape[0]
 
-        unique_percentage = unique_value/n_rows * 100
-        feature_unique = FeatureUnique(value=unique_value, percentage=unique_percentage,
+        unique_percentage = unique_value / n_rows * 100
+        feature_unique = FeatureUnique(value=unique_value,
+                                       percentage=unique_percentage,
                                        status=FeatureUnique.calc_status(unique_value, unique_percentage))
-        missing_percentage = missing/n_rows*100
-        feature_missing = FeatureMissing(value=missing, percentage=missing_percentage,
+        missing_percentage = missing_count / n_rows * 100
+        feature_missing = FeatureMissing(value=missing_count,
+                                         percentage=missing_percentage,
                                          status=FeatureMissing.calc_status(missing_percentage))
 
         # feature_correlation = FeatureCorrelation(value=unique_value, percentage=unique_value/, status=) 相关性在分析那里
@@ -225,24 +279,32 @@ class PandasAnalyzer(Analyzer):
                        extension=extension)
 
     def do_analyze_csv(self) -> DatasetStats:
-        df = self.df
+        df: pd.DataFrame = self.df
 
-        n_cols = len(df.columns)
+        # 1. replace Infinity to NaN, the error is:
+        # ValueError: cannot specify integer `bins` when input data contains infinity
+        df.replace([np.Infinity, -np.Infinity], np.nan, inplace=True)
+
+        # 2. calc missing
         missing_dict = df.isnull().sum()
-        features = [self.analyze_col(col_name, int(missing_dict[col_name]), ) for col_name in df.columns]
+
+        # 3. analyze cols
+        features = [self.analyze_col(col_name, int(missing_dict[col_name])) for col_name in df.columns]
         feature_type_dict = pd.Series(data=[f.type for f in features], name='feature_type').value_counts().to_dict()
         fts = FeatureTypeStats(**feature_type_dict)
 
-        return DatasetStats(has_header=self.is_has_header, n_rows=self.n_rows, n_cols=n_cols, features=features, feature_summary=fts)
+        return DatasetStats(has_header=self.is_has_header,
+                            n_rows=self.n_rows, n_cols=len(df.columns),
+                            features=features, feature_summary=fts)
 
         # df['SepalLengthCm'].value_counts().compute()
 
         # X1.corr(Y1, method="pearson")
 
     def infer_feature_type(self, type_name):
-        if 'float' in type_name  or 'int'  in type_name:
+        if 'float' in type_name or 'int' in type_name:
             return FeatureType.Continuous
-        elif 'datetime' in type_name :
+        elif 'datetime' in type_name:
             return FeatureType.Datetime
         else:
             # todo CategoricalInt

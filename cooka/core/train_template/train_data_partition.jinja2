@@ -2,6 +2,7 @@
 {% else %}{{ MRO.insert_tab()}}df = pd.read_csv(train_file_path, header=None)
 {{ MRO.insert_tab()}}df.columns = dataset_default_headers  # update columns
 {% endif %}
+{{ MRO.insert_tab()}}df.replace([np.Infinity, -np.Infinity], np.nan, inplace=True)
 {{ MRO.insert_tab()}}n_rows = df.shape[0]
 {{ MRO.insert_tab()}}df.dropna(axis=0, how='all', subset=[label_col], inplace=True)
 {{ MRO.insert_tab()}}print(f"Total rows which label is None: {n_rows - df.shape[0]}")

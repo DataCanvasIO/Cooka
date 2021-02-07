@@ -422,6 +422,7 @@ class YearValueCount(Bean):
 class DatetimeFeatureExtension(Bean):
     by_year = ListBeanField(YearValueCount)
     by_month = ListObjectField()
+    by_day = ListObjectField()
     by_week = ListObjectField()
     by_hour = ListObjectField()
 

@@ -45,63 +45,58 @@ const ImportFilePage = ({dispatch, location,  importFile: { pollJobResponse }}) 
 
       checkoutStepFromStepsDict(stepsDict, ImportStepType.copy, (copyStep) => {
 
-        const  copyTook = copyStep['took'];
-        const  copiedFileSize = copyStep.extension.file_size;
-
         if(copyStep.status === 'succeed') {
+          const  copyTook = copyStep['took'];
+          const  copiedFileSize = copyStep.extension.file_size;
+
           setUploadStatus(StepStatusIcon['done']);
           setUploadTips(`${formatMessage({id: 'upload.hintUploadFile'}, {elapsed: copyTook.toFixed(2), fileSize:  convertByteUnits(copiedFileSize) }) }`) // todo fixme
           setLoadingDataStatus(StepStatusIcon['doing']);
           setLoadingDataTips(formatMessage({id: 'upload.loading'}))
-
-        } else if ( copyStep.status === 'failed' ) {
+        } else  {
           setLoadingDataStatus(StepStatusIcon['undone']);
           setUploadTips(formatMessage({id: 'upload.fail'}))
-        }else{
-
         }
       })
 
       checkoutStepFromStepsDict(stepsDict, ImportStepType.load, (loadStep) => {
-        const loadStepStatus = loadStep.status;
-        const  n_cols  = loadStep.extension.n_cols;
-        const  n_cols_used  = loadStep.extension.n_cols_used;
-        const  n_rows  = loadStep.extension.n_rows;
-        const  n_rows_used  = loadStep.extension.n_rows_used;
-        const  loadingTook  = loadStep.took;
 
-        if (loadStepStatus === 'succeed') {
+        if (loadStep.status === 'succeed') {
+
+          const  n_cols  = loadStep.extension.n_cols;
+          const  n_cols_used  = loadStep.extension.n_cols_used;
+          const  n_rows  = loadStep.extension.n_rows;
+          const  n_rows_used  = loadStep.extension.n_rows_used;
+          const  loadingTook  = loadStep.took;
+
           setLoadingDataStatus(StepStatusIcon['done']);
           setLoadingDataTips(`${formatMessage({id: 'upload.hintLoadData'}, {elapsed: loadingTook.toFixed(2), nRows: n_rows, nColumns: n_cols, nRowsUsed: n_rows_used})  }`);
 
           setAnalysisDataStatus(StepStatusIcon['doing']);
           setAnalysisDataTips(formatMessage({id: 'upload.analysising'}))
 
-        } else if ( loadStepStatus === 'failed' ) {
+        } else {
           setLoadingDataStatus(StepStatusIcon['undone']);
           setLoadingDataTips(formatMessage({id: 'upload.fail'}))
         }
-
       })
 
       checkoutStepFromStepsDict(stepsDict, ImportStepType.analyze, (analyzeStep) => {
 
-        const  categorical = analyzeStep.extension.feature_summary.categorical;
-        const  continuous = analyzeStep.extension.feature_summary.continuous;
-        const  datetime = analyzeStep.extension.feature_summary.datetime;
-        const  analysisTook = analyzeStep.took;
-        const analyzeStepStatus = analyzeStep.status;
+        if (analyzeStep.status === 'succeed') {
+          const categorical = analyzeStep.extension.feature_summary.categorical;
+          const continuous = analyzeStep.extension.feature_summary.continuous;
+          const datetime = analyzeStep.extension.feature_summary.datetime;
+          const analysisTook = analyzeStep.took;
 
-        if (analyzeStepStatus === 'succeed') {
           setAnalysisDataStatus(StepStatusIcon['done']);
           setLoadingDataStatus(StepStatusIcon['done']);
           setAnalysisDataTips(`${formatMessage({id: 'upload.hintAnalysis'}, {elapsed: analysisTook.toFixed(2), nContinuous: continuous, nCategorical:categorical,  nDatetime: datetime})}`);
 
-        } else if (analyzeStepStatus === 'failed') {
+        } else  {
           setAnalysisDataStatus(StepStatusIcon['undone']);
           setAnalysisDataTips(formatMessage({id: 'import.fail'}));
         }
-
       })
     }
 
