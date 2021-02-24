@@ -56,17 +56,17 @@ class ExperimentService(object):
     def _infer_task_type(self, f:Feature):
         n_unique = f.unique.value
         if n_unique == 2:
-            log.info(f'2 class detected,  so inferred as a [binary classification] task')
+            # log.info(f'2 class detected,  so inferred as a [binary classification] task')
             return TaskType.BinaryClassification
         else:
             if 'float' in f.data_type:
-                log.info(f'Target column type is float, so inferred as a [regression] task.')
+                # log.info(f'Target column type is float, so inferred as a [regression] task.')
                 return TaskType.Regression
             else:
                 if n_unique > 1000:
                     if 'int' in f.type:
-                        log.info(
-                            'The number of classes exceeds 1000 and column type is int, so inferred as a [regression] task ')
+                        # log.info(
+                        #   'The number of classes exceeds 1000 and column type is int, so inferred as a [regression] task ')
                         return TaskType.Regression
                     else:
                         raise ValueError(
@@ -329,6 +329,7 @@ class ExperimentService(object):
             "train_mode": experiment_conf.train_mode,
             "partition_strategy": experiment_conf.partition_strategy,
             "datetime_series_col": experiment_conf.datetime_series_col,
+            "partition_col": experiment_conf.partition_col,
             "reward_metric": reward_metric,
             "optimize_direction": self.get_direction_source_code(reward_metric),
             "framework": train_job_conf.framework,
@@ -342,9 +343,13 @@ class ExperimentService(object):
             params_dict['holdout_percentage'] = experiment_conf.train_validation_holdout.holdout_percentage
             params_dict["train_percentage"] = experiment_conf.train_validation_holdout.train_percentage
             params_dict["validation_percentage"] = experiment_conf.train_validation_holdout.validation_percentage
-        else:
+        elif experiment_conf.partition_strategy == ExperimentConf.PartitionStrategy.Manual:
+            pass
+        elif experiment_conf.partition_strategy == ExperimentConf.PartitionStrategy.CrossValidation:
             params_dict['holdout_percentage'] = experiment_conf.cross_validation.holdout_percentage
             params_dict["n_folds"] = experiment_conf.cross_validation.n_folds
+        else:
+            raise Exception(f"Unseen partition strategy: {experiment_conf.partition_strategy} ")
 
         # 4. render raw python
         template_dir = P.join(consts.PATH_INSTALL_HOME, 'cooka', 'core', 'train_template')
@@ -498,7 +503,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         partition_strategy = util.require_in_dict(req_dict, 'partition_strategy', str)
         dataset_name = util.require_in_dict(req_dict, 'dataset_name', str)
 
-        holdout_percentage = util.require_in_dict(req_dict, 'holdout_percentage', int)
+        partition_col = util.get_from_dict(req_dict, 'partition_col', str)
 
         # todo check datetime_series_col
         datetime_series_col = util.get_from_dict(req_dict, 'datetime_series_col', str)
@@ -513,6 +518,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
         if partition_strategy == ExperimentConf.PartitionStrategy.CrossValidation:
             cross_validation_dict = util.require_in_dict(req_dict, 'cross_validation', dict)
             n_folds = util.require_in_dict(cross_validation_dict, 'n_folds', int)
+            holdout_percentage = util.require_in_dict(cross_validation_dict, 'holdout_percentage', int)
             if 1 < n_folds <= 50:
                 cross_validation = CrossValidation(n_folds=n_folds, holdout_percentage=holdout_percentage)
             else:
@@ -521,9 +527,13 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
             train_validation_holdout_dict = util.require_in_dict(req_dict, 'train_validation_holdout', dict)
             train_percentage = util.require_in_dict(train_validation_holdout_dict, 'train_percentage', int)
             validation_percentage = util.require_in_dict(train_validation_holdout_dict, 'validation_percentage', int)
+            holdout_percentage = util.require_in_dict(train_validation_holdout_dict, 'holdout_percentage', int)
             if train_percentage + validation_percentage + holdout_percentage != 100:
                 raise ValueError("train_percentage plus validation_percentage plus holdout_percentage should equal 100.")
             train_validation_holdout = TrainValidationHoldout(train_percentage=train_percentage, validation_percentage=validation_percentage, holdout_percentage=holdout_percentage)
+        elif partition_strategy == ExperimentConf.PartitionStrategy.Manual:
+            if partition_col is None or len(partition_col) <= 0:
+                raise ValueError(f"{ExperimentConf.PartitionStrategy.Manual} strategy need a partition col but it's empty .")
         else:
             raise ValueError(f"Unknown partition strategy = {partition_strategy}")
 
@@ -582,6 +592,7 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                               cross_validation=cross_validation,
                               train_validation_holdout=train_validation_holdout,
                               datetime_series_col=datetime_series_col,
+                              partition_col=partition_col,
                               file_path=dataset_stats.file_path)
 
         model_input_features = list(map(lambda _: ModelFeature(name=_.name, type=_.type, data_type=_.data_type).to_dict(), filter(lambda _: _.name != label_f.name, dataset_stats.features)))
@@ -693,9 +704,10 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
                 "pos_label": experiment_conf.pos_label,
                 "train_mode": experiment_conf.train_mode,
                 "engine": experiment_conf.engine,
-                "partition_strategy": ExperimentConf.PartitionStrategy.TrainValidationHoldout,
+                "partition_strategy": experiment_conf.partition_strategy,
                 "train_validation_holdout": train_validation_holdout.to_dict() if train_validation_holdout is not None else None,
                 "cross_validation": cross_validation.to_dict() if cross_validation is not None else None,
+                "partition_col": experiment_conf.partition_col,
                 "datetime_series_col": datetime_series_col
             }
         return conf

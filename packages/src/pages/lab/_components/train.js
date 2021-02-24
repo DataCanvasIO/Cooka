@@ -50,7 +50,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   const [divisionNumber, setDivisionNumber] = useState(5);
   const [testPercentage, setTestPercentage] = useState(20);
   const [dateValue, setDateValue] = useState('');
-  const [partitionCol, setPartitionCol] = useState('');
+  const [partitionCol, setPartitionCol] = useState(null);
   const [labelTipVisible, setLabelTipVisible] = useState(false);
   const [binaryTipVisible, setBinaryTipVisible] = useState(false);
   const [sliderData, setSliderData] = useState(defaultData);
@@ -160,6 +160,10 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
         setMode(config.conf.train_mode);
         setExperimentEngine(config.conf.engine);
         setPartitionStrategy(config.conf.partition_strategy);
+
+        if(config.conf.partition_strategy === PartitionStrategy.Manual){
+          setPartitionCol(config.conf.partition_col)
+        }
 
         defaultData[0].count = 80;
         defaultData[1].count = 10;
@@ -322,7 +326,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
       )
     } else if (partitionStrategy === PartitionStrategy.Manual) {
       // pass
-      return <Select placeholder={handlePartitionColSelectorPlaceholder()} style={{ width: 300 }} disabled={!hasPartitionCols} onChange={handlePartitionColChange}>
+      return <Select placeholder={handlePartitionColSelectorPlaceholder()} style={{ width: 300 }} disabled={!hasPartitionCols} onChange={handlePartitionColChange} value={partitionCol}>
         {
           partitionColArray.map((item, index) => {
             return (
