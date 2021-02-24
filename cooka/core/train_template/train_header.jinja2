@@ -6,6 +6,8 @@ import math
 import requests
 import pickle
 import numpy as np
+import json
+import time
 
 from os import path as P
 from sklearn.model_selection import train_test_split
@@ -13,9 +15,10 @@ from sklearn import metrics
 
 from cooka.common import dataset_util
 from cooka.common import util
+from cooka.common.model import PartitionClass
+
 from deeptables.models.hyper_dt import HyperDT, DnnModule, DTModuleSpace, DTFit, DTEstimator
 from deeptables.utils import consts as DT_consts
-
 
 from hypernets.core.callbacks import *
 from hypernets.core.ops import HyperInput, ModuleChoice

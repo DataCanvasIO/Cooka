@@ -355,6 +355,7 @@ class ExperimentConf(Bean):
     cross_validation = BeanField(CrossValidation)
     train_validation_holdout = BeanField(TrainValidationHoldout)
     datetime_series_col = StringField()
+    partition_col = StringField()
     # feature_series_name = StringField()
     file_path = StringField()
     test_file_path = StringField()
@@ -362,6 +363,13 @@ class ExperimentConf(Bean):
     class PartitionStrategy:
         CrossValidation = 'cross_validation'
         TrainValidationHoldout = 'train_validation_holdout'
+        Manual = 'manual'
+
+
+class PartitionClass:
+  Train = 'TRAIN'
+  Test = 'TEST'
+  Eval = 'EVAL'
 
 
 class FeatureTypeStats(Bean):

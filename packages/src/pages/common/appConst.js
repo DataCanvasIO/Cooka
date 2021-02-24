@@ -57,3 +57,23 @@ export const StepStatusIcon = {
   done: (<CheckOutlined style={{ fontSize: 16, color: 'green'}} />),
   undone: (<CloseOutlined style={{ fontSize: 16, color: 'red'}} />)
 };
+
+export const PartitionStrategy = {
+  CrossValidation: 'cross_validation',
+  TrainValidationHoldout: 'train_validation_holdout',
+  Manual: 'manual'
+};
+
+
+export const PartitionClass = {
+  Train: 'TRAIN',
+  Test: 'TEST',
+  Eval: 'EVAL'
+}
+
+export const FeatureType = {
+  Categorical: 'categorical',
+  Continuous: 'continuous',
+  Text: 'text',
+  Datetime: 'datetime'
+}

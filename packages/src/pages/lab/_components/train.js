@@ -10,6 +10,7 @@ import { getDataRetrieve, getRecommendConfig, interTaskType } from '@/services/d
 import { makeToolTipFromMsgId } from '@/utils/util';
 import { showNotification } from '@/utils/notice';
 import { setLabel } from 'echarts/src/chart/bar/helper';
+import { PartitionStrategy, PartitionClass, FeatureType } from '@/pages/common/appConst';
 
 
 const { Option } = Select;
@@ -36,7 +37,8 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   const frameworkTypes = ['HyperGBM', 'DeepTables']  // first as default value
 
   const dataRef = useRef();
-  const [dataType, setDataType] = useState('train_validation_holdout');
+
+  const [partitionStrategy, setPartitionStrategy] = useState('train_validation_holdout');
   const [labelData, setLabelData] = useState(null);  // 标签对应的 data
   const [posLabelValues, setPosLabelValues] = useState(null);  // 正样本选择数据
   const [labelType, setLabelType] = useState('');   // 标签的 type
@@ -48,6 +50,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   const [divisionNumber, setDivisionNumber] = useState(5);
   const [testPercentage, setTestPercentage] = useState(20);
   const [dateValue, setDateValue] = useState('');
+  const [partitionCol, setPartitionCol] = useState('');
   const [labelTipVisible, setLabelTipVisible] = useState(false);
   const [binaryTipVisible, setBinaryTipVisible] = useState(false);
   const [sliderData, setSliderData] = useState(defaultData);
@@ -55,6 +58,24 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
 
   const labelColArr = features?.filter(feature => feature.type === 'continuous' || feature.type === 'categorical') || [];
   const datetimeColArr = features?.filter(feature => feature.type === 'datetime') || [];
+
+  const partitionColArray = features?.filter(feature => {
+    if (feature.type === FeatureType.Categorical){
+      if (feature.extension.value_count.length === 3){
+        const labels = feature.extension.value_count.map( v => v.type);
+        if (labels.indexOf(PartitionClass.Train) > -1
+          && labels.indexOf(PartitionClass.Eval) > -1
+          && labels.indexOf(PartitionClass.Test) > -1){
+          return true
+        }
+      }
+    }
+    return false;
+  }) || [];
+
+  const hasPartitionCols = partitionColArray.length > 0 ;
+  const hasDatetimeCols = datetimeColArr.length > 0 ;
+
   const [form] = Form.useForm();
 
 
@@ -138,7 +159,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
         setPosValue(config.conf.pos_label);
         setMode(config.conf.train_mode);
         setExperimentEngine(config.conf.engine);
-        setDataType(config.conf.partition_strategy);
+        setPartitionStrategy(config.conf.partition_strategy);
 
         defaultData[0].count = 80;
         defaultData[1].count = 10;
@@ -177,18 +198,14 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
     setTarget(val);
   }
 
-
-  const handleModeChange = (e) => {
-    setMode(e.target.value)
-  }
-
-
-  const handleDataChange = (e) => {
-    setDataType(e.target.value)
-  }
   const handleDateChange = (val) => {
     setDateValue(val)
   }
+
+  const handlePartitionColChange = (val) => {
+    setPartitionCol(val)
+  }
+
 
   const onChange = value => {
     if (isNaN(value)) {
@@ -207,15 +224,20 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   // 数据分配标题
   const analysisTitle = (
     <>
-      <Radio.Group onChange={(e) => handleDataChange(e)} value={dataType} style={{ marginTop: 12 }}>
-        <Radio value='train_validation_holdout'>{formatMessage({ id: 'extra.testAndTrain' })}</Radio>
+      <Radio.Group onChange={(e) => setPartitionStrategy(e.target.value)} value={partitionStrategy} style={{ marginTop: 12 }}>
+        <Radio value={PartitionStrategy.TrainValidationHoldout}>
+          { formatMessage({ id: 'extra.testAndTrain' }) }
+        </Radio>
         {/*<Radio value='cross_validation' style={{ marginLeft: 50 }}>{formatMessage({ id: 'train.crossVerified' })}</Radio>*/}
+        {<Radio value={PartitionStrategy.Manual} style={{ marginLeft: 50 }}>
+          { formatMessage({ id: 'train.partition.manual' }) }
+        </Radio>}
       </Radio.Group>
     </>
   );
   // 数据分配内容部分
   const getAnalysisContent = () => {
-    if (dataType === 'cross_validation') {
+    if (partitionStrategy === PartitionStrategy.CrossValidation) {
       return (
         <>
           <dl>
@@ -277,20 +299,20 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
                   {
                     Array.apply(null,{length: divisionNumber}).map((_, index) => {
                       return (
-                        <span style={{ flex: 1, backgroundColor: '#0090DC', borderRight: '1px solid #fff' }}></span>
+                        <span style={{ flex: 1, backgroundColor: '#0090DC', borderRight: '1px solid #fff' }}/>
                       )
                     })
                   }
                 </div>
-                <div className={styles.testdata} style={{ flex: 1, width: `${testPercentage}%`, backgroundColor: '#E73B40'}}></div>
+                <div className={styles.testdata} style={{ flex: 1, width: `${testPercentage}%`, backgroundColor: '#E73B40'}}/>
               </div>
               <div className={styles.legend}>
                 <div className={styles.number}>
-                  <span className={styles.cvdataCir}></span>
+                  <span className={styles.cvdataCir}/>
                   <span className={styles.symbol}>{formatMessage({id: 'train.cvdata'})}</span>
                 </div>
                 <div className={styles.type}>
-                  <span className={styles.testCir}></span>
+                  <span className={styles.testCir}/>
                   <span className={styles.symbol}>{formatMessage({id: 'train.testUnion'})}</span>
                 </div>
               </div>
@@ -298,7 +320,19 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
           </Row>
         </>
       )
-    } else {
+    } else if (partitionStrategy === PartitionStrategy.Manual) {
+      // pass
+      return <Select placeholder={handlePartitionColSelectorPlaceholder()} style={{ width: 300 }} disabled={!hasPartitionCols} onChange={handlePartitionColChange}>
+        {
+          partitionColArray.map((item, index) => {
+            return (
+              <Option value={item.name} key={index}>{item.name}</Option>
+            )
+          })
+        }
+      </Select>
+
+  }else{
       return (
         <div style={{ width: 800 }}>
           <CookaSlider dataRef={dataRef} sliderData={sliderData}  />
@@ -319,7 +353,6 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
 
   // 训练
   const handleTrain = () => {
-    const data = dataRef.current.getData();
 
     let param =  {
       label_col: target, // 标签列
@@ -327,22 +360,28 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
       train_mode: mode, // 训练模式
 
       experiment_engine: experimentEngine,
-      holdout_percentage: data[2].count,  // 测试集比例
+      // holdout_percentage: data[2].count,  // 测试集比例
       // holdout_percentage: divisionNumber,  // 测试集比例
       datetime_series_col: dateValue // 日期列
     };
-
-    if (dataType === 'cross_validation') {
-      param['partition_strategy'] = 'cross_validation';  // 数据分配模式
+    param['partition_strategy'] = partitionStrategy;  // 数据分配模式
+    if (partitionStrategy === PartitionStrategy.CrossValidation) {
+      // todo add holdout
       param['cross_validation'] =  {
         n_folds: testPercentage,  // 分割数
       }
-    } else if (dataType === 'train_validation_holdout') {
-      param['partition_strategy'] = 'train_validation_holdout';  // 数据分配模式
+    } else if (partitionStrategy === PartitionStrategy.TrainValidationHoldout) {
+      const data = dataRef.current.getData();
       param['train_validation_holdout'] = {
         train_percentage: data[0].count,  // 分割数
         validation_percentage: data[1].count
       }
+    }else if (partitionStrategy === PartitionStrategy.Manual) {
+      param['partition_col'] = partitionCol;
+    }else{
+      // Handle exception
+      showNotification('Unseen partition strategy: ' + partitionStrategy);
+      return
     }
 
     const params = {
@@ -364,12 +403,21 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
   }
 
   const handleDatetimeSelectorPlaceholder = () => {
-    if(datetimeColArr && datetimeColArr.length === 0){
+    if(hasDatetimeCols){
       return formatMessage({ id: 'train.datetimeColSelectorNoItem'})
     }else{
       return formatMessage({ id: 'train.select'})
     }
   }
+
+  const handlePartitionColSelectorPlaceholder = () => {
+    if(hasPartitionCols){
+      return formatMessage({ id: 'train.partition.noPartitionCols'})
+    }else{
+      return formatMessage({ id: 'train.select'})
+    }
+  }
+
 
   const taskTypeMessageIdMapping = {
     multi_classification: "train.taskMultiClassification",
@@ -478,7 +526,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
             {makeToolTipFromMsgId('train.hintTrainMode')}
           </dt>
           <dd>
-            <Radio.Group onChange={handleModeChange} value={mode}>
+            <Radio.Group onChange={e => setMode(e.target.value)} value={mode}>
               <Radio value='quick'>{formatMessage({id: 'train.quick'})}</Radio>
               <Radio value='performance'>{formatMessage({id: 'train.performance'})}</Radio>
               <Radio value='minimal'>{formatMessage({id: 'train.minimal'})}</Radio>
@@ -488,7 +536,10 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
       </div>
       <div className={styles.advanced}>
         <dl>
-          <dt>{formatMessage({id: 'train.dataAllot'})}</dt>
+          <dt>
+            {formatMessage({id: 'train.dataAllot'})}
+            { makeToolTipFromMsgId('train.partition.hint') }
+          </dt>
         </dl>
         <Card title={analysisTitle} style={{ width: '80%'}}>
           <div>
@@ -500,9 +551,9 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
             {makeToolTipFromMsgId('train.hintDatetimeSeriesFeature')}
           </dt>
           <dd>
-            <Select placeholder={handleDatetimeSelectorPlaceholder()} style={{ width: 300 }} disabled={datetimeColArr.length === 0} onChange={handleDateChange}>
+            <Select placeholder={handleDatetimeSelectorPlaceholder()} style={{ width: 300 }} disabled={!hasDatetimeCols} onChange={setDateValue}>
               {
-                datetimeColArr && datetimeColArr.map((item, index) => {
+                  datetimeColArr.map((item, index) => {
                   return (
                     <Option value={item.name} key={index}>{item.name}</Option>
                   )

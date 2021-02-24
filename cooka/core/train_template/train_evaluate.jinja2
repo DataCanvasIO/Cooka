@@ -1,4 +1,14 @@
 {% import 'macro.jinja2' as MRO with context %}
+
+{{ MRO.insert_tab()}}if X_test.shape[0] == 0:
+{{ MRO.insert_tab()}}    print("Test dataset is empty, use eval dataset instead")
+{{ MRO.insert_tab()}}    X_test = X_eval
+{{ MRO.insert_tab()}}    y_test = y_eval
+{{ MRO.insert_tab()}}else:
+{{ MRO.insert_tab()}}    if y_test is None:
+{{ MRO.insert_tab()}}        print("Test dataset is empty, use eval dataset instead")
+{{ MRO.insert_tab()}}        X_test = X_eval
+{{ MRO.insert_tab()}}        y_test = y_eval
 {{ MRO.insert_tab()}}y_pred = estimator.predict(X_test)
 {% if task_type != 'regression' %}
 {{ MRO.insert_tab()}}y_score = estimator.predict_proba(X_test)

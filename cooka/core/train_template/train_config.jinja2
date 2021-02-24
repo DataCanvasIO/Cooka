@@ -18,6 +18,7 @@ n_folds = {{ MRO.handle_None(n_folds, False) }}
 train_percentage = {{ MRO.handle_None(train_percentage, False) }}
 validation_percentage = {{ MRO.handle_None(validation_percentage, False) }}
 datetime_series_col = {{ MRO.handle_None(datetime_series_col, True) }}
+partition_col =  {{ MRO.handle_None(partition_col, True) }}
 train_job_name = "{{ train_job_name }}"
 model_name = "{{ model_name }}"
 model_feature_list = {{ model_feature_list }}

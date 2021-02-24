@@ -6,14 +6,28 @@
 {{ MRO.insert_tab()}}n_rows = df.shape[0]
 {{ MRO.insert_tab()}}df.dropna(axis=0, how='all', subset=[label_col], inplace=True)
 {{ MRO.insert_tab()}}print(f"Total rows which label is None: {n_rows - df.shape[0]}")
+
+{% if partition_strategy == 'manual' %}
+{{ MRO.insert_tab()}}X_train = df[df[partition_col] == PartitionClass.Train]
+{{ MRO.insert_tab()}}X_eval = df[df[partition_col] == PartitionClass.Eval]
+{{ MRO.insert_tab()}}X_test = df[df[partition_col] == PartitionClass.Test]
+{{ MRO.insert_tab()}}if X_train.shape[0] < 1:
+{{ MRO.insert_tab()}}    raise Exception("No train rows in dataset ")
+{{ MRO.insert_tab()}}if X_eval.shape[0] < 1:
+{{ MRO.insert_tab()}}    raise Exception("No evaluate rows in dataset ")
+{{ MRO.insert_tab()}}if X_test.shape[0] == 0:
+{{ MRO.insert_tab()}}    raise Exception("No test rows in dataset ")
+{% else %}
 {% if datetime_series_col %}
 {{ MRO.insert_tab()}}df = df.sort_values(axis=0, by='{{ datetime_series_col }}')
-{{ MRO.insert_tab()}}X_train, X_test = train_test_split(df, test_size={{ holdout_percentage / 100 }},  shuffle=False)
-{% else %}
-{{ MRO.insert_tab()}}X_train, X_test = train_test_split(df, test_size={{ holdout_percentage / 100 }},  random_state=42, shuffle=True)
+{% endif %}
+{{ MRO.insert_tab()}}X, X_test = train_test_split(df, test_size={{ holdout_percentage / 100 }},  shuffle=False)
+{{ MRO.insert_tab()}}X_train, X_eval = train_test_split(df, test_size={{ (validation_percentage / 100)  / (1 - holdout_percentage / 100) }},  shuffle=False)
 {% endif %}
 {{ MRO.insert_tab()}}y_train = X_train.pop(label_col)
+{{ MRO.insert_tab()}}y_eval = X_eval.pop(label_col)
 {{ MRO.insert_tab()}}y_test = X_test.pop(label_col)
 {{ MRO.insert_tab()}}X_train = dataset_util.cast_df(X_train, model_feature_list, remove_unnecessary_cols=True)
+{{ MRO.insert_tab()}}X_eval = dataset_util.cast_df(X_eval, model_feature_list, remove_unnecessary_cols=True)
 {{ MRO.insert_tab()}}X_test = dataset_util.cast_df(X_test, model_feature_list, remove_unnecessary_cols=True)
 {{ MRO.insert_tab()}}classes = list(set(y_train).union(set(y_test)))
