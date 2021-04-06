@@ -15,6 +15,7 @@ from cooka.common.model import Feature
 from cooka.service.dataset_service import DatasetService
 from cooka.service.experiment_service import ExperimentService
 from cooka.common import consts
+from cooka.common.authentication import authenticated
 
 
 class DatasetHandler(BaseHandler):
@@ -22,6 +23,7 @@ class DatasetHandler(BaseHandler):
     dataset_service = DatasetService()
 
     @gen.coroutine
+    @authenticated
     def post(self, *args, **kwargs):
         # 1. validate param
         request_body = self.get_request_as_dict_if_json()
@@ -36,12 +38,14 @@ class DatasetHandler(BaseHandler):
         self.response_json({})
 
     @gen.coroutine
+    @authenticated
     def get(self, *args, **kwargs):
         args = self.get_query_args()
         datasets, count = self.dataset_service.brevity_dataset_pagination(req_dict=args)
         self.response_json({"datasets": datasets, "count": count})
 
     @gen.coroutine
+    @authenticated
     def delete(self, dataset_name, *args, **kwargs):
         # 1. validate param
         if dataset_name is None:
@@ -61,31 +65,11 @@ class DatasetHandler(BaseHandler):
         self.response_json(meta_dict)
 
 
-# class DatasetDetailHandler(BaseHandler):
-#
-#     @gen.coroutine
-#     def get(self, dataset_name, *args, **kwargs):
-#         # 1. validate param
-#         if dataset_name is None:
-#             raise IllegalParamException("dataset_name", None, "not empty")
-#
-#         path_dataset = P.join(consts.PATH_DATASET, dataset_name)
-#         if not P.exists(path_dataset):
-#             raise EntityNotExistsException(EntityNotExistsException.Entities.Dataset, dataset_name)
-#
-#         meta_file = P.join(path_dataset, 'meta.json')
-#         if not P.exists(meta_file):
-#             raise ValueError(f"Dataset={dataset_name} is broken")
-#
-#         with open(meta_file, 'r') as f:
-#             meta_dict = util.loads(f.read())
-#
-#         self.response_json(meta_dict)
-
 class DatasetItemHandler(BaseHandler):
     dataset_service = DatasetService()
 
     @gen.coroutine
+    @authenticated
     def get(self, dataset_name, *args, **kwargs):
 
         query_args = self.get_query_args()
@@ -97,6 +81,7 @@ class DatasetItemHandler(BaseHandler):
         self.response_json(d)
 
     @gen.coroutine
+    @authenticated
     def delete(self, dataset_name, *args, **kwargs):
         self.dataset_service.delete(dataset_name)
         self.response_json({})
@@ -107,6 +92,7 @@ class DatasetNameHandler(BaseHandler):
     dataset_service = DatasetService()
 
     @gen.coroutine
+    @authenticated
     def post(self, dataset_name, *args, **kwargs):
 
         # check it in db
@@ -128,6 +114,7 @@ class DatasetPreviewDataHandler(BaseHandler):
     dataset_service = DatasetService()
 
     @gen.coroutine
+    @authenticated
     def get(self, dataset_name, *args, **kwargs):
 
         # 1. validate param
@@ -148,6 +135,7 @@ class DatasetPreviewDataHandler(BaseHandler):
 class TestImportFileHandler(BaseHandler):
 
     @gen.coroutine
+    @authenticated
     def post(self, *args, **kwargs):
         path = self.get_request_as_dict_if_json().get("path")
 
@@ -165,8 +153,6 @@ class TestImportFileHandler(BaseHandler):
         self.response_json(response)
 
 
-
-
 class TemporaryDatasetHandler(BaseHandler):
 
     temporary_dataset_service = DatasetService()
@@ -174,6 +160,7 @@ class TemporaryDatasetHandler(BaseHandler):
     DEFAULT_SAMPLE_SIZE = 1000
 
     @gen.coroutine
+    @authenticated
     def post(self, *args, **kwargs):
         # 1. read params
         req_dict = self.get_request_as_dict_if_json()
@@ -195,6 +182,7 @@ class DatasetAnalyzeProcessHandler(BaseHandler):
     dataset_service = DatasetService()
 
     @gen.coroutine
+    @authenticated
     def post(self, dataset_name, analyze_job_name, *args, **kwargs):
         # 1. read param
         dict_body = self.get_request_as_dict_if_json()
@@ -205,6 +193,7 @@ class DatasetAnalyzeProcessHandler(BaseHandler):
         self.response_json({})
 
     @gen.coroutine
+    @authenticated
     def get(self, dataset_name, analyze_job_name, *args, **kwargs):
         # 1. validate param
         if analyze_job_name is None:
@@ -233,6 +222,7 @@ class InferTaskTypeHandler(BaseHandler):
     dataset_service = DatasetService()
 
     @gen.coroutine
+    @authenticated
     def post(self, dataset_name, *args, **kwargs):
         req_dict = self.get_request_as_dict_if_json()
 

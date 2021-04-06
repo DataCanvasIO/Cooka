@@ -1,6 +1,6 @@
 from os import path as P
 import psutil
-import os
+import os, hashlib
 
 from traitlets.config import Application
 from traitlets.traitlets import (
@@ -140,4 +140,12 @@ METRICS_GBM_OPTIMIZE_MAPPING = {
 MAX_DISTINCT_VALUES = 10
 KEY_REMAINED_FEATURE_VALUES_SUM = 'Remained_SUM'
 BIN_SIZE = 10
+
+# pass |
+
+# TOKEN = hashlib.md5(b'123456').hexdigest()
+
+AUTHENTICATION = None  # http_basic,None
+TOKEN = "123456"
+USER_NAME = "admin"
 

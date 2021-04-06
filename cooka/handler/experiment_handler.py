@@ -14,11 +14,13 @@ from os import path as P
 import os
 
 from cooka.service.experiment_service import ExperimentService
+from cooka.common.authentication import authenticated
 
 
 class ExperimentHandler(BaseHandler):
     experiment_service = ExperimentService()
 
+    @authenticated
     @gen.coroutine
     def post(self, dataset_name, *args, **kwargs):
         request_body = self.get_request_as_dict_if_json()
@@ -27,9 +29,11 @@ class ExperimentHandler(BaseHandler):
         config = self.experiment_service.experiment(request_body)
         self.response_json(config)
 
+    @authenticated
     @gen.coroutine
     def get(self, dataset_name, *args, **kwargs):
         # page_num, page_size
+
         page_num = int(self.get_argument('page_num', 1))
         page_size = int(self.get_argument('page_size', 20))
 
@@ -46,6 +50,7 @@ class ModelDetailHandler(BaseHandler):
 
     experiment_service = ExperimentService()
 
+    @authenticated
     @gen.coroutine
     def get(self, dataset_name, model_name, *args, **kwargs):
         m = self.experiment_service.retrieve(model_name)
@@ -56,6 +61,7 @@ class ModelTrainProcessHandler(BaseHandler):
 
     experiment_service = ExperimentService()
 
+    @authenticated
     @gen.coroutine
     def post(self, dataset_name, train_job_name, *args, **kwargs):
         # 1. read param
@@ -65,6 +71,7 @@ class ModelTrainProcessHandler(BaseHandler):
         # 2. response
         self.response_json({})
 
+    @authenticated
     @gen.coroutine
     def get(self, temporary_dataset_name, analyze_job_name, *args, **kwargs):
         pass
@@ -94,6 +101,7 @@ class RecommendTrainConfigurationHandler(BaseHandler):
 
     experiment_service = ExperimentService()
 
+    @authenticated
     @gen.coroutine
     def post(self, dataset_name, *args, **kwargs):
         req_dict = self.get_request_as_dict_if_json()

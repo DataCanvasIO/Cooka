@@ -3,6 +3,7 @@
 from tornado import gen
 
 from cooka.common import util
+from cooka.common.authentication import authenticated
 from cooka.common.model import JobStep
 from cooka.dao import db
 from cooka.dao.entity import MessageEntity
@@ -14,6 +15,7 @@ class BatchPredictJobItemHandler(BaseHandler):
 
     model_serving_service = ModelServingService()
 
+    @authenticated
     @gen.coroutine
     def get(self, dataset_name, model_name, batch_predict_job_name, *args, **kwargs):
         # 1. query all the message of request_id  todo move to service
@@ -32,6 +34,7 @@ class BatchPredictJobItemHandler(BaseHandler):
             }
         self.response_json(response)
 
+    @authenticated
     @gen.coroutine
     def post(self, dataset_name, model_name, batch_predict_job_name, *args, **kwargs):
 
@@ -48,6 +51,7 @@ class BatchPredictJobHandler(BaseHandler):
 
     model_serving_service = ModelServingService()
 
+    @authenticated
     @gen.coroutine
     def post(self, dataset_name, model_name, *args, **kwargs):
         request_body = self.get_request_as_dict_if_json()

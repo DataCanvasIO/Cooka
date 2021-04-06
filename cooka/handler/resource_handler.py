@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from cooka.common import util
+from cooka.common.authentication import authenticated
 from cooka.common.exceptions import MissingParamException
 from cooka.common.log import log_web as logger
 
@@ -16,6 +17,7 @@ from tornado import httputil
 
 class AbstractTextResourceHandler(BaseHandler):
 
+    @authenticated
     @gen.coroutine
     def get(self, path, *args, **kwargs):
         # 1. validate param
@@ -137,6 +139,7 @@ class StreamResourceHandler(BaseHandler):
         del chunk  # free mem
 
     @gen.coroutine
+    @authenticated
     def post(self, *args, **kwargs):
         # 1. close file
         file_size = util.human_data_size(self.writed_size)

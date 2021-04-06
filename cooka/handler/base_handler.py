@@ -31,16 +31,19 @@ class BaseHandler(tornado.web.RequestHandler):
 
         """
         exc_info = kwargs.get('exc_info')
+        http_code = 200
         if exc_info is not None:
             exception_class, exception, trace = exc_info
             logger.exception(exception)
 
             if isinstance(exception, AssertionError):
                 service_exception = ServiceException(consts.CODE_ASSERTION_ERROR, exc_info[1].args[0], exc_info)
+
             elif isinstance(exception, ServiceException):
                 service_exception = exception
             elif isinstance(exception, HTTPError):
                 service_exception = ServiceException(consts.CODE_HTTP_ERROR, f"status={exception.status_code}", exception)
+                http_code = exception.status_code
             else:
                 service_exception = ServiceException(consts.CODE_OTHER, exception.args[0], exception)
 
@@ -51,7 +54,10 @@ class BaseHandler(tornado.web.RequestHandler):
 
         self.set_header('Content-Type', 'application/json')
         # handled
-        self.set_status(200)
+        self.set_status(http_code)
+        if http_code == 401:
+            self.set_header('WWW-Authenticate', 'Basic realm="%s"' % "admin")
+
         self.finish(response.to_json())
 
     @staticmethod
