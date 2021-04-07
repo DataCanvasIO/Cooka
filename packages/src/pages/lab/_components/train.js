@@ -164,13 +164,17 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
 
         if(config.conf.partition_strategy === PartitionStrategy.Manual){
           setPartitionCol(config.conf.partition_col)
+        }else if(config.conf.partition_strategy === PartitionStrategy.TrainValidationHoldout){
+          defaultData[0].count = config.conf.train_validation_holdout.train_percentage;
+          defaultData[1].count = config.conf.train_validation_holdout.validation_percentage;
+          defaultData[2].count = config.conf.train_validation_holdout.holdout_percentage;
+          setSliderData(defaultData);
+          // V 0.1.1 has no random state
+          const random_state = config.conf.train_validation_holdout.random_state;
+          if( random_state !== undefined && random_state !== null){
+            setRandomState(config.conf.train_validation_holdout.random_state);
+          }
         }
-
-        defaultData[0].count = 80;
-        defaultData[1].count = 10;
-        defaultData[2].count = 10;
-        setSliderData(defaultData);
-
         features.forEach(feature => {
           if (feature.name === config.conf.label_col) {
             setPosLabelValues(feature.extension.value_count);
@@ -347,7 +351,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
             <dt>{formatMessage({id: 'train.random_split.seed'})}</dt>
           </dl>
           <Row>
-              <InputNumber onChange={v => setRandomState(v)}  min={0} max={65535} defaultValue={9527} style={{ width: 300 }} />
+              <InputNumber onChange={v => setRandomState(v)}  min={0} max={65535} value={randomState} style={{ width: 300 }} />
           </Row>
           <dl>
             <dt>{formatMessage({id: 'train.random_split.proportion'})}</dt>
