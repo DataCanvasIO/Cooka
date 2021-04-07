@@ -44,10 +44,10 @@ class Line extends PureComponent {
       options.parallelAxis.push({
         dim: index,
         name
-      })
+      });
     });
     data.data.forEach((item, index) => {
-      options['series']['data'] = new Array(data.param_names.length)
+      options['series']['data'] = new Array(data.param_names.length);
       options['series'][0]['data'][index] = item.params;
     });
 

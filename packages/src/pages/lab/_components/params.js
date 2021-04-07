@@ -18,7 +18,12 @@ const Params = ({ modelName, location: { query: { datasetName } } }) => {
       const res = originRes.data;
       if (res.trials) {
         setLoading(false);
-        setData(res.trials);
+        const trials = res.trials;
+        trials.param_names.push('Reward metric');
+        trials.data.forEach(ele => {
+          ele.params.push(ele.reward)
+        });
+        setData(trials);
       }
     })
   }, [datasetName, modelName])
