@@ -558,7 +558,7 @@ const Train = ({ train: { labelName }, dispatch, location: { query: { datasetNam
             <Radio.Group onChange={e => setMode(e.target.value)} value={mode}>
               <Radio value='quick'>{formatMessage({id: 'train.quick'})}</Radio>
               <Radio value='performance'>{formatMessage({id: 'train.performance'})}</Radio>
-              <Radio value='minimal'>{formatMessage({id: 'train.minimal'})}</Radio>
+              {/*<Radio value='minimal'>{formatMessage({id: 'train.minimal'})}</Radio>*/}
             </Radio.Group>
           </dd>
         </dl>
