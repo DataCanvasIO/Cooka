@@ -1,6 +1,19 @@
 Release Note
 =====================
 
+Version 0.1.2
+-------------
+
+**Experiment design**
+- Support input random state to split dataset
+
+**Experiment list**
+- Use reward metric in visualmap of hyperparams line chart(Fix bug)
+
+** Other **
+- Update hypergbm to 0.2.2
+
+
 Version 0.1.1
 -------------
 

@@ -83,7 +83,7 @@ if __name__ == '__main__':
             'tornado==6.0.4',
             'jinja2',
             'deeptables==0.1.13',
-            'hypergbm==0.2.1',
+            'hypergbm==0.2.2',
             'traitlets',
         ],
         # extras_require={
