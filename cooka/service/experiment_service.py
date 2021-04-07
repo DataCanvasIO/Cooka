@@ -343,6 +343,7 @@ class ExperimentService(object):
             params_dict['holdout_percentage'] = experiment_conf.train_validation_holdout.holdout_percentage
             params_dict["train_percentage"] = experiment_conf.train_validation_holdout.train_percentage
             params_dict["validation_percentage"] = experiment_conf.train_validation_holdout.validation_percentage
+            params_dict["random_state"] = experiment_conf.train_validation_holdout.random_state
         elif experiment_conf.partition_strategy == ExperimentConf.PartitionStrategy.Manual:
             pass
         elif experiment_conf.partition_strategy == ExperimentConf.PartitionStrategy.CrossValidation:
@@ -528,9 +529,13 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
             train_percentage = util.require_in_dict(train_validation_holdout_dict, 'train_percentage', int)
             validation_percentage = util.require_in_dict(train_validation_holdout_dict, 'validation_percentage', int)
             holdout_percentage = util.require_in_dict(train_validation_holdout_dict, 'holdout_percentage', int)
+            random_state = util.require_in_dict(train_validation_holdout_dict, 'random_state', int)
             if train_percentage + validation_percentage + holdout_percentage != 100:
                 raise ValueError("train_percentage plus validation_percentage plus holdout_percentage should equal 100.")
-            train_validation_holdout = TrainValidationHoldout(train_percentage=train_percentage, validation_percentage=validation_percentage, holdout_percentage=holdout_percentage)
+            train_validation_holdout = TrainValidationHoldout(train_percentage=train_percentage,
+                                                              validation_percentage=validation_percentage,
+                                                              holdout_percentage=holdout_percentage,
+                                                              random_state=random_state)
         elif partition_strategy == ExperimentConf.PartitionStrategy.Manual:
             if partition_col is None or len(partition_col) <= 0:
                 raise ValueError(f"{ExperimentConf.PartitionStrategy.Manual} strategy need a partition col but it's empty .")

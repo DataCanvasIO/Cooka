@@ -21,5 +21,5 @@ def authenticated(method):
                 raise HTTPError(401)
         else:
             # No authentication
-            pass
+            return method(self, *args, **kwargs)
     return wrapper

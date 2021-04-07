@@ -91,6 +91,7 @@ if __name__ == '__main__':
         #         'shap',
         #         'jupyterlab',
         #         'matplotlib'
+        #         'pyecharts'
         #     ]
         # },
         zip_safe=False,

@@ -6,13 +6,12 @@ from tornado.web import Finish, HTTPError
 import codecs
 
 from cooka.common.model import RestResponse, ResponseCode, ErrorResponse, LocaleInfo
+from cooka.common.log import log_web as logger
 from typing import Any
-import logging
+
 
 from cooka.common import consts
 from cooka.common.exceptions import ServiceException
-
-logger = logging.getLogger(__name__)
 
 
 class BaseHandler(tornado.web.RequestHandler):

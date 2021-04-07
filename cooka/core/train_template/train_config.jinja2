@@ -18,6 +18,8 @@ n_folds = {{ MRO.handle_None(n_folds, False) }}
 train_percentage = {{ MRO.handle_None(train_percentage, False) }}
 validation_percentage = {{ MRO.handle_None(validation_percentage, False) }}
 datetime_series_col = {{ MRO.handle_None(datetime_series_col, True) }}
+random_state = {{ random_state }}
+eval_size = {{ validation_percentage / ( train_percentage + validation_percentage ) }}
 partition_col =  {{ MRO.handle_None(partition_col, True) }}
 train_job_name = "{{ train_job_name }}"
 model_name = "{{ model_name }}"
@@ -42,6 +44,7 @@ print(f"holdout_percentage: {holdout_percentage}")
 print(f"n_folds: {n_folds}")
 print(f"train_percentage: {train_percentage}")
 print(f"validation_percentage: {validation_percentage}")
+print(f"eval_size: {eval_size}")
 print(f"datetime_series_col: {datetime_series_col}")
 print(f"train_job_name: {train_job_name}")
 print(f"model_name: {model_name}")

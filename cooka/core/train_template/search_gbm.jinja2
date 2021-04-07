@@ -9,6 +9,6 @@
 {{ MRO.insert_tab()}}hk = HyperGBM(rs, task="{{ gbm_task_type }}", reward_metric=reward_metric,
 {{ MRO.insert_tab()}}              callbacks=[{% if target_source_type == 'raw_python' %}TrainTrialCallback(server_portal, train_job_name, dataset_name), {% endif %}SummaryCallback(), FileLoggingCallback(rs), EarlyStoppingCallback(max_no_improvement_trials=5, mode=optimize_direction.value)])
 
-{{ MRO.insert_tab()}}experiment = CompeteExperiment(hk, X_train, y_train, X_eval=X_eval, y_eval=y_eval, X_test=X_test, train_test_split_strategy=None, cv=False, task=None, callbacks=None, random_state=9527,scorer=None,data_cleaner_args=None, collinearity_detection=False, drift_detection=False,ensemble_size=20,feature_reselection=False,pseudo_labeling=False,retrain_on_wholedata=False,log_level=None)
+{{ MRO.insert_tab()}}experiment = CompeteExperiment(hk, X_train, y_train, eval_size=eval_size, X_test=X_test, train_test_split_strategy=None, cv=False, task=None, callbacks=None, random_state=9527,scorer=None,data_cleaner_args=None, collinearity_detection=False, drift_detection=False,ensemble_size=20,feature_reselection=False,pseudo_labeling=False,retrain_on_wholedata=False,log_level=None)
 
 {{ MRO.insert_tab()}}estimator = experiment.run(use_cache=True, max_trials=max_trials)

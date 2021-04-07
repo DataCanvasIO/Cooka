@@ -331,9 +331,13 @@ class TrainValidationHoldout(Bean):
     train_percentage = IntegerField()
     validation_percentage = IntegerField()
     holdout_percentage = IntegerField()
+    random_state = IntegerField()
 
 
-TrainValidationHoldoutDefault = TrainValidationHoldout(train_percentage=80, validation_percentage=10, holdout_percentage=10)
+TrainValidationHoldoutDefault = TrainValidationHoldout(train_percentage=80,
+                                                       validation_percentage=10,
+                                                       holdout_percentage=10,
+                                                       random_state=9527)
 
 
 class TrainMode:

@@ -3,14 +3,22 @@ import { Pie, HBChart } from 'components';
 
 const LabelChart = memo((props) => {
   const { labelType, labelData } = props;
+  var style = props.style;
+
+  if(style === null || style === undefined){
+    style = {
+      width: 500
+    }
+  }
+
   const chartConfig = {
     categorical: (
-    <div style={{ width: 500 }}>
-      <Pie data={labelData} updateWhenChange={true}/>
+    <div style={style}>
+      <Pie data={labelData} updateWhenChange={false}/>
     </div>
     ),
     continuous: (
-    <div style={{ width: 500 }}>
+    <div style={style}>
       <HBChart hData={labelData} />
     </div>
     )

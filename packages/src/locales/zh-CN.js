@@ -140,6 +140,8 @@ export default {
   'train.hintTarget': '选择一个目标列来进行训练',
   'train.hintPositiveLabel': '正样本帮助正确评估模型',
   'train.hintExperimentEngine': '训练模型以及处理特征的方式',
+  'train.random_split.seed': '随机种子',
+  'train.random_split.proportion': '比例',
 
   // 模型中心 Elapsed
   'center.trainingPanelTitle': '第{noExperiment}次训练',

@@ -28,7 +28,7 @@ class Line extends PureComponent {
         hoverLink:true,
       },
     };
-  }
+  };
 
   render() {
     const { style, className, data, xAxisProp, seriesData, loading, ...restProp } = this.props;
@@ -49,7 +49,7 @@ class Line extends PureComponent {
     data.data.forEach((item, index) => {
       options['series']['data'] = new Array(data.param_names.length)
       options['series'][0]['data'][index] = item.params;
-    })
+    });
 
     return (
       <EchartsCore

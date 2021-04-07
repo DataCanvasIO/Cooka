@@ -31,7 +31,7 @@ const CookaSlider = ({ dataRef, sliderData }) => {
     const currData = [...data];
     const { deltaX, deltaY } = ui;
     // console.log('ui=>', deltaX, ui, index)
-    const count =Math.abs(deltaX) / 8;
+    const count = Math.round(Math.abs(deltaX) / 8);
     if (deltaX < 0) {
       currData[index].count = data[index].count - count;
       currData[index+1].count = data[index+1].count + count;

@@ -142,6 +142,9 @@ export default {
   'train.hintTarget': 'Select target column to train',
   'train.hintPositiveLabel': 'Positive label help to evaluate the model correctly',
   'train.hintExperimentEngine': 'Experiment Engine',
+  'train.random_split.seed': 'Random seed',
+  'train.random_split.proportion': 'Proportion',
+
 
   // 模型中心
   'center.trainingPanelTitle': 'Experiment No. {noExperiment}',
