@@ -23,12 +23,25 @@ cooka server
 ### 使用 Docker
 
 使用Docker拉起一个Cooka 服务：
-```shell
-docker run -ti -p 8888:8888 -p 8000:8000 -p 9001:9001 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
+```
+docker run -ti -p 8000:8000 -p 9001:9001 datacanvas/cooka:latest
+# port 9001 is supervisor(which used to manage process) web ui, and the account/password is: user/123 
+# port 8000 is cooka web ui
+```
+打开浏览器访问 `http://<your-ip>:8000` 来使用Cooka。
+
+如果需要与jupyter notebook 整合，请指定运行在容器中的jupyter的url： 
+```
+docker run -ti -p 8000:8000 -p 9001:9001 -p 8888:8888 -e COOKA_NOTEBOOK_PORTAL=http://<your_ip>:8888 datacanvas/cooka:latest
+# port 8888 is jupyter notebook
 ```
 
-打开浏览器访问 `http://<your-ip>:8000` 来使用Cooka
-Open browser visit site `http://<your-ip>:8000`，notebook的token您设置的"you-token"，如果不指定则为空。
+您可也可以把数据存储在主机中:
+```shell script
+docker run -v /path/to/cooka-config-dir:/root/.config/cooka -v /path/to/cooka-data:/root/cooka -ti -p 8000:8000 -p 9001:9001 datacanvas/cooka:latest
+# Config file is at: /root/.config/cooka/cooka.py
+# User data is at: /root/cooka
+```
 
 ### 从源码安装
 
