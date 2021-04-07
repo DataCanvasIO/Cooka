@@ -28,7 +28,7 @@ docker run -ti -p 8000:8000 -p 9001:9001 datacanvas/cooka:latest
 # port 9001 is supervisor(which used to manage process) web ui, and the account/password is: user/123 
 # port 8000 is cooka web ui
 ```
-Open browser and visit site http://<your-ip>:8000 to use cooka.
+Open browser and visit site `http://<your-ip>:8000` to use cooka.
 
 If you want to integrate with jupyter notebook, please specify jupyter url running in the container:
 ```
