@@ -287,6 +287,10 @@ class ExperimentService(object):
         return notebook_json
 
     def generate_code(self, model_name, model_input_features, n_rows, train_job_conf: TrainJobConf, experiment_conf: ExperimentConf):
+        def fix_escape(p: str):
+            if p is not None:
+                return p.replace('\\', '\\\\')
+
         # 1. set earlystopping
         if experiment_conf.train_mode == TrainMode.Minimal:
             earlystopping_patience = "[1]"
@@ -311,16 +315,17 @@ class ExperimentService(object):
         pos_label = experiment_conf.pos_label
         pos_label_is_str = isinstance(pos_label, str)
         reward_metric = self.get_optimize_metric(experiment_conf.task_type, train_job_conf.framework)
+
         params_dict = {
             "server_portal": consts.SERVER_PORTAL,
             "train_job_name": train_job_conf.name,
-            "data_root": consts.DATA_DIR,
+            "data_root": fix_escape(consts.DATA_DIR),
             "model_name": model_name,
             "pos_label": pos_label,
             "earlystopping_patience": earlystopping_patience,
             "pos_label_is_str": pos_label_is_str,
-            "train_file_path": experiment_conf.file_path,
-            "test_file_path": experiment_conf.test_file_path,
+            "train_file_path": fix_escape(experiment_conf.file_path),
+            "test_file_path": fix_escape(experiment_conf.test_file_path),
             "task_type": experiment_conf.task_type,
             "gbm_task_type": experiment_conf.task_type,
             "dataset_name": experiment_conf.dataset_name,
@@ -463,13 +468,11 @@ shap_values = dt_explainer.get_shap_values(X_test[:1], nsamples='auto')"""
 
         # 4. run train process
         # Note: if plus & at end of command, the process id will be plus 1 cause a bug
-        command = f"nohup {sys.executable} {train_source_code_path} 1>{train_log} 2>&1"
+        command = f"{sys.executable} {train_source_code_path}"
 
-        log.info(f"Run train job command: \n{command}")
-        log.info(f"Log file:\ntail -f  {train_log}")
-        log.info(f"Train source code:\n {train_source_code_path}")
+        log.info(f"Run train job command: \n{command}\nlog file:\ntail -f  {train_log}")
 
-        train_process = subprocess.Popen(["bash", "-c", command], stdout=subprocess.PIPE)
+        train_process = util.run_command(command, train_log)
 
         with db.open_session() as s:
             self.model_dao.update_model_by_name(s, model_name, {"pid": train_process.pid})

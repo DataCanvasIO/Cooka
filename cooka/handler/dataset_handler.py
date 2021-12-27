@@ -27,8 +27,6 @@ class DatasetHandler(BaseHandler):
     def post(self, *args, **kwargs):
         # 1. validate param
         request_body = self.get_request_as_dict_if_json()
-        print("request_body:")
-        print(request_body)
         dataset_name = util.require_in_dict(request_body, 'dataset_name', str)
         temporary_dataset_name = util.require_in_dict(request_body, 'temporary_dataset_name', str)
 

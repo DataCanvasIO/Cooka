@@ -5,6 +5,7 @@ from uuid import uuid4
 import json
 from json import JSONEncoder
 import math
+import subprocess
 import re
 from cooka.common import consts
 from os import path as P
@@ -60,7 +61,7 @@ def predict_job_name(dataset_name, _datetime=None):
 
 
 def temporary_upload_file_path(filename):
-    return f'{consts.PATH_TMP_UPLOAD}/{short_uuid()}/{filename}'
+    return P.abspath(f'{consts.PATH_TMP_UPLOAD}/{short_uuid()}/{filename}')
 
 
 def get_file_suffix(file_name):
@@ -549,7 +550,7 @@ def serialize2file(obj, path):
 
 
 def script_path(script):
-    return f"{consts.PATH_INSTALL_HOME}/cooka/core/{script}"
+    return P.abspath(f"{consts.PATH_INSTALL_HOME}/cooka/core/{script}")
 
 
 def abs_path(p):
@@ -568,3 +569,9 @@ def validate_sample_conf(sample_conf):
         pass
     else:
         raise ValueError(f"Unknown sample strategy: {sample_conf.sample_strategy}")
+
+
+def run_command(cmd, output_file):
+    with open(output_file, 'w') as stdout:
+        p = subprocess.Popen(cmd, stdout=stdout, stderr=stdout, shell=True, encoding="utf-8")
+    return p

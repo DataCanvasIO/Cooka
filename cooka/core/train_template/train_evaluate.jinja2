@@ -12,7 +12,11 @@
 {{ MRO.insert_tab()}}y_pred = estimator.predict(X_test)
 {% if task_type != 'regression' %}
 {{ MRO.insert_tab()}}y_score = estimator.predict_proba(X_test)
+{% if framework == 'HyperGBM' %}
 {{ MRO.insert_tab()}}y_pos_score = y_score[:, 1]
+{% elif framework == 'DeepTables'  %}
+{{ MRO.insert_tab()}}y_pos_score = y_score
+{% endif %}
 {% endif %}
 {% if target_source_type == 'raw_python' %}
 {% if task_type == 'binary_classification' %}

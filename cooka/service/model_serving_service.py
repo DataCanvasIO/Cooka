@@ -53,11 +53,10 @@ class ModelServingService:
         else:
             default_headers = None
 
-        command = f"nohup {sys.executable} {consts.PATH_INSTALL_HOME}/cooka/core/batch_predict_job.py --input_file_path={abs_file_path} --reserved_cols={reserved_cols_str} --model_name={model_name} --dataset_name={dataset_name} --job_name={predict_job_name} --has_header={dataset_stats.has_header} --default_headers={default_headers}  --server_portal={consts.SERVER_PORTAL} 1>{predict_log_path} 2>&1 &"
+        command = f"{sys.executable} {consts.PATH_INSTALL_HOME}/cooka/core/batch_predict_job.py --input_file_path={abs_file_path} --reserved_cols={reserved_cols_str} --model_name={model_name} --dataset_name={dataset_name} --job_name={predict_job_name} --has_header={dataset_stats.has_header} --default_headers={default_headers}  --server_portal={consts.SERVER_PORTAL}"
 
-        logger.info(f"Run analyze job command: \n{command}")
-        logger.info(f"Log file:\ntail -f {predict_log_path}")
-        os.system(command)  # ha ha ha
+        logger.info(f"Run prediction job command: \n{command} \nthe file:\ntail -f {predict_log_path}")
+        util.run_command(command, predict_log_path)
 
         return predict_job_name
 

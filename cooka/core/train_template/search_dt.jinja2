@@ -52,7 +52,7 @@
 {{ MRO.insert_tab()}}                        use_bn=Bool(),
 {{ MRO.insert_tab()}}                        dnn_layers=2,
 {{ MRO.insert_tab()}}                        activation='relu')(dt_module)
-{{ MRO.insert_tab()}}        fit = DTFit(batch_size=Choice([32, 64]), epochs=1000)(dt_module)
+{{ MRO.insert_tab()}}        fit = DTFit(batch_size=Choice([32, 64]), epochs=10)(dt_module)
 {{ MRO.insert_tab()}}
 {{ MRO.insert_tab()}}    return space
 {% else %}
@@ -91,6 +91,6 @@
 {{ MRO.insert_tab()}}             dnn_params={
 {{ MRO.insert_tab()}}                 'dnn_units': ((256, 0, False), (256, 0, False)),
 {{ MRO.insert_tab()}}                 'dnn_activation': 'relu'})
-{{ MRO.insert_tab()}}hk.search(X_train, y_train, eval_size=eval_size, max_trials=max_trials)
+{{ MRO.insert_tab()}}hk.search(X_train, y_train, X_eval=X_train, y_eval=y_train, max_trials=max_trials)
 {{ MRO.insert_tab()}}best_trial = hk.get_best_trial()
 {{ MRO.insert_tab()}}estimator = hk.final_train(best_trial.space_sample, X_train, y_train)

@@ -5,7 +5,6 @@
 {{ MRO.insert_tab()}}fbeta_value = round(metrics.fbeta_score(y_test, y_pred, beta=10, average='binary', pos_label=pos_label), 4)  # beta == 10 from aps
 {{ MRO.insert_tab()}}precision_value = round(metrics.precision_score(y_test, y_pred, average='binary', pos_label=pos_label), 4)
 {{ MRO.insert_tab()}}recall_value = round(metrics.recall_score(y_test, y_pred, average='binary', pos_label=pos_label), 4)
-{{ MRO.insert_tab()}}log_loss_value = round(metrics.log_loss(y_test, y_score), 4)
 {{ MRO.insert_tab()}}metrics_dict = {
 {{ MRO.insert_tab()}}    "accuracy": accuracy_value,
 {{ MRO.insert_tab()}}    "f1": f1_value,
@@ -14,7 +13,6 @@
 {{ MRO.insert_tab()}}    "recall": recall_value,
 {{ MRO.insert_tab()}}    # "auc": auc_value,
 {{ MRO.insert_tab()}}    "roc_auc": auc_value,
-{{ MRO.insert_tab()}}    "log_loss": log_loss_value
 {{ MRO.insert_tab()}}}
 {{ MRO.insert_tab()}}
 {{ MRO.insert_tab()}}tn, fp, fn, tp = metrics.confusion_matrix(y_test, y_pred).ravel()

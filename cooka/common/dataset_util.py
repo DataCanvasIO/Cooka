@@ -42,9 +42,11 @@ def cast_df(input_df, schema, remove_unnecessary_cols=False):
         input_df = input_df[list(feature_names)]
 
     # 4. cast type
+    features_name = []
     for f in schema:
         # 4.1. check feature exists
         feature_name = f['name']
+        features_name.append(feature_name)
         if feature_name not in input_data_name_type_dict:
             raise Exception("Missing input feature: %s" % feature_name)
 
@@ -62,4 +64,5 @@ def cast_df(input_df, schema, remove_unnecessary_cols=False):
                     raise Exception(f"For feature {feature_name} in input data type is {data_type_name}, cat only convert to {','. join(matched_cols) }, but target type is: {feature_type_name} .")
             else:
                 raise Exception(f"There no convert for feature {feature_name} and  type is: {data_type_name}, but target type is {feature_type_name}")
-    return input_df
+    # 5. sort features
+    return input_df[features_name]

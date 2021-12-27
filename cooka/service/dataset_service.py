@@ -4,11 +4,11 @@ import time
 import pandas as pd
 from os import path as P
 import sys
+import subprocess
 import numpy as np
 from cooka.dao.dao import DatasetDao, ExperimentDao
 from cooka.dao import db
 from cooka.dao.entity import DatasetEntity, MessageEntity
-
 from cooka.common import util, consts
 from cooka.common.exceptions import EntityNotExistsException, IllegalParamException
 from cooka.common.log import log_web as logger
@@ -380,15 +380,11 @@ class DatasetService:
         os.makedirs(temporary_dataset_dir, exist_ok=True)
 
         std_log = P.join(temporary_dataset_dir, f"{analyze_job_name}.log")
-
-        command = f"nohup {python_executable} {util.script_path('analyze_job.py')} --file_path={file_path} --job_name={analyze_job_name} --dataset_name={temporary_dataset_name} --sample_strategy={sample_conf.sample_strategy} --n_rows={self.replace_None(sample_conf.n_rows)} --percentage={self.replace_None(sample_conf.percentage)} --server_portal={consts.SERVER_PORTAL} 1>{std_log} 2>&1 &"
-
+        command = f"{python_executable} {util.script_path('analyze_job.py')} --file_path={file_path} --job_name={analyze_job_name} --dataset_name={temporary_dataset_name} --sample_strategy={sample_conf.sample_strategy} --n_rows={self.replace_None(sample_conf.n_rows)} --percentage={self.replace_None(sample_conf.percentage)} --server_portal={consts.SERVER_PORTAL}"
         logger.info(f"Run analyze job command: \n{command}")
         logger.info(f"Log file:\ntail -f {std_log}")
-
+        util.run_command(command, std_log)
         # JobManager.instance().run_job(job)
-        os.system(command)  # ha ha ha
-
         return temporary_dataset_name, analyze_job_name
 
     def preview(self, dataset_name: str, page_num: int, page_size: int) -> RespPreviewDataset:

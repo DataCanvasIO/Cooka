@@ -64,7 +64,7 @@ _app = CookaApp()
 if P.exists(_config_path):
     _app.load_config_file(_config_name, path=[_config_dir])
 
-DATA_DIR = P.expanduser(_app.data_directory)
+DATA_DIR = P.abspath(P.expanduser(_app.data_directory))
 NOTEBOOK_PORTAL = _app.notebook_portal
 LANG = _app.language
 

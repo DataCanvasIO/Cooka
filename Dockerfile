@@ -31,12 +31,15 @@ ENV LLVM_CONFIG /usr/bin/llvm-config-9.0-64
 #RUN echo -e "[easy_install]\n\
 #index_url = https://mirrors.aliyun.com/pypi/simple" > /root/.pydistutils.cfg
 
-RUN pip3 -v install jupyterlab==2.0.0 supervisor pyarrow==2.0.0 # Docker Image deps
 
-RUN pip3 -v install numpy==1.19.1 scikit-learn==0.23.1  # Prepare for shap
-RUN pip3 -v install shap==0.28.5 matplotlib  # Prepare for hypergbm
+RUN pip3 install -v jupyterlab==2.0.0 supervisor pyarrow==2.0.0 # Docker Image deps
+
+RUN pip3 install -v numpy==1.19.1 scikit-learn==0.23.1 tensorflow==2.2.0  # Prepare for shap
+RUN pip3 install -v shap==0.28.5 matplotlib dask-ml==1.4.0  # Prepare for hypergbm
 
 RUN pip3 install -v cooka  # install cooka
+
+RUN pip3 install -v scikit-learn==0.23.1 featuretools==0.27.1 dask-ml==1.4.0
 
 RUN mkdir -p /root/.config/cooka /root/cooka /etc/supervisor/ /var/log
 
