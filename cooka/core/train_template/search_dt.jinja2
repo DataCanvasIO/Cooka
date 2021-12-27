@@ -52,7 +52,7 @@
 {{ MRO.insert_tab()}}                        use_bn=Bool(),
 {{ MRO.insert_tab()}}                        dnn_layers=2,
 {{ MRO.insert_tab()}}                        activation='relu')(dt_module)
-{{ MRO.insert_tab()}}        fit = DTFit(batch_size=Choice([32, 64]), epochs=10)(dt_module)
+{{ MRO.insert_tab()}}        fit = DTFit(batch_size=Choice([32, 64]), epochs=500)(dt_module)
 {{ MRO.insert_tab()}}
 {{ MRO.insert_tab()}}    return space
 {% else %}
