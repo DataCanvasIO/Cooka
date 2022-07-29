@@ -8,7 +8,7 @@ class TestAnalyzer(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-       cls.data_path = "cooka/test/dataset/diabetes_10k_datetime.csv"
+       cls.data_path = "cooka/tests/dataset/diabetes_10k_datetime.csv"
 
     def test_sample_random_rows_analyzer(self):
         sample_conf = SampleConf(sample_strategy=SampleConf.Strategy.RandomRows, percentage=None, n_rows=200)

@@ -30,7 +30,7 @@ class PandasAnalyzer(Analyzer):
         import time
         # 1. check params
         if not os.path.exists(file_path):
-            raise FileExistsError("File not found: %s" % file_path)
+            raise FileNotFoundError(file_path)
         self.file_path = file_path
         self.sample_conf = sample_conf
         self.label_col = label_col

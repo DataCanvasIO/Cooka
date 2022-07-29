@@ -1,12 +1,16 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from os.path import join as pjoin
+import os
+import subprocess
 import shutil
-from setuptools import setup, find_packages
 import distutils.cmd
 import distutils.log
-import subprocess
+
+
 from os import path as P
+from os.path import join as pjoin
+
+from setuptools import setup, find_packages
+
 
 
 try:
@@ -23,6 +27,20 @@ execfile(P.join(HERE, 'cooka', '_version.py'), version_ns)
 version = version_ns['__version__']
 
 print("__version__=" + version)
+
+
+def read_requirements(file_path='requirements.txt'):
+    if not os.path.exists(file_path):
+        return []
+
+    with open(file_path, 'r')as f:
+        lines = f.readlines()
+
+    lines = [x.strip('\n').strip(' ') for x in lines]
+    lines = list(filter(lambda x: len(x) > 0 and not x.startswith('#'), lines))
+
+    return lines
+
 
 with open(P.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -74,18 +92,7 @@ if __name__ == '__main__':
         cmdclass={'buildjs': BuildJSCommand},
         python_requires='>=3.6.*',
         license='Apache License 2.0',
-        install_requires=[
-            'numpy',
-            'pandas',
-            'scikit-learn>=0.22.1',
-            'requests',
-            'SQLAlchemy>=1.3.18',
-            'tornado==6.0.4',
-            'jinja2',
-            'deeptables==0.1.13',
-            'hypergbm==0.2.2',
-            'traitlets',
-        ],
+        install_requires=read_requirements(),
         # extras_require={
         #     'notebook': [
         #         'shap',

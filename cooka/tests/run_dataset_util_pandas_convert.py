@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from cooka.common import dataset_util
 
 # 1. 构建带有int32, int64, float32,float64, object(时间样式) 类型数据的数据集
-df = pd.read_csv('cooka/test/dataset/iris.csv')
+df = pd.read_csv('cooka/tests/dataset/iris.csv')
 
 df['label_int_64_1'] = LabelEncoder().fit_transform(df['Species'])  # int32
 df['label_int_64_2'] = df['label_int_64_1']

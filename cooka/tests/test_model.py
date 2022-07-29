@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from cooka.common import util
-from cooka.test.test_dataset import TestDataset
+from cooka.tests.test_dataset import TestDataset
 from os import path as P
 import time
 import os
@@ -52,7 +52,7 @@ class TestModel(TestDataset):
 
     def test_multi_classification_model(self):
         # 1. create a dataset
-        dataset_name = self.create_dataset_from_file('cooka/test/dataset/iris.csv')
+        dataset_name = self.create_dataset_from_file('cooka/tests/dataset/iris.csv')
 
         # 2. create a train job
         req_dict = \
@@ -97,7 +97,7 @@ class TestModel(TestDataset):
         req_dict = \
             {
                 "upload_took": 10,  # 10 just for test
-                "file_path": P.abspath('cooka/test/dataset/diabetes_10k_datetime.csv'),
+                "file_path": P.abspath('cooka/tests/dataset/diabetes_10k_datetime.csv'),
                 "reserved_cols": ['race'],
             }
 

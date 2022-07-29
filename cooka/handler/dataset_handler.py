@@ -120,7 +120,7 @@ class DatasetPreviewDataHandler(BaseHandler):
             raise IllegalParamException("dataset_name", None, "not empty")
 
         # page_num, page_size
-        page_num = int(self.get_argument('page_num', 0))
+        page_num = int(self.get_argument('page_num', 1))
         page_size = int(self.get_argument('page_size', 20))
 
         # 2. read file

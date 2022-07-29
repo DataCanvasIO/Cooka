@@ -29,7 +29,7 @@ class TestHypernet(unittest.TestCase):
         hk = HyperGBM(rs, task='classification', reward_metric='accuracy',
                       callbacks=[SummaryCallback(), FileLoggingCallback(rs)])
 
-        df = pd.read_csv('cooka/test/dataset/Bank_Marketing_Data/train.csv')
+        df = pd.read_csv('cooka/tests/dataset/Bank_Marketing_Data/train.csv')
 
         df.drop(['id'], axis=1, inplace=True)
         X_train, X_test = train_test_split(df.head(1000), test_size=0.2, random_state=42)
@@ -55,7 +55,7 @@ class TestHypernet(unittest.TestCase):
         hk = HyperGBM(rs, task='classification', reward_metric='accuracy',
                       callbacks=[SummaryCallback(), FileLoggingCallback(rs)])
 
-        df = pd.read_csv('cooka/test/dataset/diabetes_10k.csv')
+        df = pd.read_csv('cooka/tests/dataset/diabetes_10k.csv')
 
         X_train, X_test = train_test_split(df.head(1000), test_size=0.2, random_state=42)
         y_train = X_train.pop('readmitted')

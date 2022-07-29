@@ -4,7 +4,7 @@ from os import path as P
 from cooka.common import util
 from cooka.common import consts
 from cooka.common.model import Feature, FeatureType
-from cooka.test.base_test_case import BaseTestCase, WithTemporaryDatasetTestCase
+from cooka.tests.base_test_case import BaseTestCase, WithTemporaryDatasetTestCase
 
 
 class TestDataset(WithTemporaryDatasetTestCase):
@@ -129,11 +129,11 @@ class TestDataset(WithTemporaryDatasetTestCase):
         response = self.fetch(preview_uri, method="GET", headers=self.DEFAULT_HEADER)
         response_dict = self.assert_response_and_get(response)
         assert len(response_dict['rows']) == 20
-        assert len(response_dict['headers']) == 52
+        assert len(response_dict['headers']) == 53
         assert response_dict['count'] > 0
 
     def test_recommend_train_conf(self):
-        dataset_name = self.create_dataset_from_file("cooka/test/dataset/Bank_Marketing_Data/train.csv")
+        dataset_name = self.create_dataset_from_file("cooka/tests/dataset/Bank_Marketing_Data/train.csv")
 
         recommend_conf = self.assert_response_and_get(self.fetch(f'/api/dataset/{dataset_name}/feature-series/default/recommend-train-conf', method="GET", headers=self.DEFAULT_HEADER)).get("conf")
 

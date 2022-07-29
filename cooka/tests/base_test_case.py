@@ -64,7 +64,7 @@ class WithTemporaryDatasetTestCase(BaseTestCase):
         yield write(b"--%s--\r\n" % (boundary_bytes,))
 
     def create_temporary_dataset(self) -> str:
-        data_path = P.join(PATH_INSTALL_HOME, "cooka/test/dataset/diabetes_10k_datetime.csv")
+        data_path = P.join(PATH_INSTALL_HOME, "cooka/tests/dataset/diabetes_10k_datetime.csv")
         return self.create_temporary_dataset_from_file(data_path)
 
     def create_temporary_dataset_from_file(self, data_path):

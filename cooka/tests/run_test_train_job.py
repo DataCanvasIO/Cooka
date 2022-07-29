@@ -19,8 +19,8 @@ class TestTrainJob:
                            partition_strategy=ExperimentConf.PartitionStrategy.TrainValidationHoldout,
                            train_validation_holdout=TrainValidationHoldout(train_percentage=80, validation_percentage=10,  holdout_percentage=10),
                            datetime_series_col=None,
-                           file_path='cooka/test/dataset/Bank_Marketing_Data/train.csv',
-                           test_file_path="cooka/test/dataset/Bank_Marketing_Data/test.csv")
+                           file_path='cooka/tests/dataset/Bank_Marketing_Data/train.csv',
+                           test_file_path="cooka/tests/dataset/Bank_Marketing_Data/test.csv")
 
         train_job_conf = self._make_train_job_conf(framework)
 
@@ -40,8 +40,8 @@ class TestTrainJob:
                            partition_strategy=ExperimentConf.PartitionStrategy.TrainValidationHoldout,
                            train_validation_holdout=TrainValidationHoldout(train_percentage=80, validation_percentage=10,  holdout_percentage=10),
                            datetime_series_col=None,
-                           file_path='cooka/test/dataset/Players/train.csv',
-                           test_file_path="cooka/test/dataset/Players/test.csv")
+                           file_path='cooka/tests/dataset/Players/train.csv',
+                           test_file_path="cooka/tests/dataset/Players/test.csv")
 
         train_job_conf = self._make_train_job_conf(framework)
 
@@ -65,8 +65,8 @@ class TestTrainJob:
                            partition_strategy=ExperimentConf.PartitionStrategy.TrainValidationHoldout,
                            train_validation_holdout=TrainValidationHoldout(train_percentage=80, validation_percentage=10,  holdout_percentage=10),
                            datetime_series_col=None,
-                           file_path='cooka/test/dataset/House_Prices/train.csv',
-                           test_file_path='cooka/test/dataset/House_Prices/test.csv')
+                           file_path='cooka/tests/dataset/House_Prices/train.csv',
+                           test_file_path='cooka/tests/dataset/House_Prices/test.csv')
 
         train_job_conf = self._make_train_job_conf(framework)
 
