@@ -118,7 +118,7 @@ Open `http://<your_ip:8000>` with your browser to visit cooka.
 If you use Cooka in your research, please cite us as follows:
 
 Haifeng Wu, Jian Yang. Cooka: A Python Package for Lightweight and Visualization AutoML System. https://github.com/DataCanvasIO/Cooka, 2021. Version 0.1.x
-```shell script
+```
 @misc{cooka,
   author={Haifeng Wu, Jian Yang},
   title={{Cooka}: {A Python Package for Lightweight and Visualization AutoML System}},
