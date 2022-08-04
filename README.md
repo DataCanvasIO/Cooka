@@ -1,4 +1,6 @@
-# Cooka
+<p align="center">
+<img src="docs/static/Cooka.png" width="500" >
+
 [![Python Versions](https://img.shields.io/pypi/pyversions/cooka.svg)](https://pypi.org/project/hypergbm)
 [![Downloads](https://pepy.tech/badge/cooka)](https://pepy.tech/project/hypergbm)
 [![PyPI Version](https://img.shields.io/pypi/v/cooka.svg)](https://pypi.org/project/hypergbm)
@@ -7,8 +9,8 @@
 
 Cooka is a lightweight and visualization toolkit to manage datasets and design model learning experiments through web UI.
 It using [DeepTables](https://github.com/DataCanvasIO/DeepTables) and [HyperGBM](https://github.com/DataCanvasIO/HyperGBM) as experiment engine to complete feature engineering, neural architecture search and hyperparameter tuning automatically.
-
-<img src="docs/static/datacanvas_automl_toolkit.png" alt="drawing" width="700" height="450"/>
+    
+![DAT_logo](https://user-images.githubusercontent.com/94043544/182804811-0e8b6a36-1635-45b2-90f4-1d5ba3e8e52d.png)
 
 ## Features overview 
 Through the web UI provided by cooka you can:
