@@ -121,7 +121,7 @@ Haifeng Wu, Jian Yang. Cooka: A Python Package for Lightweight and Visualization
 ```
 @misc{cooka,
   author={Haifeng Wu, Jian Yang},
-  title={{Cooka}: {A Python Package for Lightweight and Visualization AutoML System}},
+  title={{Cooka}: {A lightweight and visual AutoML system}},
   howpublished={https://github.com/DataCanvasIO/Cooka},
   note={Version 0.1.x},
   year={2021}
