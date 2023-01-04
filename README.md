@@ -1,5 +1,5 @@
 <p align="center">
-<img src="docs/static/Cooka.png" width="500" >
+<img src="https://raw.githubusercontent.com/DataCanvasIO/Cooka/main/docs/static/Cooka.png" width="500" >
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/cooka.svg)](https://pypi.org/project/hypergbm)
 [![Downloads](https://pepy.tech/badge/cooka)](https://pepy.tech/project/hypergbm)
@@ -8,7 +8,7 @@
 [Doc](https://cooka.readthedocs.io) | [简体中文](README_zh_CN.md)
 
 Cooka is a lightweight and visualization toolkit to manage datasets and design model learning experiments through web UI.
-It using [DeepTables](https://github.com/DataCanvasIO/DeepTables) and [HyperGBM](https://github.com/DataCanvasIO/HyperGBM) as experiment engine to complete feature engineering, neural architecture search and hyperparameter tuning automatically.
+It's using [DeepTables](https://github.com/DataCanvasIO/DeepTables) and [HyperGBM](https://github.com/DataCanvasIO/HyperGBM) as experiment engine to complete feature engineering, neural architecture search and hyperparameter tuning automatically.
     
 ![DAT_logo](https://user-images.githubusercontent.com/94043544/182804811-0e8b6a36-1635-45b2-90f4-1d5ba3e8e52d.png)
 
@@ -23,8 +23,8 @@ Through the web UI provided by cooka you can:
 
 Screen shots：
 <table style="border: none">
-    <th><img src="docs/static/cooka_home_page.png" width="500"/></th>
-    <th><img src="docs/static/cooka_train.gif" width="500"/></th>
+    <th><img src="https://raw.githubusercontent.com/DataCanvasIO/Cooka/main/docs/static/cooka_home_page.png" width="500"/></th>
+    <th><img src="https://raw.githubusercontent.com/DataCanvasIO/Cooka/main/docs/static/cooka_train.gif" width="500"/></th>
 </table>
 
 The machine learning algorithms supported are ：
@@ -130,8 +130,6 @@ Haifeng Wu, Jian Yang. Cooka: A lightweight and visual AutoML system. https://gi
 
 ## DataCanvas
 
-![](docs/static/dc_logo_1.png)
+![](https://raw.githubusercontent.com/DataCanvasIO/Cooka/main/docs/static/dc_logo_1.png)
 
 Cooka is an open source project created by [DataCanvas](https://www.datacanvas.com/). 
-
-
