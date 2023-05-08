@@ -150,11 +150,12 @@ t_write_result_start = time.time()
 write_result_status = AnalyzeStep.Status.Succeed
 try:
     df = X  # remained cols
-    if reserved_cols is not None and len(reserved_cols) > 0:
-        result_df = df_origin[reserved_cols]
-        result_df[BATCH_PREDICTION_COL] = y_pred
-    else:
-        result_df = pd.DataFrame(data={BATCH_PREDICTION_COL: y_pred})
+    # if reserved_cols is not None and len(reserved_cols) > 0:
+    # result_df = df_origin[reserved_cols]
+    result_df = df_origin.copy()
+    result_df[BATCH_PREDICTION_COL] = y_pred
+    # else:
+    #     result_df = pd.DataFrame(data={BATCH_PREDICTION_COL: y_pred})
 
     output_path = P.join(consts.PATH_TMP_PREDICT, f"{model_name}_{util.human_datetime()}.csv")
     if not P.exists(consts.PATH_TMP_PREDICT):

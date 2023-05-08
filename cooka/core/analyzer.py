@@ -115,7 +115,7 @@ class PandasAnalyzer(Analyzer):
 
     def _count_lines(self, path, is_has_header):
         count = 0
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             for _ in f.readlines():
                 count = count + 1
         if count > 0:
