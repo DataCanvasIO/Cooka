@@ -9,7 +9,7 @@ Cooka是一个轻量级、可视化的自动机器学习工具，可以通过Web
 并使用[DeepTables](https://github.com/DataCanvasIO/DeepTables) 和[HyperGBM](https://github.com/DataCanvasIO/HyperGBM)
 执行，从而自动进行特征工程、算法超参数调优和神经网络架构搜索。
 
-<img src="docs/static/datacanvas_automl_toolkit.png" alt="drawing" width="700" height="450"/>
+![DataCanvas AutoML Toolkit](https://raw.githubusercontent.com/DataCanvasIO/Cooka/main/docs/static/DAT_latest.png)
 
 ## 功能概览  
 通过Cooka提供的Web UI可以：
