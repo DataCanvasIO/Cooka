@@ -10,7 +10,7 @@
 Cooka is a lightweight and visualization toolkit to manage datasets and design model learning experiments through web UI.
 It's using [DeepTables](https://github.com/DataCanvasIO/DeepTables) and [HyperGBM](https://github.com/DataCanvasIO/HyperGBM) as experiment engine to complete feature engineering, neural architecture search and hyperparameter tuning automatically.
     
-![DAT_logo](https://user-images.githubusercontent.com/94043544/182804811-0e8b6a36-1635-45b2-90f4-1d5ba3e8e52d.png)
+![DAT_logo](https://raw.githubusercontent.com/DataCanvasIO/Cooka/blob/main/docs/static/datacanvas_automl_toolkit.png)
 
 ## Features overview 
 Through the web UI provided by cooka you can:
